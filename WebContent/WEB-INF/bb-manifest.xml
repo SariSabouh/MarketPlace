@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<manifest>
+	<!-- core extension information -->
+	<plugin>
+		<name value= "MarketPlace"/>
+		<handle value= "MarketPlace"/>
+		<description value= "This module displays the Market Place for possible items to be purchased."/>
+		<version value= "1.0"/>
+		<requires>
+			<bbversion value="9.0.0"/>
+		</requires>
+		<vendor>
+			<id value="dt"/>
+			<name value="David Thornton"/>
+			<url value="http://www.jsu.edu/mcis/people/thornton.html" />
+			<description value="This module displays the Market Place for possible items to be purchased." />
+		</vendor>
+		<http-actions>
+		</http-actions>
+  
+		<!-- Modules, types, and channels for the community -->
+		<module-defs>		
+			<module-type ext-ref="MarketPlace" title="MarketPlace" uicreatable="true">
+				<jsp>		
+				  <view>tabbedPain.js</view>		
+				</jsp>		
+			</module-type>		
+			<module type="MarketPlace" isadmin="true" isavailabletocourse="true" useraddable="true" isdeletable="true" isdetachable="true" title="MarketPlace">		
+				<description>This module displays the Market Place for possible items to be purchased.</description>		
+				<ExtraInfo />		
+				<module-groups>		
+					<module-group id="Everyone"/>		
+				</module-groups>		
+			</module>		
+		</module-defs>
+ 
+		<!-- code permissions required for proper operation -->
+		<permissions>
+			<permission type="persist" name="Content" actions="create,modify,delete"/>
+			<permission type="attribute" name="user.authinfo" actions="get,set"/>
+			<permission type="attribute" name="user.personalinfo" actions="get,set"/>
+			<permission type="socket" name="*" actions="connect" /> 
+			<permission type="persist" name="Attempt" actions="load,persist,delete" />
+			<permission type="persist" name="Outcome" actions="load,persist,delete" />
+			<permission type="persist" name="OutcomeDefinition" actions="load,persist,delete" />
+			<permission type="persist" name="outcomedefinitioncategory" actions="load,persist,delete" />
+			<permission type="persist" name="OutcomeDefinitionScale" actions="create,delete,load,persist" />
+			<permission type="persist" name="OutcomeDefinitionScaleSymbol" actions="create,delete,load,persist" />
+		</permissions>
+	</plugin>
+
+</manifest>
