@@ -22,7 +22,7 @@
 		<module-defs>		
 			<module-type ext-ref="MarketPlace" title="MarketPlace" uicreatable="true">
 				<jsp>		
-				  <view>tabbedPain.js</view>		
+				  <view>main.jsp</view>		
 				</jsp>		
 			</module-type>		
 			<module type="MarketPlace" isadmin="true" isavailabletocourse="true" useraddable="true" isdeletable="true" isdetachable="true" title="MarketPlace">		
