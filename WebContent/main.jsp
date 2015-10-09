@@ -1,7 +1,3 @@
-<%@page import="itemHandler.*"%>
-<%@page import="itemLoot.*"%>
-<!--<%@page import="edu.ku.it.si.blackboardcoursesforuser.app.*"%>-->
-<%@page import="java.util.*"%>
 <% 
 //	BlackboardCoursesForUserApp currentApp = new BlackboardCoursesForUserApp();
 //	ItemController currentItemController = currentApp.run();
