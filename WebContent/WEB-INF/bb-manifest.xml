@@ -36,6 +36,7 @@
  
 		<!-- code permissions required for proper operation -->
 		<permissions>
+			<permission type="java.util.PropertyPermission" name="*" actions="read,write"/>
 			<permission type="persist" name="Content" actions="create,modify,delete"/>
 			<permission type="attribute" name="user.authinfo" actions="get,set"/>
 			<permission type="attribute" name="user.personalinfo" actions="get,set"/>

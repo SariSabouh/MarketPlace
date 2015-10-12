@@ -1,0 +1,20 @@
+Manifest-Version: 1.0
+Ant-Version: Apache Ant 1.8.2
+Created-By: 1.6.0_26-b03 (Sun Microsystems Inc.)
+Trusted-Library: true
+Class-Path: rome-1.0.jar velocity-1.5.jar org.mortbay.jetty.jar xerces
+ Impl.jar activemq/kahadb-5.5.0.jar java-getopt-1.0.13.jar bcprov-jdk1
+ 5-137.jar ehcache-core-1.7.2.jar ezmorph-1.0.6.jar activemq/geronimo-
+ jta_1.0.1B_spec-1.0.1.jar slf4j-jdk14-1.5.8.jar oauth-20100601.jar jd
+ bc/ojdbc6.jar lucene/lucene-snowball.jar json-lib-2.2.3-jdk15.jar com
+ mons-beanutils-1.8.0.jar activemq/geronimo-jms_1.1_spec-1.1.1.jar com
+ mons-httpclient-3.1.jar cssparser-0.9.5.jar commons-discovery-0.4.jar
+  commons-codec-1.3.jar yuicompressor-css-2.4.2.jar activemq/activemq-
+ core-5.5.0.jar log4j.jar activation.jar commons-logging-1.1.1.jar jst
+ l.jar sac.jar jdom.jar lucene/lucene-core.jar Tidy.jar commons-collec
+ tions-3.2.1.jar activemq/geronimo-j2ee-management_1.0_spec-1.0.jar co
+ mmons-pool-1.4.jar jdbc/Merlia.jar jdbc/ucp.jar lucene/lucene-queries
+ .jar mail.jar commons-dbcp-1.4.jar wsdl4j.jar commons-lang-2.4.jar ro
+ me-fetcher-1.0.jar opencsv-1.8.jar slf4j-api-1.5.8.jar jaxrpc.jar js.
+ jar
+

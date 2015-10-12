@@ -1,0 +1,1 @@
+class=blackboard.platform.messagequeue.impl.activemq.PeerDiscoveryAgentFactory

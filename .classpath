@@ -17,5 +17,8 @@
 			<attribute name="maven.pomderived" value="true"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="Jars/bb-cms-admin.jar"/>
+	<classpathentry kind="lib" path="Jars/bb-platform.jar"/>
+	<classpathentry kind="lib" path="Jars/bb-taglibs.jar"/>
 	<classpathentry kind="output" path="target/classes"/>
 </classpath>

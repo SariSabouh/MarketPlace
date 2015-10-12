@@ -31,6 +31,11 @@
 		<artifactId>javax.servlet-api</artifactId>
 		<version>3.1.0</version>
 	</dependency>
+	<dependency>
+	  <groupId>joda-time</groupId>
+	  <artifactId>joda-time</artifactId>
+	  <version>2.8.2</version>
+	</dependency>
   </dependencies>
   
   <build>
@@ -53,6 +58,9 @@
         <artifactId>maven-war-plugin</artifactId>
         <version>2.6</version>
         <configuration>
+			<archive>
+				<compress>true</compress>
+			</archive>
           <warSourceDirectory>WebContent</warSourceDirectory>
           <failOnMissingWebXml>false</failOnMissingWebXml>
         </configuration>
