@@ -63,7 +63,7 @@
 	List<Item> itemList = itemContr.getItemList();
 	String allItems = "";
 	for(Item item: itemList){
-		allItems += item.toString() + "\n";
+		allItems += item.toString() + "<br /><br />";
 	}
 
 %>
@@ -79,33 +79,34 @@
 <title>Market Place</title>
 
 <link rel="stylesheet"
-	href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+	href="http://code.jquery.com/ui/1.11.4/themes/south-street/jquery-ui.css">
 
-<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
 
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
 <link rel="stylesheet" href="/resources/demos/style.css">
 
+
 <script>
   $(function() {
     $( "#tabs" ).tabs();
-//	  var student = <%=canSeeGold %>
-//    if (!student) {
-//        $('#tabs > ul li:has(a[href="#tabs-3"])').hide()
-//        $("#tabs").tabs('refresh');
-//        $("#tabs").tabs('option', 'active', 1);
-//    }
+	var student = <%=canSeeGold %>
+    if (!student) {
+        $('#tabs > ul li:has(a[href="#tabs-3"])').hide()
+        $("#tabs").tabs('refresh');
+        $("#tabs").tabs('option', 'active', 1);
+    }
     
-//    else{
-//    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
-//        $("#tabs").tabs('refresh');
-//        $("#tabs").tabs('option', 'active', 1);
-//    }
+    else{
+    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
+        $("#tabs").tabs('refresh');
+        $("#tabs").tabs('option', 'active', 1);
+    }
 
   });
 
-  </script>
+</script>
 
 </head>
 

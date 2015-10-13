@@ -81,7 +81,21 @@ public class Item extends MarketPlaceItem{
 	@Override
 	public String toString(){
 		String output = "Item Name: " + name
-				+ "\nItem Cost: " + cost;
+				+ "<br />Item Duration: " + duration
+				+ "<br />Item Supply: " + supply
+				+ "<br />Item Attribute Affected: " + attributeAffected
+				+ "<br />Item Effect Mangnitue: " + effectMagnitude
+				+ "<br />Item Type: " + type;
 		return output;
 	}
+	
+	@Override
+    public boolean equals(Object o) {
+        if (o instanceof Item) {
+            if (name.equals(((Item) o).name)) {
+                return true;
+            }
+        }
+        return false;
+    }
 }

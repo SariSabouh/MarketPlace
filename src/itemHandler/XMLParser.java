@@ -40,7 +40,7 @@ public class XMLParser extends DefaultHandler {
 	}
 
 	public void startElement(String s, String s1, String elementName, Attributes attributes) throws SAXException {
-		if(item != null){
+		if(item != null && !itemList.contains(item)){
 			itemList.add(item);
 		}
 		// WE CAN USE THAT IN CASE WE USE THE XML FOR ITEMS TO BUY AND SOMETHING
