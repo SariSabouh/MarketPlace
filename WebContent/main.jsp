@@ -7,6 +7,8 @@
 <%@page import="blackboard.platform.gradebook2.*"%>
 <%@page import="blackboard.platform.gradebook2.impl.*"%>
 <%@page import="blackboard.data.content.Content"%>
+<%@page import="blackboard.persist.navigation.CourseTocDbLoader"%>
+<%@page import="blackboard.data.navigation.CourseToc"%>
 <%@page import="java.util.*"%> 								
 <%@page import="itemHandler.*"%>	
 <%@page import="itemLoot.*"%>	
@@ -33,27 +35,31 @@
 	Iterator<CourseMembership> i = cmlist.iterator();
 	
 	// instructors will see student names
-	String canSeeGold = "false";
+	boolean canSeeGold = false;
 	String role = sessionUserRole.trim().toLowerCase();
 	// out.print("dave, role is " + role);
 	if (role.contains("student")  ) {
-		canSeeGold = "true";
+		canSeeGold = true;
 	}
 	
 	ContentDbLoader contentDb = ContentDbLoader.Default.getInstance();
-	List<Content> content = contentDb.loadByCourseIdAndTitle(courseID, "itemList");
+	CourseTocDbLoader cTocLoader = CourseTocDbLoader.Default.getInstance();
 	
-	ItemController itemContr = new ItemController();
-	String name = "null";
-	if(content.get(0).getBody() != null){
-		name = "Has Body";
-		if(content.get(0).getBody().getFormattedText() != null){
-			name = "Has Form Text";
-			
+	List<CourseToc> tableOfContents = cTocLoader.loadByCourseId(courseID);
+	List<Content> tableChildren = new ArrayList<Content>();
+	for (CourseToc t : tableOfContents) {
+		if (t.getTargetType() == CourseToc.Target.CONTENT) {
+			tableChildren.addAll(contentDb.loadChildren(t.getContentId(), false, null));
 		}
 	}
-	String test = content.get(0).getBody().getFormattedText();
-	itemContr.createItemListFromContents(test);
+	ItemController itemContr = new ItemController();
+	String test = null;
+	for(Content content : tableChildren){
+		if(content.getTitle().equals("itemList")){
+			String contentText = content.getBody().getText();
+			itemContr.createItemListFromContents(contentText);			
+		}
+	}
 	List<Item> itemList = itemContr.getItemList();
 	String allItems = "";
 	for(Item item: itemList){
@@ -70,7 +76,7 @@
 
 <meta charset="utf-8">
 
-<title>jQuery UI Tabs - Default functionality</title>
+<title>Market Place</title>
 
 <link rel="stylesheet"
 	href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
@@ -82,23 +88,22 @@
 <link rel="stylesheet" href="/resources/demos/style.css">
 
 <script>
-jQuery.noConflict()
   $(function() {
     $( "#tabs" ).tabs();
-    var student = <%=canSeeGold %>
-    if (student === "false") {
-        $('#tabs > ul li:has(a[href="#tabs-3"])').hide()
-        $("#tabs").tabs('refresh');
-        $("#tabs").tabs('option', 'active', 1);
-    }
+//	  var student = <%=canSeeGold %>
+//    if (!student) {
+//        $('#tabs > ul li:has(a[href="#tabs-3"])').hide()
+//        $("#tabs").tabs('refresh');
+//        $("#tabs").tabs('option', 'active', 1);
+//    }
     
-    else{
-    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
-        $("#tabs").tabs('refresh');
-        $("#tabs").tabs('option', 'active', 1);
-    }
+//    else{
+//    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
+//        $("#tabs").tabs('refresh');
+//        $("#tabs").tabs('option', 'active', 1);
+//    }
 
-  })(jQuery);
+  });
 
   </script>
 
@@ -124,7 +129,7 @@ jQuery.noConflict()
 
 		<div id="tabs-1">
 
-			<p><% out.print(test); %></p>
+			<p>No Items!</p>
 
 		</div>
 
@@ -136,13 +141,13 @@ jQuery.noConflict()
 		
 		<div id="tabs-3">
 
-			<p><% out.print(role); %></p>
+			<p>Gold</p>
 
 		</div>
 		
 		<div id="tabs-4">
 
-			<p><% out.print(name); %></p>
+			<p>add</p>
 
 		</div>
 

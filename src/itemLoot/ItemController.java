@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class ItemController {
 
-	private ArrayList<Item> itemList;
+	private ArrayList<Item> itemList = null;
 	
 	public ArrayList<Item> getItemList(){
 		return itemList;
