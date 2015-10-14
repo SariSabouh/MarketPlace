@@ -10,8 +10,8 @@
 <%@page import="blackboard.persist.navigation.CourseTocDbLoader"%>
 <%@page import="blackboard.data.navigation.CourseToc"%>
 <%@page import="java.util.*"%> 								
-<%@page import="itemHandler.*"%>	
-<%@page import="itemLoot.*"%>	
+<%@page import="itemHandler.*"%>
+<%@page import="controllers.*"%>	
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <bbNG:includedPage ctxId="ctx">
@@ -24,22 +24,38 @@
 	String sessionUserID = sessionUser.getId().toString();
 	
 	// use the GradebookManager to get the gradebook data
-	GradebookManager gm = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
-	BookData bookData = gm.getBookData(new BookDataRequest(courseID));
-	List<GradableItem> lgm = gm.getGradebookItems(courseID);
+	GradebookManager gradebookManager = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
+	BookData bookData = gradebookManager.getBookData(new BookDataRequest(courseID));
+	List<GradableItem> gradableItemList = gradebookManager.getGradebookItems(courseID);
 	// it is necessary to execute these two methods to obtain calculated students and extended grade data
 	bookData.addParentReferences();
 	bookData.runCumulativeGrading();
 	// get a list of all the students in the class
 	List <CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
 	Iterator<CourseMembership> i = cmlist.iterator();
+	List<Student> students = new ArrayList<Student>();
+	while(i.hasNext()){
+		CourseMembership selectedMember = (CourseMembership) i.next();
+		User currentUser = selectedMember.getUser();
+		Student student = new Student();
+		student.setFirstName(currentUser.getGivenName());
+		student.setLastName(currentUser.getFamilyName());
+		student.setStudentID(currentUser.getStudentId());
+		student.setUserName(currentUser.getUserName());
+		students.add(student);
+	}
 	
 	// instructors will see student names
 	boolean canSeeGold = false;
 	String role = sessionUserRole.trim().toLowerCase();
-	// out.print("dave, role is " + role);
+	int myGold = 0;
 	if (role.contains("student")  ) {
 		canSeeGold = true;
+		for(Student student : students){
+			if(student.getStudentID().equals(sessionUser.getStudentId())){
+				myGold = student.getGold();
+			}
+		}
 	}
 	
 	ContentDbLoader contentDb = ContentDbLoader.Default.getInstance();
@@ -79,9 +95,9 @@
 <title>Market Place</title>
 
 <link rel="stylesheet"
-	href="http://code.jquery.com/ui/1.11.4/themes/south-street/jquery-ui.css">
+	href="//code.jquery.com/ui/1.11.4/themes/blitzer/jquery-ui.css">
 
-<script src="http://code.jquery.com/jquery-2.1.4.js"></script>
+<script src="//code.jquery.com/jquery-2.1.4.js"></script>
 
 <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
 
@@ -89,22 +105,22 @@
 
 
 <script>
-  $(function() {
+jQuery.noConflict()
+(function($) {
     $( "#tabs" ).tabs();
 	var student = <%=canSeeGold %>
     if (!student) {
-        $('#tabs > ul li:has(a[href="#tabs-3"])').hide()
+        $('#tabs > ul li:has(a[href="#tabs-1"])').hide()
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
     
     else{
-    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
+    	$('#tabs > ul li:has(a[href="#tabs-3"])').hide()
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
-
-  });
+  })(jQuery);
 
 </script>
 
@@ -122,15 +138,16 @@
 
 			<li><a href="#tabs-2">Market Place</a></li>
 			
-			<li><a href="#tabs-3">My Gold</a></li>
-			
-			<li><a href="#tabs-4">Add Item</a></li>
+			<li><a href="#tabs-3">Add Item/Assign Gold</a></li>
 
 		</ul>
 
 		<div id="tabs-1">
 
 			<p>No Items!</p>
+			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
+				 My Gold: <% out.print(myGold); %> 
+			</div>
 
 		</div>
 
@@ -141,12 +158,6 @@
 		</div>
 		
 		<div id="tabs-3">
-
-			<p>Gold</p>
-
-		</div>
-		
-		<div id="tabs-4">
 
 			<p>add</p>
 

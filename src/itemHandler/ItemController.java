@@ -1,14 +1,11 @@
-package itemLoot;
-
-import itemHandler.Item;
-import itemHandler.XMLParser;
+package itemHandler;
 
 import java.util.ArrayList;
 
 
 public class ItemController {
 
-	private ArrayList<Item> itemList = null;
+	private ArrayList<Item> itemList;
 	
 	public ArrayList<Item> getItemList(){
 		return itemList;
