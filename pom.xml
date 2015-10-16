@@ -6,6 +6,34 @@
   <packaging>war</packaging>
   
   <dependencies>
+    <dependency>
+	  <groupId>bb-cms-admin</groupId>
+	  <artifactId>LIB_NAME</artifactId>
+	  <version>1.0.0</version>
+	  <scope>system</scope>
+	  <systemPath>${basedir}/Jars/bb-cms-admin.jar</systemPath>
+	</dependency>
+	<dependency>
+	  <groupId>bb-platform</groupId>
+	  <artifactId>LIB_NAME</artifactId>
+	  <version>1.0.0</version>
+	  <scope>system</scope>
+	  <systemPath>${basedir}/Jars/bb-platform.jar</systemPath>
+	</dependency>
+	<dependency>
+	  <groupId>bb-taglibs</groupId>
+	  <artifactId>LIB_NAME</artifactId>
+	  <version>1.0.0</version>
+	  <scope>system</scope>
+	  <systemPath>${basedir}/Jars/bb-taglibs.jar</systemPath>
+	</dependency>
+	<dependency>
+	  <groupId>cs499</groupId>
+	  <artifactId>LIB_NAME</artifactId>
+	  <version>1.0.0</version>
+	  <scope>system</scope>
+	  <systemPath>${basedir}/Jars/cs499.jar</systemPath>
+	</dependency>
   	<dependency>
 		<groupId>org.springframework</groupId>
 		<artifactId>spring-context</artifactId>
@@ -41,7 +69,7 @@
   <build>
   	<resources>
      <resource>
-       <directory>src/my-resources</directory>
+       <directory>src/</directory>
      </resource>
    </resources>
     <sourceDirectory>src</sourceDirectory>

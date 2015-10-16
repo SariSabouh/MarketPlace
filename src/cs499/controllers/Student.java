@@ -1,12 +1,14 @@
-package controllers;
+package cs499.controllers;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import itemHandler.Item;
+import blackboard.persist.Id;
+import cs499.itemHandler.Item;
 
 public class Student{
 	private String fName, lName, userName, studentID;
+	private Id id;
 	private List<Item> itemList;
 	private int gold;
 	
@@ -58,5 +60,13 @@ public class Student{
 	
 	public String getUserName() {
 		return userName;
+	}
+
+	public Id getId() {
+		return id;
+	}
+
+	public void setId(Id id) {
+		this.id = id;
 	}
 }

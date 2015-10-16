@@ -1,4 +1,4 @@
-package itemHandler;
+package cs499.itemHandler;
 
 public class Item extends MarketPlaceItem{
 	

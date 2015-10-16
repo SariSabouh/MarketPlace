@@ -1,6 +1,6 @@
-package itemHandler;
+package cs499.itemHandler;
 
-import itemHandler.Item.*;
+import cs499.itemHandler.Item.*;
 
 import java.io.IOException;
 import java.io.StringReader;

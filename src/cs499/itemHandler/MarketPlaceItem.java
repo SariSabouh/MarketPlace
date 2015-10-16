@@ -1,4 +1,4 @@
-package itemHandler;
+package cs499.itemHandler;
 
 import org.joda.time.DateTime;
 

@@ -10,18 +10,20 @@
 <%@page import="blackboard.persist.navigation.CourseTocDbLoader"%>
 <%@page import="blackboard.data.navigation.CourseToc"%>
 <%@page import="java.util.*"%> 								
-<%@page import="itemHandler.*"%>
-<%@page import="controllers.*"%>	
+<%@page import="cs499.controllers.*"%>
+<%@page import="cs499.itemHandler.*"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <bbNG:includedPage ctxId="ctx">
 
-	<%
+<%
 	// get the current user
 	User sessionUser = ctx.getUser();
 	Id courseID = ctx.getCourseId();		
 	String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 	String sessionUserID = sessionUser.getId().toString();
+	
+	BlackboardHandler bbHandler = new BlackboardHandler();
 	
 	// use the GradebookManager to get the gradebook data
 	GradebookManager gradebookManager = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
@@ -30,37 +32,9 @@
 	// it is necessary to execute these two methods to obtain calculated students and extended grade data
 	bookData.addParentReferences();
 	bookData.runCumulativeGrading();
-	// get a list of all the students in the class
-	List <CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
-	Iterator<CourseMembership> i = cmlist.iterator();
-	List<Student> students = new ArrayList<Student>();
-	while(i.hasNext()){
-		CourseMembership selectedMember = (CourseMembership) i.next();
-		User currentUser = selectedMember.getUser();
-		Student student = new Student();
-		student.setFirstName(currentUser.getGivenName());
-		student.setLastName(currentUser.getFamilyName());
-		student.setStudentID(currentUser.getStudentId());
-		student.setUserName(currentUser.getUserName());
-		students.add(student);
-	}
-	
-	// instructors will see student names
-	boolean canSeeGold = false;
-	String role = sessionUserRole.trim().toLowerCase();
-	int myGold = 0;
-	if (role.contains("student")  ) {
-		canSeeGold = true;
-		for(Student student : students){
-			if(student.getStudentID().equals(sessionUser.getStudentId())){
-				myGold = student.getGold();
-			}
-		}
-	}
-	
+	// get items list from contents
 	ContentDbLoader contentDb = ContentDbLoader.Default.getInstance();
 	CourseTocDbLoader cTocLoader = CourseTocDbLoader.Default.getInstance();
-	
 	List<CourseToc> tableOfContents = cTocLoader.loadByCourseId(courseID);
 	List<Content> tableChildren = new ArrayList<Content>();
 	for (CourseToc t : tableOfContents) {
@@ -76,6 +50,36 @@
 			itemContr.createItemListFromContents(contentText);			
 		}
 	}
+	// get a list of all the students in the class
+	List <CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
+	Iterator<CourseMembership> i = cmlist.iterator();
+	List<Student> students = bbHandler.getStudentsList(i);
+	
+	// assign gold for grade
+	
+	// calculate gold per grade
+	boolean userCanSeeGold = false;
+	String role = sessionUserRole.trim().toLowerCase();
+	int myGold = 0;
+	if (role.contains("student")  ) {
+		userCanSeeGold = true;
+		for(Student student : students){
+			if(student.getId().getExternalString().equals(sessionUser.getId().getExternalString())){
+				for (GradableItem gradeItem : gradableItemList) {
+					GradeWithAttemptScore gwas2 = bookData.get(student.getId(), gradeItem.getId());
+					Grade grade = (Grade) gwas2;
+					if (!gradeItem.getCategory().isEmpty() && !grade.isNullGrade()) {
+						if(bbHandler.passesCondition(grade.getScoreValue(), grade)){
+							student.setGold(grade.getGoldWorth());
+						}
+						
+					}
+				}
+				myGold = student.getGold();
+			}
+		}
+	}
+	
 	List<Item> itemList = itemContr.getItemList();
 	String allItems = "";
 	for(Item item: itemList){
@@ -108,7 +112,7 @@
 jQuery.noConflict()
 (function($) {
     $( "#tabs" ).tabs();
-	var student = <%=canSeeGold %>
+	var student = <%=userCanSeeGold %>
     if (!student) {
         $('#tabs > ul li:has(a[href="#tabs-1"])').hide()
         $("#tabs").tabs('refresh');
@@ -117,6 +121,7 @@ jQuery.noConflict()
     
     else{
     	$('#tabs > ul li:has(a[href="#tabs-3"])').hide()
+    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide()
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
@@ -138,7 +143,9 @@ jQuery.noConflict()
 
 			<li><a href="#tabs-2">Market Place</a></li>
 			
-			<li><a href="#tabs-3">Add Item/Assign Gold</a></li>
+			<li><a href="#tabs-3">Add Item</a></li>
+			
+			<li><a href="#tabs-4">Assign Gold</a></li>
 
 		</ul>
 
@@ -160,6 +167,12 @@ jQuery.noConflict()
 		<div id="tabs-3">
 
 			<p>add</p>
+
+		</div>
+		
+		<div id="tabs-4">
+
+			<p>AA</p>
 
 		</div>
 
