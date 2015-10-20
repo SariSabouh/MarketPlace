@@ -47,11 +47,17 @@
 	boolean userCanSeeGold = false;
 	String role = sessionUserRole.trim().toLowerCase();
 	String error = "";
+	String myItems = "";
 	int myGold = 0;
 	if (role.contains("student")) {
 		userCanSeeGold = true;
 		error = bbHandler.setStudentGold();
-		myGold = bbHandler.getStudent().getGold();
+		Student student = bbHandler.getStudent();
+		myGold = student.getGold();
+		for(Item item : student.getItemList()){
+			myItems += item.toString() + " AA ";
+		}
+		
 	}
 	
 	List<Item> itemList = itemContr.getItemList();
@@ -103,7 +109,7 @@ jQuery.noConflict()
 $(".PickAxe").click(function($) {
 	var student = <%=userCanSeeGold%>
 	if(student){
-	    <% bbHandler.buyItem(itemList, "PickAxe");%>
+	    <% bbHandler.buyItem(itemList, "PickAxe");%> //AJAX CALL
 	}
 }) 
 (jQuery);
@@ -130,7 +136,7 @@ $(".PickAxe").click(function($) {
 
 		<div id="tabs-1">
 
-			<p>No Items!</p>
+			<p><% out.print(myItems); %></p>
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 
 			</div>

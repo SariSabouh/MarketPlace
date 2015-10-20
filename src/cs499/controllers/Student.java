@@ -77,7 +77,8 @@ public class Student{
 		return true;
 	}
 	
-	public void payPrice(float price){
+	public void payPrice(float price, Item item){
 		gold = (int) (gold - price);
+		itemList.add(item);
 	}
 }

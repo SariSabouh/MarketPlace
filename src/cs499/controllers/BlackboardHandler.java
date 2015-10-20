@@ -106,14 +106,15 @@ public class BlackboardHandler {
 	
 	public void buyItem(List<Item> itemList, String itemName){
 		Student student = getStudent();
-		for(Item item: itemList){
-			if(item.getName().equals(itemName)){
-				if(student.canAfford(item.getCost())){
-					student.payPrice(item.getCost());
+		if(student != null){
+			for(Item item: itemList){
+				if(item.getName().equals(itemName)){
+					if(student.canAfford(item.getCost())){
+						student.payPrice(item.getCost(), item);
+					}
 				}
 			}
 		}
-		
 	}
 	
 }
