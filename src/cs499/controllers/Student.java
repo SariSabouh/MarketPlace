@@ -8,9 +8,9 @@ import cs499.itemHandler.Item;
 
 public class Student{
 	private String fName, lName, userName, studentID;
-	private Id id;
 	private List<Item> itemList;
 	private int gold;
+	private Id id;
 	
 	public Student(){
 		gold = 0;
@@ -62,11 +62,22 @@ public class Student{
 		return userName;
 	}
 
-	public Id getId() {
-		return id;
-	}
-
 	public void setId(Id id) {
 		this.id = id;
+	}
+	
+	public Id getId(){
+		return id;
+	}
+	
+	public boolean canAfford(float price){
+		if(price > gold){
+			return false;
+		}
+		return true;
+	}
+	
+	public void payPrice(float price){
+		gold = (int) (gold - price);
 	}
 }

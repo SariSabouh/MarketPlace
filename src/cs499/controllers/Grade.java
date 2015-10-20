@@ -12,9 +12,19 @@ public class Grade extends GradeWithAttemptScore{
 	private Condition condition;
 	private double passingGrade;
 	
-	public Grade(){
+	public Grade(GradeWithAttemptScore p){
 		goldWorth = 0;
 		condition = Condition.FULLCREDIT;
+		passingGrade = 0;
+		setAttemptGrade(p.getAttemptGrade());
+		setAttemptScore(p.getAttemptScore());
+		setCourseUserId(p.getCourseUserId());
+		setGradableItem(p.getGradableItem());
+		setGradableItemId(p.getGradableItemId());
+		setId(p.getId());
+		setManualGrade(p.getManualGrade());
+		setManualScore(p.getManualScore());
+		setPointsPossible(p.getPointsPossible());
 	}
 
 	public int getGoldWorth() {
