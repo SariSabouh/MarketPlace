@@ -1,7 +1,6 @@
 package cs499.controllers;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -12,33 +11,32 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Servlet implementation class Servlet
  */
-@WebServlet("/Servlet")
-public class Servlet extends HttpServlet {
+@WebServlet("/JavaControllerServlet")
+public class JavaControllerServlet extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-       
+	
+	BlackboardHandler bbHandler;
+	
     /**
      * @see HttpServlet#HttpServlet()
      */
-    public Servlet() {
+    public JavaControllerServlet() {
         super();
-        // TODO Auto-generated constructor stub
     }
 
 	/**
 	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		PrintWriter out = response.getWriter();
-        out.println("Hello World");
+		doPost(request, response);
 	}
 
 	/**
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
+		bbHandler = (BlackboardHandler) request.getSession().getAttribute("bbHandler");
+		bbHandler.buyItem(request.getParameter("name"));
 	}
 
 }

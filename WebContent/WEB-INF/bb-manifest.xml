@@ -18,11 +18,28 @@
 		<http-actions>
 		</http-actions>
   
+		<application-defs>
+		    <application 
+		      handle="MarketPlace" 
+	  	      type="system_tool"
+		      name="MarketPlace" is-course-tool="false">
+		    <description lang="en_US">Building Block Java Serlvet</description>
+		    <links>
+		      <link>
+		        <type value="system_tool"/>
+		        <name value="MarketPlace"/>
+		        <url value="index.jsp"/>
+		        <description value="Building Block Java Serlvet"/>
+	          </link>
+		    </links>
+		  </application>
+		</application-defs>  
+  
 		<!-- Modules, types, and channels for the community -->
 		<module-defs>		
 			<module-type ext-ref="MarketPlace" title="MarketPlace" uicreatable="true">
 				<jsp>		
-				  <view>main.jsp</view>		
+				  <view>main.jsp</view>
 				</jsp>		
 			</module-type>		
 			<module type="MarketPlace" isadmin="true" isavailabletocourse="true" useraddable="true" isdeletable="true" isdetachable="true" title="MarketPlace">		
@@ -31,7 +48,7 @@
 				<module-groups>		
 					<module-group id="Everyone"/>		
 				</module-groups>		
-			</module>		
+			</module>
 		</module-defs>
  
 		<!-- code permissions required for proper operation -->

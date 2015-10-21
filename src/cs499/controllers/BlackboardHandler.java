@@ -27,6 +27,7 @@ public class BlackboardHandler {
 	private List<GradableItem> gradableItemList;
 	private List<Student> students;
 	private User sessionUser;
+	private List<Item> itemList;
 
 	public BlackboardHandler(Id courseID, User sessionUser) throws GradebookException, BbSecurityException, KeyNotFoundException, PersistenceException{
 		this.sessionUser = sessionUser;
@@ -39,6 +40,10 @@ public class BlackboardHandler {
 		List<CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
 		Iterator<CourseMembership> i = cmlist.iterator();
 		setStudentsList(i);
+	}
+	
+	public void setItemList(List<Item> itemList){
+		this.itemList = itemList;
 	}
 	
 	public void setStudentsList(Iterator<CourseMembership> i){
@@ -104,7 +109,7 @@ public class BlackboardHandler {
 		return error;
 	}
 	
-	public void buyItem(List<Item> itemList, String itemName){
+	public void buyItem(String itemName){
 		Student student = getStudent();
 		if(student != null){
 			for(Item item: itemList){

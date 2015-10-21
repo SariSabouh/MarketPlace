@@ -24,6 +24,8 @@
 	String sessionUserID = sessionUser.getId().toString();	
 	BlackboardHandler bbHandler = new BlackboardHandler(courseID, sessionUser);
 	
+	session.setAttribute("bbHandler", bbHandler);
+	
 	// get items list from contents
 	ContentDbLoader contentDb = ContentDbLoader.Default.getInstance();
 	CourseTocDbLoader cTocLoader = CourseTocDbLoader.Default.getInstance();
@@ -61,6 +63,8 @@
 	}
 	
 	List<Item> itemList = itemContr.getItemList();
+	bbHandler.setItemList(itemList);
+	session.setAttribute("itemList", itemList);
 	String allItems = "";
 	for(Item item: itemList){
 		allItems += item.toString() + "<br /><br />";
@@ -83,44 +87,13 @@
 
 <script src="//code.jquery.com/jquery-2.1.4.js"></script>
 
-<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
-
-<link rel="stylesheet" href="/resources/demos/style.css">
-
-
-<script>
-jQuery.noConflict()
-(function($) {
-	var student = <%=userCanSeeGold%>
-    $( "#tabs" ).tabs();
-    if (!student) {
-        $('#tabs > ul li:has(a[href="#tabs-1"])').hide()
-        $("#tabs").tabs('refresh');
-        $("#tabs").tabs('option', 'active', 1);
-    }
-    
-    else{
-    	$('#tabs > ul li:has(a[href="#tabs-3"])').hide()
-        $("#tabs").tabs('refresh');
-        $("#tabs").tabs('option', 'active', 1);
-    }                        
-})
-
-$(".PickAxe").click(function($) {
-	var student = <%=userCanSeeGold%>
-	if(student){
-	    <% bbHandler.buyItem(itemList, "PickAxe");%> //AJAX CALL
-	}
-}) 
-(jQuery);
-
-</script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script> 
 
 </head>
 
 <body>
 
-
+<input type="hidden" id="userCanSeeGold" name="userCanSeeGold" value="<%=userCanSeeGold%>"/>
 
 	<div id="tabs">
 
@@ -146,7 +119,7 @@ $(".PickAxe").click(function($) {
 		<div id="tabs-2">
 
 			<p><% out.print(allItems); %></p>
-			<a class="PickAxe" href="#">PickAxe</a>
+			<a class="Items" name="PickAxe" href="#">PickAxe</a>
 
 		</div>
 		
@@ -158,6 +131,10 @@ $(".PickAxe").click(function($) {
 
 
 	</div>
+	
+	<script type="text/javascript">
+		<jsp:include page="js/MarketPlaceUtil.js" />
+	</script>
 
 </bbNG:includedPage>
 
