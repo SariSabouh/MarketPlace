@@ -1,8 +1,8 @@
 jQuery.noConflict();
 (function($) {
-	var student = $("#userCanSeeGold")
+	var student = $("#isStudent").val();
     $( "#tabs" ).tabs();
-    if (!student) {
+    if (student == "false") {
         $('#tabs > ul li:has(a[href="#tabs-1"])').hide()
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
@@ -14,10 +14,10 @@ jQuery.noConflict();
         $("#tabs").tabs('option', 'active', 1);
     }
 	$(".Items").click(function() {
-		var student = $("#userCanSeeGold")
-		if(student){
+		var student = $("#isStudent").val();
+		if(student == "true"){
 			$.ajax({
-		    	url: "MarketPlace/controller",
+		    	url: "/webapps/dt-MarketPlace/-BBLEARN-bb_bb60/JavaControllerServlet",
 	    		type: "POST",
 	    		data: $(this).attr("name"),
 	    		success: function(result){

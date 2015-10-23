@@ -1,7 +1,14 @@
 package cs499.itemHandler;
 
-public class Item extends MarketPlaceItem{
+import java.io.Serializable;
+
+public class Item extends MarketPlaceItem implements Serializable{
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 8072867929811246027L;
+
 	public enum AssessmentType {
 		ASSIGNMENT, EXAMS, ALL
 	};

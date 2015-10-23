@@ -1,25 +1,26 @@
-<html>
-  <head>
-    <title>Sample Application JSP Page</title>
-  </head>
+<%@ page language="java" contentType="text/html; charset=US-ASCII"
+	pageEncoding="US-ASCII"
+	import="java.util.*,
+				blackboard.data.*,
+				blackboard.data.user.*,
+				blackboard.data.course.*"%>
 
-  <body bgcolor=white>
+<%@ taglib uri="/bbNG" prefix="bbNG"%>
 
-  <table border="0" cellpadding="10">
-    <tr>
-      <td align=center>
-        <img src="images/springsource.png">
-      </td>
-      <td>
-         <h1>Sample Application JSP Page</h1>
-      </td>
-    </tr>
-  </table>
+<bbNG:learningSystemPage
+	title="Welcome to Market Place Java Controller Servlet" 
+	ctxId="ctx">
 
-  <br />
-  <p>This is the output of a JSP page that is part of the HelloWorld application.</p>
+	<bbNG:pageHeader>
 
-  <%= new String("Hello!") %>
+		<bbNG:pageTitleBar>
+			Home Page
+		</bbNG:pageTitleBar>
+		
+	</bbNG:pageHeader>
 
-  </body>
-</html> 
+	<p>Welcome to Market Place Java Controller Servlet</p>
+
+	<p><a href="JavaControllerServlet">Java Servlet</a>.</p>
+
+</bbNG:learningSystemPage>

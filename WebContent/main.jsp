@@ -9,6 +9,12 @@
 <%@page import="blackboard.data.content.Content"%>
 <%@page import="blackboard.persist.navigation.CourseTocDbLoader"%>
 <%@page import="blackboard.data.navigation.CourseToc"%>
+<%@page import="blackboard.platform.blog.impl.BlogDAO"%>
+<%@page import="blackboard.platform.blog.BlogEntry.BlogEntryStatus"%>
+<%@page import="blackboard.platform.blog.BlogEntry"%>
+<%@page import="blackboard.platform.blog.BlogEntriesUserStatus"%>
+<%@page import="blackboard.platform.blog.Blog"%>
+<%@page import="blackboard.platform.blog.impl.BlogEntryDAO"%>
 <%@page import="java.util.*"%> 								
 <%@page import="cs499.controllers.*"%>
 <%@page import="cs499.itemHandler.*"%>
@@ -46,13 +52,13 @@
 	}
 	
 	// get Gold for student
-	boolean userCanSeeGold = false;
+	boolean isStudent = false;
 	String role = sessionUserRole.trim().toLowerCase();
 	String error = "";
 	String myItems = "";
 	int myGold = 0;
 	if (role.contains("student")) {
-		userCanSeeGold = true;
+		isStudent = true;
 		error = bbHandler.setStudentGold();
 		Student student = bbHandler.getStudent();
 		myGold = student.getGold();
@@ -68,6 +74,29 @@
 	String allItems = "";
 	for(Item item: itemList){
 		allItems += item.toString() + "<br /><br />";
+	}
+	
+	List<Blog> blogs = BlogDAO.get().loadByCourseId(courseID, true, false, false);
+	for(Blog blog : blogs){
+		if(blog.getTitle().equalsIgnoreCase("item")){
+			List<BlogEntry> blogEntries = BlogEntryDAO.get().loadAllByBlogId(blog.getId());
+			for(BlogEntry blogEntry : blogEntries){
+				myItems += "BlogEntry: " + blogEntry.getCreatorLocaleName();
+				myItems += "<br /><br />" + blogEntry.getTitle();
+				myItems += "<br /><br />" + blogEntry.getAttachments();
+				myItems += "<br /><br />" + blogEntry.getBlogId();
+				myItems += "<br /><br />" + blogEntry.getCommentAddedDate();
+				myItems += "<br /><br />" + blogEntry.getCommentModifiedDate();
+				myItems += "<br /><br />" + blogEntry.getCreationDate();
+				myItems += "<br /><br />" + blogEntry.getCreatorCourseUserId();
+				myItems += "<br /><br />" + blogEntry.getDataType();
+				myItems += "<br /><br />" + blogEntry.getDescription();
+				myItems += "<br /><br />" + blogEntry.getId();
+				myItems += "<br /><br />" + blogEntry.getStatus();
+				myItems += "<br /><br />" + blogEntry.getUpdateDate();
+				myItems += "<br /><br />";
+			}
+		}
 	}
 
 %>
@@ -93,7 +122,7 @@
 
 <body>
 
-<input type="hidden" id="userCanSeeGold" name="userCanSeeGold" value="<%=userCanSeeGold%>"/>
+<input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
 
 	<div id="tabs">
 

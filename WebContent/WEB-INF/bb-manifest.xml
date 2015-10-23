@@ -21,8 +21,8 @@
 		<application-defs>
 		    <application 
 		      handle="MarketPlace" 
-	  	      type="system_tool"
-		      name="MarketPlace" is-course-tool="false">
+	  	      type=""
+		      name="MarketPlace" is-course-tool="true" is-org-tool="true" is-sys-tool="true" is-group-tool="true" can-allow-guest="true">
 		    <description lang="en_US">Building Block Java Serlvet</description>
 		    <links>
 		      <link>
@@ -57,8 +57,10 @@
 			<permission type="persist" name="Content" actions="create,modify,delete"/>
 			<permission type="attribute" name="user.authinfo" actions="get,set"/>
 			<permission type="attribute" name="user.personalinfo" actions="get,set"/>
-			<permission type="socket" name="*" actions="connect" /> 
+			<permission type="socket" name="*" actions="resolve,connect" /> 
 			<permission type="persist" name="Attempt" actions="load,persist,delete" />
+			<permission type="java.lang.reflect.ReflectPermission" name="suppressAccessChecks"/>
+		    <permission type="java.lang.RuntimePermission" name="*"/>
 			<permission type="persist" name="Outcome" actions="load,persist,delete" />
 			<permission type="persist" name="OutcomeDefinition" actions="load,persist,delete" />
 			<permission type="persist" name="outcomedefinitioncategory" actions="load,persist,delete" />

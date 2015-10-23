@@ -8,6 +8,8 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cs499.exceptions.ItemProcessException;
+
 /**
  * Servlet implementation class Servlet
  */
@@ -36,7 +38,14 @@ public class JavaControllerServlet extends HttpServlet {
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		bbHandler = (BlackboardHandler) request.getSession().getAttribute("bbHandler");
-		bbHandler.buyItem(request.getParameter("name"));
+		try {
+			bbHandler.buyItem(request.getParameter("name"));
+			if(!bbHandler.hasItem(request.getParameter("name"))){
+				throw new ItemProcessException("Item Purchase Failed.");
+			}
+		}catch (ItemProcessException e) {
+			e.printStackTrace();
+		}
 	}
 
 }
