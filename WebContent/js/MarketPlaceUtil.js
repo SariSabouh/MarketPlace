@@ -21,7 +21,8 @@ jQuery.noConflict();
 	    		type: "POST",
 	    		data: $(this).attr("name"),
 	    		success: function(result){
-	    			alert("SUCCESS");
+	    			
+	    			alert(result.responseText);
 	    		},
 	    		error: function(result){
 	    			alert("FAIL");

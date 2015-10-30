@@ -1,24 +1,15 @@
 package cs499.controllers;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
-import blackboard.base.FormattedText;
 import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
 import blackboard.persist.Id;
 import blackboard.persist.KeyNotFoundException;
 import blackboard.persist.PersistenceException;
 import blackboard.persist.course.CourseMembershipDbLoader;
-import blackboard.platform.blog.Blog;
-import blackboard.platform.blog.BlogEntriesUserStatus;
-import blackboard.platform.blog.BlogEntry;
-import blackboard.platform.blog.BlogEntry.BlogEntryStatus;
-import blackboard.platform.blog.impl.BlogDAO;
-import blackboard.platform.blog.impl.BlogEntryDAO;
-import blackboard.platform.blog.impl.BlogManagerImpl;
 import blackboard.platform.gradebook2.BookData;
 import blackboard.platform.gradebook2.BookDataRequest;
 import blackboard.platform.gradebook2.GradableItem;
@@ -27,6 +18,7 @@ import blackboard.platform.gradebook2.GradebookManager;
 import blackboard.platform.gradebook2.GradebookManagerFactory;
 import blackboard.platform.security.authentication.BbSecurityException;
 import cs499.controllers.Grade.Condition;
+import cs499.dao.DatabaseController;
 import cs499.itemHandler.Item;
 
 public class BlackboardHandler {
@@ -37,10 +29,8 @@ public class BlackboardHandler {
 	private List<Student> students;
 	private User sessionUser;
 	private List<Item> itemList;
-	private Id courseID;
 
 	public BlackboardHandler(Id courseID, User sessionUser) throws GradebookException, BbSecurityException, KeyNotFoundException, PersistenceException{
-		this.courseID = courseID;
 		this.sessionUser = sessionUser;
 		students = new ArrayList<Student>();
 		gradebookManager = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
@@ -51,8 +41,19 @@ public class BlackboardHandler {
 		List<CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
 		Iterator<CourseMembership> i = cmlist.iterator();
 		setStudentsList(i);
+		updateStudentGold();
 	}
 	
+	private void updateStudentGold() {
+		DatabaseController dbController = new DatabaseController();
+		System.out.println("Updating student gold");
+		for(Student student: students){
+			int goldUsed = dbController.loadNewPurchases(student.getStudentID());
+			System.out.println("Gold used is: " + goldUsed);
+			student.substractGold(goldUsed);
+		}
+	}
+
 	public void setItemList(List<Item> itemList){
 		this.itemList = itemList;
 	}
@@ -64,7 +65,7 @@ public class BlackboardHandler {
 			Student student = new Student();
 			student.setFirstName(currentUser.getGivenName());
 			student.setLastName(currentUser.getFamilyName());
-			student.setStudentID(currentUser.getStudentId());
+			student.setStudentID(Integer.parseInt(currentUser.getStudentId()));
 			student.setUserName(currentUser.getUserName());
 			student.setId(selectedMember.getId());
 			students.add(student);
@@ -95,7 +96,7 @@ public class BlackboardHandler {
 	
 	public Student getStudent(){
 		for(Student student : students){
-			if(student.getStudentID().equals(sessionUser.getStudentId())){
+			if(student.getStudentID() == Integer.parseInt(sessionUser.getStudentId())){
 				return student;
 			}
 		}
@@ -120,63 +121,19 @@ public class BlackboardHandler {
 		return error;
 	}
 	
-	public void buyItem(String itemName){
+	public void processItem(String itemName){
 		Student student = getStudent();
+		System.out.print("In process");
 		if(student != null){
 			for(Item item: itemList){
 				if(item.getName().equals(itemName)){
 					if(student.canAfford(item.getCost())){
-						student.payPrice(item.getCost(), item);
-						addItemToBlog(itemName);
+						System.out.println("Student can afford");
+						student.buyItem(item);
 					}
 				}
 			}
 		}
-	}
-	
-	public void addItemToBlog(String itemName){
-		List<Blog> blogs = BlogDAO.get().loadByCourseId(courseID, true, false, false);
-		for(Blog blog : blogs){
-			BlogEntry blogEntry = createBlogEntry(blog, itemName);
-			BlogManagerImpl blogManager = new BlogManagerImpl();
-			BlogEntriesUserStatus blogStatus = new BlogEntriesUserStatus(sessionUser.getId(), blog.getId());
-			blogStatus.markEntryAsNew(blogEntry.getId());
-			BlogEntryDAO.get().persist(blogEntry);
-			BlogEntryDAO.get().persistAndUpdateTimeStamp(blogEntry);
-			BlogEntryDAO.get().persistAndUpdateTimeStamp(blogEntry);
-			BlogDAO.get().persist(blog);
-			blogManager.persistBlogEntry(blog, sessionUser.getId(), blogEntry, false, blogStatus);
-			blogManager.saveBlog(blog);
-		}
-	}
-	
-	private BlogEntry createBlogEntry(Blog blog, String itemName){
-		BlogEntry blogEntry = new BlogEntry();
-		blogEntry.setBlogId(blog.getId());
-		blogEntry.setCreatorCourseUserId(sessionUser.getId());
-		blogEntry.setStatus(BlogEntryStatus.POSTED);
-		blogEntry.setTitle(itemName);
-		blogEntry.setAnonymous(false);
-		blogEntry.setCreationDate(Calendar.getInstance());
-		FormattedText formatText = FormattedText.toFormattedText("Item name is: " + itemName);
-		blogEntry.setDescription(formatText);
-		blogEntry.setId(Id.toId(BlogEntry.DATA_TYPE, "_200_1"));
-		return blogEntry;
-	}
-
-	public boolean hasItem(String itemName) {
-		List<Blog> blogs = BlogDAO.get().loadByCourseId(courseID, true, false, false);
-		for(Blog blog : blogs){
-			if(blog.getTitle().equalsIgnoreCase("item")){
-				List<BlogEntry> blogEntries = BlogEntryDAO.get().loadAllByBlogId(blog.getId());
-				for(BlogEntry blogEntry : blogEntries){
-					if(blogEntry.getTitle().equals(itemName)){
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 	
 }

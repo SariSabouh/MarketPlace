@@ -6,18 +6,11 @@
 <%@page import="blackboard.persist.course.*"%> 	
 <%@page import="blackboard.platform.gradebook2.*"%>
 <%@page import="blackboard.platform.gradebook2.impl.*"%>
-<%@page import="blackboard.data.content.Content"%>
-<%@page import="blackboard.persist.navigation.CourseTocDbLoader"%>
-<%@page import="blackboard.data.navigation.CourseToc"%>
-<%@page import="blackboard.platform.blog.impl.BlogDAO"%>
-<%@page import="blackboard.platform.blog.BlogEntry.BlogEntryStatus"%>
-<%@page import="blackboard.platform.blog.BlogEntry"%>
-<%@page import="blackboard.platform.blog.BlogEntriesUserStatus"%>
-<%@page import="blackboard.platform.blog.Blog"%>
-<%@page import="blackboard.platform.blog.impl.BlogEntryDAO"%>
 <%@page import="java.util.*"%> 								
 <%@page import="cs499.controllers.*"%>
 <%@page import="cs499.itemHandler.*"%>
+<%@page import="cs499.dao.DatabaseController"%>
+<%@page import="java.io.InputStream"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <bbNG:includedPage ctxId="ctx">
@@ -29,37 +22,15 @@
 	String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 	String sessionUserID = sessionUser.getId().toString();	
 	BlackboardHandler bbHandler = new BlackboardHandler(courseID, sessionUser);
-	
 	session.setAttribute("bbHandler", bbHandler);
-	
-	// get items list from contents
-	ContentDbLoader contentDb = ContentDbLoader.Default.getInstance();
-	CourseTocDbLoader cTocLoader = CourseTocDbLoader.Default.getInstance();
-	List<CourseToc> tableOfContents = cTocLoader.loadByCourseId(courseID);
-	List<Content> tableChildren = new ArrayList<Content>();
-	for (CourseToc t : tableOfContents) {
-		if (t.getTargetType() == CourseToc.Target.CONTENT) {
-			tableChildren.addAll(contentDb.loadChildren(t.getContentId(), false, null));
-		}
-	}
-	ItemController itemContr = new ItemController();
-	String test = null;
-	for(Content content : tableChildren){
-		if(content.getTitle().equals("itemList")){
-			String contentText = content.getBody().getText();
-			itemContr.createItemListFromContents(contentText);			
-		}
-	}
 	
 	// get Gold for student
 	boolean isStudent = false;
 	String role = sessionUserRole.trim().toLowerCase();
-	String error = "";
 	String myItems = "";
 	int myGold = 0;
 	if (role.contains("student")) {
 		isStudent = true;
-		error = bbHandler.setStudentGold();
 		Student student = bbHandler.getStudent();
 		myGold = student.getGold();
 		for(Item item : student.getItemList()){
@@ -68,35 +39,21 @@
 		
 	}
 	
-	List<Item> itemList = itemContr.getItemList();
+	ItemController itemContr = new ItemController();
+	DatabaseController dbController = new DatabaseController();
+	List<Item> itemList = dbController.loadItems();
+	if(dbController.loadItem("ITEM_INIT") == null){
+		System.out.println("Initializing Database.");
+		InputStream in = this.getClass().getClassLoader() .getResourceAsStream("/dataSeed.txt");
+		String content = new Scanner(in).useDelimiter("\\Z").next();
+		itemList = dbController.initilizeDatabase(content);
+	}
+	
 	bbHandler.setItemList(itemList);
 	session.setAttribute("itemList", itemList);
 	String allItems = "";
 	for(Item item: itemList){
 		allItems += item.toString() + "<br /><br />";
-	}
-	
-	List<Blog> blogs = BlogDAO.get().loadByCourseId(courseID, true, false, false);
-	for(Blog blog : blogs){
-		if(blog.getTitle().equalsIgnoreCase("item")){
-			List<BlogEntry> blogEntries = BlogEntryDAO.get().loadAllByBlogId(blog.getId());
-			for(BlogEntry blogEntry : blogEntries){
-				myItems += "BlogEntry: " + blogEntry.getCreatorLocaleName();
-				myItems += "<br /><br />" + blogEntry.getTitle();
-				myItems += "<br /><br />" + blogEntry.getAttachments();
-				myItems += "<br /><br />" + blogEntry.getBlogId();
-				myItems += "<br /><br />" + blogEntry.getCommentAddedDate();
-				myItems += "<br /><br />" + blogEntry.getCommentModifiedDate();
-				myItems += "<br /><br />" + blogEntry.getCreationDate();
-				myItems += "<br /><br />" + blogEntry.getCreatorCourseUserId();
-				myItems += "<br /><br />" + blogEntry.getDataType();
-				myItems += "<br /><br />" + blogEntry.getDescription();
-				myItems += "<br /><br />" + blogEntry.getId();
-				myItems += "<br /><br />" + blogEntry.getStatus();
-				myItems += "<br /><br />" + blogEntry.getUpdateDate();
-				myItems += "<br /><br />";
-			}
-		}
 	}
 
 %>

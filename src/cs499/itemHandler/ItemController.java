@@ -1,13 +1,18 @@
 package cs499.itemHandler;
 
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class ItemController {
 
-	private ArrayList<Item> itemList;
+	private List<Item> itemList;
 	
-	public ArrayList<Item> getItemList(){
+	public ItemController(){
+		itemList = new ArrayList<Item>();
+	}
+	
+	public List<Item> getItemList(){
 		return itemList;
 	}
 	
@@ -67,4 +72,5 @@ public class ItemController {
 		XMLParser xmlP = new XMLParser(xml);
 		itemList = xmlP.getItemsList();
 	}	
+	
 }

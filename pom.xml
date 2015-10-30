@@ -71,6 +71,9 @@
      <resource>
        <directory>src/</directory>
      </resource>
+     <resource>
+       <directory>WebContent/WEB-INF/resources/</directory>
+     </resource>
    </resources>
     <sourceDirectory>src</sourceDirectory>
     <plugins>

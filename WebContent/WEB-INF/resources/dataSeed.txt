@@ -1,0 +1,16 @@
+--
+name=PickAxe
+cost=875
+duration=ONCE
+type=EXAMS
+attAffected=DUEDATE
+supply=10
+effectMagnitude=2
+--
+name=LongSword
+cost=115
+duration=65
+type=ALL
+attAffected=DUEDATE
+supply=1
+effectMagnitude=2 

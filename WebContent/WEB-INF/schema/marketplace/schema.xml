@@ -1,0 +1,44 @@
+<schema name="dt_marketplace">
+<comment>This schema defines a table used by the application to store a Blackboard user's favorite Blackboard course</comment>
+
+  <table name="dt_item">
+  	<column name="item_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence dt_item_seq which will be created automatically" />
+    <column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Item" />
+    <column name="attribute_affected" data-type="nvarchar(100)" nullable="false" identity="false" comment="Attribute that the Item will affect" />
+    <column name="cost" data-type="int" nullable="false" identity="false" comment="Cost of Item" />
+    <column name="duration" data-type="int" nullable="false" identity="false" comment="Duration of Item" />
+    <column name="effect_magnitude" data-type="int" nullable="false" identity="false" comment="The magnitude of the effect of the Item" />
+    <column name="supply" data-type="int" nullable="false" identity="false" comment="Supply of Item" />
+    <column name="type" data-type="nvarchar(100)" nullable="false" identity="false" comment="Assessment Type of Item" />
+
+    <primary-key name="dt_item_id" comment="Unique primary key">
+      <columnref name="item_pk1" />
+    </primary-key>
+    
+    <index name="dt_name_ui1" unique="true">
+        <columnref name="name"/>
+    </index>
+  </table>
+  
+  <table name="dt_purchaseinfo">
+  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence dt_item_seq which will be created automatically" />
+  	<column name="student_id" data-type="int" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
+  	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Username of person that made the purchase." />
+  	<column name="purchase_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Purhcase." />
+  	<column name="used_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Use." />
+  	<column name="expiry_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
+  	<column name="new" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
+  	
+  	<primary-key name="dt_purchaseinfo_id2" comment="Unique primary key">
+      <columnref name="purchase_info_pk1" />
+    </primary-key>
+  	
+  	<foreign-key name="dt_item_id_fk2" reference-table="dt_item" comment="This is a Foreign Key referencing the primary key of the dt_item table.">
+	  <columnref name="item_pk1" />
+	</foreign-key>
+  </table>
+
+ 
+
+</schema>
+

@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import cs499.dao.DatabaseController;
 import cs499.exceptions.ItemProcessException;
 
 /**
@@ -37,12 +38,18 @@ public class JavaControllerServlet extends HttpServlet {
 	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
 	 */
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		bbHandler = (BlackboardHandler) request.getSession().getAttribute("bbHandler");
+		//bbHandler = (BlackboardHandler) request.getSession().getAttribute("bbHandler");
+		response.setContentType("text/xml");
+		response.getWriter().write("Server Accessed");
+		DatabaseController dbController = new DatabaseController();
 		try {
-			bbHandler.buyItem(request.getParameter("name"));
-			if(!bbHandler.hasItem(request.getParameter("name"))){
-				throw new ItemProcessException("Item Purchase Failed.");
+			System.out.print("In TRy");
+			if(dbController.loadItem(request.getParameter("name")) == null){
+				System.out.print("Exception thrown");
+				throw new ItemProcessException("Item Purchase Failed. Item is not in Database");
 			}
+			System.out.print("Before process");
+			bbHandler.processItem(request.getParameter("name"));
 		}catch (ItemProcessException e) {
 			e.printStackTrace();
 		}

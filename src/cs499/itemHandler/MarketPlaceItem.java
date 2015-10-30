@@ -5,7 +5,7 @@ import org.joda.time.DateTime;
 public abstract class MarketPlaceItem {
 
 	private DateTime purchaseDate, usedBy, expiredOn;
-	int id;
+	private int id;
 	
 	public DateTime getPurchaseDate() {
 		return purchaseDate;

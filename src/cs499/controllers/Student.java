@@ -4,12 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 import blackboard.persist.Id;
+import cs499.dao.DatabaseController;
 import cs499.itemHandler.Item;
 
 public class Student{
-	private String fName, lName, userName, studentID;
+	private String fName, lName, userName;
 	private List<Item> itemList;
-	private int gold;
+	private int gold, studentID;
 	private Id id;
 	
 	public Student(){
@@ -29,7 +30,7 @@ public class Student{
 		this.gold = gold;
 	}
 
-	public void setStudentID(String ID){
+	public void setStudentID(int ID){
 		this.studentID = ID;
 	}
 
@@ -46,7 +47,7 @@ public class Student{
 		this.userName = userName;
 	}
 	
-	public String getStudentID(){
+	public int getStudentID(){
 		return studentID;
 	}
 	
@@ -77,8 +78,15 @@ public class Student{
 		return true;
 	}
 	
-	public void payPrice(float price, Item item){
-		gold = (int) (gold - price);
+	public void buyItem(Item item){
+		gold = (int) (gold - item.getCost());
+		DatabaseController dbController = new DatabaseController();
+		System.out.println("Gold substracted about to persist");
+		dbController.persistPurhcase(studentID, item.getName());
 		itemList.add(item);
+	}
+
+	public void substractGold(int goldUsed) {
+		gold -= goldUsed;
 	}
 }
