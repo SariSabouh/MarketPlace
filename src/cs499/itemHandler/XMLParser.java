@@ -67,7 +67,7 @@ public class XMLParser extends DefaultHandler {
 		}
 
 		else if (element.equals("effectMagnitude")) {
-			item.setAmount(Float.parseFloat(tmpValue));
+			item.setEffectMagnitude(Float.parseFloat(tmpValue));
 		}
 
 		else if (element.equals("type")) {

@@ -3,7 +3,6 @@ package cs499.itemHandler;
 import java.util.ArrayList;
 import java.util.List;
 
-
 public class ItemController {
 
 	private List<Item> itemList;
@@ -14,6 +13,14 @@ public class ItemController {
 	
 	public List<Item> getItemList(){
 		return itemList;
+	}
+	
+	public Item getItemByName(List<Item> itemList, String name){
+		for(Item item : itemList){
+			if(item.getName().equals(name))
+				return item;
+		}
+		return null;
 	}
 	
 	public void createItemListFromContents(String content){
@@ -71,6 +78,6 @@ public class ItemController {
 		xml += "</items>";
 		XMLParser xmlP = new XMLParser(xml);
 		itemList = xmlP.getItemsList();
-	}	
+	}
 	
 }

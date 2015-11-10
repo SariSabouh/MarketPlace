@@ -26,12 +26,4 @@
     <servlet-name>dwr-invoker</servlet-name>
     <url-pattern>/dwr/*</url-pattern>
   </servlet-mapping>
-  <servlet>
-    <servlet-name>JavaControllerServlet</servlet-name>
-    <servlet-class>cs499.controllers.JavaControllerServlet</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>JavaControllerServlet</servlet-name>
-    <url-pattern>/controller</url-pattern>
-  </servlet-mapping>
 </web-app>

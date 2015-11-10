@@ -1,10 +1,10 @@
-package cs499.controllers;
+package cs499.util;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import blackboard.persist.Id;
-import cs499.dao.DatabaseController;
+import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
 
 public class Student{
@@ -16,6 +16,10 @@ public class Student{
 	public Student(){
 		gold = 0;
 		itemList = new ArrayList<Item>();
+	}
+	
+	public void addItem(Item item){
+		itemList.add(item);
 	}
 	
 	public List<Item> getItemList(){
@@ -80,13 +84,15 @@ public class Student{
 	
 	public void buyItem(Item item){
 		gold = (int) (gold - item.getCost());
-		DatabaseController dbController = new DatabaseController();
+		MarketPlaceDAO dbController = new MarketPlaceDAO();
 		System.out.println("Gold substracted about to persist");
 		dbController.persistPurhcase(studentID, item.getName());
 		itemList.add(item);
 	}
 
-	public void substractGold(int goldUsed) {
-		gold -= goldUsed;
+	public void substractGold(Item item) {
+		System.out.println("Gold Substracted is: " + item.getCost());
+		gold -= item.getCost();
+		itemList.add(item);
 	}
 }

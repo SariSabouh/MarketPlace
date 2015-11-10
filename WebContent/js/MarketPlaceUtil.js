@@ -13,22 +13,39 @@ jQuery.noConflict();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
-	$(".Items").click(function() {
+    $(".Items").click(function() {
 		var student = $("#isStudent").val();
 		if(student == "true"){
 			$.ajax({
-		    	url: "/webapps/dt-MarketPlace/-BBLEARN-bb_bb60/JavaControllerServlet",
+		    	url: $("#buyItemURL").val(),
 	    		type: "POST",
-	    		data: $(this).attr("name"),
+	    		data: {itemName: "PickAxe"},
 	    		success: function(result){
-	    			
-	    			alert(result.responseText);
+	    			alert("SUCCESS");
+	    			console.log(result.responseText);
 	    		},
 	    		error: function(result){
 	    			alert("FAIL");
 	    		}
-		    });
+		    })
+			.done(function(result){
+    			alert("DONE");
+    		});
 		}
+	});
+    $(".MyItems").click(function() {
+		$.ajax({
+	    	url: $("#useItemURL").val(),
+    		type: "POST",
+    		data: {itemName: "PickAxe"},
+    		success: function(result){
+    			alert("SUCCESS");
+    			console.log(result.responseText);
+    		},
+    		error: function(result){
+    			alert("FAIL");
+    		}
+	    })
 	});
 })
 (jQuery);

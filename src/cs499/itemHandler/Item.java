@@ -41,7 +41,7 @@ public class Item extends MarketPlaceItem implements Serializable{
 		}
 	}
 
-	public void setAmount(float effectMagnitude) {
+	public void setEffectMagnitude(float effectMagnitude) {
 		this.effectMagnitude = effectMagnitude;
 	}
 
@@ -73,7 +73,7 @@ public class Item extends MarketPlaceItem implements Serializable{
 		return supply;
 	}
 
-	public float getAmount() {
+	public float getEffectMagnitude() {
 		return effectMagnitude;
 	}
 	

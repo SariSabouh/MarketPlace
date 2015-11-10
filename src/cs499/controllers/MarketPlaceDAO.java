@@ -1,4 +1,4 @@
-package cs499.dao;
+package cs499.controllers;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -15,11 +15,11 @@ import cs499.itemHandler.Item;
 import cs499.itemHandler.Item.AssessmentType;
 import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
+import cs499.util.WaitListPojo;
 
-public class DatabaseController {
+public class MarketPlaceDAO {
 	
 	public List<Item> loadItems(){
-		System.out.print("Load Items");
 		ConnectionManager cManager = null;
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -39,11 +39,10 @@ public class DatabaseController {
 		        	item.setAttributeAffected(AttributeAffected.valueOf(rSet.getString("attribute_affected")));
 		        	item.setCost(rSet.getInt("cost"));
 		        	item.setDuration(rSet.getInt("duration"));
-		        	item.setAmount(rSet.getInt("effect_magnitude"));
+		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
 		        	item.setId(rSet.getInt("item_pk1"));
-		        	System.out.println(item.toString());
 		        	itemList.add(item);
 	        	}
 	        }
@@ -86,7 +85,7 @@ public class DatabaseController {
 		        	item.setAttributeAffected(AttributeAffected.valueOf(rSet.getString("attribute_affected")));
 		        	item.setCost(rSet.getInt("cost"));
 		        	item.setDuration(rSet.getInt("duration"));
-		        	item.setAmount(rSet.getInt("effect_magnitude"));
+		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
 		        	item.setId(rSet.getInt("item_pk1"));
@@ -132,7 +131,7 @@ public class DatabaseController {
 	            insertQuery.setString(2, item.getAttributeAffected().toString());
 	            insertQuery.setInt(3, (int)item.getCost());
 	            insertQuery.setInt(4, item.getDuration());
-	            insertQuery.setInt(5, (int)item.getAmount());
+	            insertQuery.setInt(5, (int)item.getEffectMagnitude());
 	            insertQuery.setInt(6, (int)item.getSupply());
 	            insertQuery.setString(7, item.getType().toString());
 	            insertQuery.executeUpdate();
@@ -165,9 +164,9 @@ public class DatabaseController {
 			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 	        conn = cManager.getConnection();
 	        PreparedStatement insertQuery = null;
-	        queryString.append("INSERT INTO dt_pruchaseinfo");
-            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiry_date, new) ");
-            queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\') ");
+	        queryString.append("INSERT INTO dt_purchaseinfo");
+            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiry_date, new, usage) ");
+            queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0) ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.setInt(1, studentID);
             insertQuery.setString(2, itemName);
@@ -187,7 +186,7 @@ public class DatabaseController {
 	    }		
 	}
 	
-	public void deletePurhcase(int studentID, String itemName) {
+	private void deletePurhcases() {
 		ConnectionManager cManager = null;
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -195,10 +194,202 @@ public class DatabaseController {
 			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 	        conn = cManager.getConnection();
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_pruchaseinfo ");
-            queryString.append("where student_id = ?");
+	        queryString.append("delete from dt_purchaseinfo ");
             insertQuery = conn.prepareStatement(queryString.toString());
-            insertQuery.setInt(1, studentID);
+            insertQuery.executeUpdate();
+            insertQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }		
+        System.out.println("Deleted Purchase Info");
+	}
+
+	public List<String> loadNewPurchases(int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        List<String> itemList = new ArrayList<String>();
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement selectQuery = null;
+	        System.out.println("Updating gold for studentid: " + studentID);
+	        
+	        queryString.append("select name from dt_item where item_pk1 in (");
+            queryString.append("select item_pk1 from dt_purchaseinfo where new = \'Y\' and student_id = ?)");
+            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setInt(1, studentID);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        boolean notEmpty = false;
+	        while(rSet.next()){
+	        	String itemName = rSet.getString("name");
+	        	System.out.println("Item found: " + itemName);
+	        	itemList.add(itemName);
+	        	notEmpty = true;
+	        }
+	        if(notEmpty){
+		        queryString = new StringBuffer("");
+		        queryString.append("update dt_purchaseinfo ");
+	            queryString.append("set new = \'N\' where new = \'Y\' and student_id = ?");
+	            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		        selectQuery.setInt(1, studentID);
+		        selectQuery.executeUpdate();
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        return itemList;
+	}
+	
+	public List<String> loadUnusedItems(int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        List<String> itemList = new ArrayList<String>();
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement selectQuery = null;
+	        queryString.append("select name from dt_item where item_pk1 in (");
+            queryString.append("select item_pk1 from dt_purchaseinfo where expiry_date = \'NA\' and student_id = ?)");
+            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setInt(1, studentID);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	String itemName = rSet.getString("name");
+	        	System.out.println("Item found: " + itemName);
+	        	itemList.add(itemName);
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        return itemList;
+	}
+
+	public boolean expireInstantItem(String name, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set used_date = ?, expiry_date = ?, usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(1, new DateTime().toString());
+            selectQuery.setString(2, new DateTime().toString());
+            selectQuery.setString(3, name);
+            selectQuery.setInt(4, studentID);
+	        int rowsUpdated = selectQuery.executeUpdate();
+	        if(rowsUpdated == 0){
+	        	return false;
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        addToWaitList(name, studentID);
+		return true;
+	}
+	
+	private void addToWaitList(String name, int studentID){
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Inserting item in waiting list: " + studentID);
+	        queryString.append("insert into dt_waitlist(student_id, name) ");
+	        queryString.append("values(?, ?)");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(2, name);
+            selectQuery.setInt(1, studentID);
+	        selectQuery.executeUpdate();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+	}
+	
+	public List<WaitListPojo> loadWaitList() {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        List<WaitListPojo> itemStudent = new ArrayList<WaitListPojo>();
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement selectQuery = null;
+	        queryString.append("select name, student_id from dt_waitlist");
+            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	WaitListPojo waitList = new WaitListPojo();
+	        	waitList.setName(rSet.getString("name"));
+	        	waitList.setPrimaryKey(rSet.getInt("waitlist_pk1"));
+	        	waitList.setStudentID(rSet.getInt("student_id"));
+	        	itemStudent.add(waitList);
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        return itemStudent;
+	}
+
+	public void removeItemWaitList(int primaryKey) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from dt_waitlist ");
+            queryString.append("where waitlist_pk1 = ?");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setInt(1, primaryKey);
             insertQuery.executeUpdate();
             insertQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -211,44 +402,5 @@ public class DatabaseController {
 	        }
 	    }		
 	}
-
-	public int loadNewPurchases(int studentID) {
-		ConnectionManager cManager = null;
-        Connection conn = null;
-        StringBuffer queryString = new StringBuffer("");
-        int allGold = 0;
-        try {
-			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
-	        conn = cManager.getConnection();
-	        PreparedStatement selectQuery = null;
-	        queryString.append("select cost from dt_item where item_pk1 in (");
-            queryString.append("select item_pk1 from dt_purchaseinfo where new = \'Y\' and student_id = ?)");
-            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setInt(1, studentID);
-	        ResultSet rSet = selectQuery.executeQuery();
-	        boolean notEmpty = false;
-	        while(rSet.next()){
-	        	allGold += rSet.getInt("cost");
-	        	notEmpty = true;
-	        }
-	        if(notEmpty){
-		        queryString = new StringBuffer("");
-		        queryString.append("update dt_purchaseinfo ");
-	            queryString.append("set new = \'N\' where new = \'Y\' and student_id = ?");
-	            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-		        selectQuery.setInt(1, studentID);
-		        selectQuery.executeQuery();
-	        }
-	        selectQuery.close();
-	    } catch (java.sql.SQLException sE){
-	    	sE.printStackTrace();
-	    } catch (ConnectionNotAvailableException cE){
-	    	cE.printStackTrace();;
-	    } finally {
-	        if(conn != null){
-	            cManager.releaseConnection(conn);
-	        }
-	    }
-        return allGold;
-	}
+	
 }

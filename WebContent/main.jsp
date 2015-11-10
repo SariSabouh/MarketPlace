@@ -9,8 +9,10 @@
 <%@page import="java.util.*"%> 								
 <%@page import="cs499.controllers.*"%>
 <%@page import="cs499.itemHandler.*"%>
-<%@page import="cs499.dao.DatabaseController"%>
+<%@page import="cs499.util.Student"%>
+<%@page import="cs499.exceptions.ItemProcessException"%>
 <%@page import="java.io.InputStream"%>
+<%@page import="blackboard.platform.plugin.PlugInUtil"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <bbNG:includedPage ctxId="ctx">
@@ -21,8 +23,17 @@
 	Id courseID = ctx.getCourseId();		
 	String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 	String sessionUserID = sessionUser.getId().toString();	
-	BlackboardHandler bbHandler = new BlackboardHandler(courseID, sessionUser);
-	session.setAttribute("bbHandler", bbHandler);
+	System.out.println("\n\nSession Started for " + sessionUserRole);
+	MarketPlaceDAO dbController = new MarketPlaceDAO();
+	List<Item> itemList = dbController.loadItems();
+	if(dbController.loadItem("ITEM_INIT") == null){
+		System.out.println("Initializing Database.");
+		InputStream in = this.getClass().getClassLoader() .getResourceAsStream("/dataSeed.txt");
+		String content = new Scanner(in).useDelimiter("\\Z").next();
+		itemList = dbController.initilizeDatabase(content);
+	}	
+	BlackboardHandler bbHandler = new BlackboardHandler(courseID, sessionUser, itemList);
+	application.setAttribute("bbHandler", bbHandler);
 	
 	// get Gold for student
 	boolean isStudent = false;
@@ -34,27 +45,19 @@
 		Student student = bbHandler.getStudent();
 		myGold = student.getGold();
 		for(Item item : student.getItemList()){
-			myItems += item.toString() + " AA ";
+			myItems += item.getName() + "<br />";
 		}
 		
 	}
 	
 	ItemController itemContr = new ItemController();
-	DatabaseController dbController = new DatabaseController();
-	List<Item> itemList = dbController.loadItems();
-	if(dbController.loadItem("ITEM_INIT") == null){
-		System.out.println("Initializing Database.");
-		InputStream in = this.getClass().getClassLoader() .getResourceAsStream("/dataSeed.txt");
-		String content = new Scanner(in).useDelimiter("\\Z").next();
-		itemList = dbController.initilizeDatabase(content);
-	}
-	
-	bbHandler.setItemList(itemList);
 	session.setAttribute("itemList", itemList);
 	String allItems = "";
 	for(Item item: itemList){
 		allItems += item.toString() + "<br /><br />";
 	}
+	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/BuyItemUtil.jsp");
+	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/UseItemUtil.jsp");
 
 %>
 
@@ -80,6 +83,8 @@
 <body>
 
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
+<input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
+<input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=useItemURL%>"/>
 
 	<div id="tabs">
 
@@ -96,6 +101,7 @@
 		<div id="tabs-1">
 
 			<p><% out.print(myItems); %></p>
+			<a class="MyItems" name="PickAxe" href="#">PickAxe</a>
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 
 			</div>

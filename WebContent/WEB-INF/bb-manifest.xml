@@ -18,23 +18,6 @@
 		<http-actions>
 		</http-actions>
   
-		<application-defs>
-		    <application 
-		      handle="MarketPlace" 
-	  	      type=""
-		      name="MarketPlace" is-course-tool="true" is-org-tool="true" is-sys-tool="true" is-group-tool="true" can-allow-guest="true">
-		    <description lang="en_US">Building Block Java Serlvet</description>
-		    <links>
-		      <link>
-		        <type value="system_tool"/>
-		        <name value="MarketPlace"/>
-		        <url value="index.jsp"/>
-		        <description value="Building Block Java Serlvet"/>
-	          </link>
-		    </links>
-		  </application>
-		</application-defs>  
-  
 		<!-- Modules, types, and channels for the community -->
 		<module-defs>		
 			<module-type ext-ref="MarketPlace" title="MarketPlace" uicreatable="true">
@@ -67,6 +50,7 @@
 		    <permission type="java.lang.RuntimePermission" name="*"/>
 			<permission type="persist" name="Outcome" actions="load,persist,delete" />
 			<permission type="blackboard.persist.PersistPermission" name="user" actions="create"/>
+			<permission type="blackboard.persist.PersistPermission" name="gradableitem" actions="create, modify"/>
 			<permission type="persist" name="OutcomeDefinition" actions="load,persist,delete" />
 			<permission type="persist" name="outcomedefinitioncategory" actions="load,persist,delete" />
 			<permission type="persist" name="OutcomeDefinitionScale" actions="create,delete,load,persist" />
