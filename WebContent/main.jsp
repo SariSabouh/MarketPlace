@@ -6,11 +6,11 @@
 <%@page import="blackboard.persist.course.*"%> 	
 <%@page import="blackboard.platform.gradebook2.*"%>
 <%@page import="blackboard.platform.gradebook2.impl.*"%>
-<%@page import="java.util.*"%> 								
+<%@page import="java.util.List"%>
+<%@page import="java.util.Scanner"%>
 <%@page import="cs499.controllers.*"%>
-<%@page import="cs499.itemHandler.*"%>
+<%@page import="cs499.itemHandler.Item"%>
 <%@page import="cs499.util.Student"%>
-<%@page import="cs499.exceptions.ItemProcessException"%>
 <%@page import="java.io.InputStream"%>
 <%@page import="blackboard.platform.plugin.PlugInUtil"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
@@ -50,7 +50,6 @@
 		
 	}
 	
-	ItemController itemContr = new ItemController();
 	session.setAttribute("itemList", itemList);
 	String allItems = "";
 	for(Item item: itemList){
@@ -84,7 +83,7 @@
 
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
 <input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
-<input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=useItemURL%>"/>
+<input type="hidden" id="useItemURL" name="useItemURL" value="<%=useItemURL%>"/>
 
 	<div id="tabs">
 
@@ -101,7 +100,7 @@
 		<div id="tabs-1">
 
 			<p><% out.print(myItems); %></p>
-			<a class="MyItems" name="PickAxe" href="#">PickAxe</a>
+			<a class="MyItems" name="PickAxe" href="#">USE</a>
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 
 			</div>
@@ -111,7 +110,7 @@
 		<div id="tabs-2">
 
 			<p><% out.print(allItems); %></p>
-			<a class="Items" name="PickAxe" href="#">PickAxe</a>
+			<a class="Items" name="PickAxe" href="#">BUY</a>
 
 		</div>
 		

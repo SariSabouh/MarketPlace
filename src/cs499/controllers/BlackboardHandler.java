@@ -56,11 +56,45 @@ public class BlackboardHandler {
 		List<CourseMembership> cmlist = CourseMembershipDbLoader.Default.getInstance().loadByCourseIdAndRole(courseID, CourseMembership.Role.STUDENT, null, true);
 		Iterator<CourseMembership> i = cmlist.iterator();
 		setStudentsList(i);
-		setStudentsGold();
 		if(!isStudent){
 			updateStudentGold();
 			activateWaitList();
 		}
+	}
+	
+	public void processItem(String itemName){
+		if(isStudent){
+			Student student = getStudent();
+			System.out.print("In process");
+			if(student != null){
+				ItemController itemController = new ItemController();
+				Item item = itemController.getItemByName(itemList, itemName);
+				if(student.canAfford(item.getCost())){
+					System.out.println("Student can afford");
+					student.buyItem(item);
+				}
+			}
+		}
+	}
+	
+	public boolean useItem(Item item){
+		if(isStudent){
+			Student student = getStudent();
+			if(student != null){
+				updateItem(item);
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	public Student getStudent(){
+		for(Student student : students){
+			if(student.getStudentID() == Integer.parseInt(sessionUser.getStudentId())){
+				return student;
+			}
+		}
+		return null;
 	}
 	
 	private void setStudentsList(Iterator<CourseMembership> i){
@@ -79,6 +113,7 @@ public class BlackboardHandler {
 				System.out.println("isStudent");
 			}
 		}
+		setStudentsGold();
 	}
 	
 	private void activateWaitList(){
@@ -179,16 +214,7 @@ public class BlackboardHandler {
 		return false;
 	}
 	
-	public Student getStudent(){
-		for(Student student : students){
-			if(student.getStudentID() == Integer.parseInt(sessionUser.getStudentId())){
-				return student;
-			}
-		}
-		return null;
-	}
-	
-	public void setStudentsGold(){
+	private void setStudentsGold(){
 		for(Student student: students){
 			for (GradableItem gradeItem : gradableItemList) {
 				Grade grade = new Grade(bookData.get(student.getId(), gradeItem.getId()));
@@ -211,39 +237,13 @@ public class BlackboardHandler {
 		}
 	}
 	
-	public void processItem(String itemName){
-		if(isStudent){
-			Student student = getStudent();
-			System.out.print("In process");
-			if(student != null){
-				ItemController itemController = new ItemController();
-				Item item = itemController.getItemByName(itemList, itemName);
-				if(student.canAfford(item.getCost())){
-					System.out.println("Student can afford");
-					student.buyItem(item);
-				}
-			}
-		}
-	}
-	
-	public boolean useItem(Item item){
-		if(isStudent){
-			Student student = getStudent();
-			System.out.println("In process");
-			if(student != null){
-				expireItem(item);
-				return true;
-			}
-		}
-		return false;
-	}
-	
 	private boolean activateItem(Item item, Student student) {
 		System.out.println("In activate Item");
 		AssessmentType type = item.getType(); // HOW WOULD IT DIFFERENTIATE BETWEEN EXAM AND ASSIGN... etc Also discuss structure and item attrs
 		AttributeAffected attribute = item.getAttributeAffected();
 		switch(attribute){
 		case GRADE:
+			adjustColumnGrade(item.getEffectMagnitude(), "Assignment 1", student);
 			break;
 		case DUEDATE:
 			adjustColumnDueDate(item.getEffectMagnitude(), "Exam 1");
@@ -274,15 +274,59 @@ public class BlackboardHandler {
 		}
 	}
 	
-	private boolean expireItem(Item item){
+	private void adjustColumnGrade(float effectMagnitude, String columnName, Student student){
+		System.out.println("In Adjust Grade Step");
+		for (int i = 0; i<gradableItemList.size(); i ++) {
+			GradableItem gradeItem = gradableItemList.get(i);
+			if(gradeItem.getTitle().equals(columnName)){
+				try {
+					GradeDetail gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+					String manualGrade = gradeDetail.getManualGrade();
+					manualGrade = (Double.parseDouble(manualGrade) + effectMagnitude) + "";
+					double manualScore = gradeDetail.getManualScore();
+					manualScore = manualScore + effectMagnitude;
+					gradeDetail.setManualGrade(manualGrade);
+					gradeDetail.setManualScore(manualScore);
+					gradebookManager.updateGrade(gradeDetail, true, courseID);
+					break;
+				} catch (BbSecurityException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
+	}
+	
+	private boolean updateItem(Item item){
 		MarketPlaceDAO dbController = new MarketPlaceDAO();
-		if(item.getSupply() == 0){
-			System.out.println("Attempting to expire item");
+		if(item.getDuration() == 0){
+			System.out.println("Attempting to expire instant item");
 			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID())){
 				return true;
 			}
 		}
-		System.out.println("Could not expire item");
+		else if(item.getDuration() == -1){
+			System.out.println("Attempting to update passive item");
+			if(!dbController.isOutOfSupply(item, getStudent().getStudentID())){
+				if(dbController.updateUsageItem(item.getName(), getStudent().getStudentID())){
+					return true;
+				}
+			}
+		}
+		else{
+			System.out.println("Attempting to expire continuous item");
+			if(!dbController.isExpired(item, getStudent().getStudentID())){
+				if(dbController.updateUsageItem(item.getName(), getStudent().getStudentID())){
+					return true;
+				}
+			}
+			else{
+				if(dbController.updateContinuousItem(item, getStudent().getStudentID())){
+					return true;
+				}
+			}
+		}
+		System.out.println("Could not update item");
 		return false;
 	}
 	

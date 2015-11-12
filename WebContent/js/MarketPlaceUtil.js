@@ -18,7 +18,7 @@ jQuery.noConflict();
 		if(student == "true"){
 			$.ajax({
 		    	url: $("#buyItemURL").val(),
-	    		type: "POST",
+	    		type: "GET",
 	    		data: {itemName: "PickAxe"},
 	    		success: function(result){
 	    			alert("SUCCESS");
@@ -36,7 +36,7 @@ jQuery.noConflict();
     $(".MyItems").click(function() {
 		$.ajax({
 	    	url: $("#useItemURL").val(),
-    		type: "POST",
+    		type: "GET",
     		data: {itemName: "PickAxe"},
     		success: function(result){
     			alert("SUCCESS");

@@ -1,15 +1,14 @@
 <%@page import="cs499.controllers.BlackboardHandler"%>
-<%@page import="cs499.itemHandler.ItemController"%>
+<%@page import="cs499.controllers.MarketPlaceDAO"%>
 <%@page import="cs499.itemHandler.Item"%>
-<%@page import="cs499.dao.DatabaseController"%>
 <%@page import="cs499.exceptions.ItemUseException"%>
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%
+	System.out.println("In UseItemUtil");
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
-	DatabaseController dbController = new DatabaseController();
-	ItemController itemController = new ItemController();
-	Item item = dbController.loadItem("PickAxe");
+	MarketPlaceDAO dbController = new MarketPlaceDAO();
+	Item item = dbController.loadItem("Continuous");
 	try{
 		System.out.println("Item loaded: " + item.getName());
 		boolean done = bbHandler.useItem(item);
@@ -19,5 +18,5 @@
 	}catch(ItemUseException e){
 		e.printStackTrace();
 	}
-	out.println("Item Use ENDED");
+	System.out.println("Item Use ENDED");
 %>

@@ -27,7 +27,7 @@ public class Grade extends GradeWithAttemptScore{
 			setId(p.getId());
 			setPointsPossible(p.getPointsPossible());
 		}catch(NullPointerException e){
-			System.out.println("Column " + getGradableItem().getTitle() + " does not have an attempt");
+			System.out.println("Column does not have an attempt");
 		}
 	}
 

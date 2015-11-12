@@ -186,7 +186,7 @@ public class MarketPlaceDAO {
 	    }		
 	}
 	
-	private void deletePurhcases() {
+	public void deletePurhcases() { // VERY DANGEROUS METHOD REMOVES ALL ITEMS IN ALL TABLES IN DB USE WISELY
 		ConnectionManager cManager = null;
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -206,8 +206,58 @@ public class MarketPlaceDAO {
 	        if(conn != null){
 	            cManager.releaseConnection(conn);
 	        }
-	    }		
+	    }
+        deleteWaitList();
         System.out.println("Deleted Purchase Info");
+	}
+	
+	private void deleteWaitList() {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from dt_waitlist ");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        deleteItemList();
+        System.out.println("Deleted Wait List");
+	}
+	
+	private void deleteItemList() {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from dt_item ");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        System.out.println("Deleted Item List");
 	}
 
 	public List<String> loadNewPurchases(int studentID) {
@@ -320,6 +370,39 @@ public class MarketPlaceDAO {
 		return true;
 	}
 	
+	private boolean expireItem(String name, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set expiry_date = ?, usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(1, new DateTime().toString());
+            selectQuery.setString(2, name);
+            selectQuery.setInt(3, studentID);
+	        int rowsUpdated = selectQuery.executeUpdate();
+	        if(rowsUpdated == 0){
+	        	return false;
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        addToWaitList(name, studentID);
+		return true;
+	}
+	
 	private void addToWaitList(String name, int studentID){
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -355,7 +438,7 @@ public class MarketPlaceDAO {
 			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 	        conn = cManager.getConnection();
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select name, student_id from dt_waitlist");
+	        queryString.append("select * from dt_waitlist");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
@@ -400,7 +483,209 @@ public class MarketPlaceDAO {
 	        if(conn != null){
 	            cManager.releaseConnection(conn);
 	        }
+	    }
+        System.out.println("Item removed from wait list");
+	}
+
+	public boolean updateUsageItem(String name, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(1, name);
+            selectQuery.setInt(2, studentID);
+	        int rowsUpdated = selectQuery.executeUpdate();
+	        if(rowsUpdated == 0){
+	        	return false;
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        addToWaitList(name, studentID);
+		return true;
+	}
+
+	public boolean isOutOfSupply(Item item, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        boolean outOfSupply = false;
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement selectQuery = null;
+	        queryString.append("select usage from dt_purchaseinfo where name = ? and student_id = ?");
+            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setInt(2, studentID);
+            selectQuery.setString(1, item.getName());
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	if(rSet.getInt("usage") == 0){
+	        		setUsedDate(item.getName(), studentID);
+	        	}
+	        	if(item.getSupply() <= rSet.getInt("usage")){
+	        		outOfSupply = true;
+	        		expireItem(item.getName(), studentID);
+	        	}
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+		return outOfSupply;
+	}
+	
+	private void setUsedDate(String name, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set used_date = ? where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(1, new DateTime().toString());
+            selectQuery.setString(2, name);
+            selectQuery.setInt(3, studentID);
+	        selectQuery.executeUpdate();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+	}
+
+	public boolean isExpired(Item item, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        boolean expired = true;
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        PreparedStatement selectQuery = null;
+	        queryString.append("select usage, expiry_date from dt_purchaseinfo where name = ? and student_id = ?");
+            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setInt(2, studentID);
+            selectQuery.setString(1, item.getName());
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	if(rSet.getInt("usage") == 0){
+	        		setUsedExpiryDate(item, studentID);
+	        	}
+	        	String date = rSet.getString("expiry_date");
+	        	if(date.equals("NA")){
+	        		expired = false;
+	        	}
+	        	else if(new DateTime(date).isAfterNow()){
+	        		expired = false;
+	        	}
+	        	else{
+	        		expired = true;
+	        		expireItem(item.getName(), studentID);
+	        	}
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+		return expired;
+	}
+
+	private void setUsedExpiryDate(Item item, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set used_date = ?, expiry_date = ?, usage = usage + 1 where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        DateTime date = new DateTime();
+            selectQuery.setString(1, date.toString());
+            selectQuery.setString(2, date.plusHours(item.getDuration()).toString());
+            selectQuery.setString(3, item.getName());
+            selectQuery.setInt(4, studentID);
+	        selectQuery.executeUpdate();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
 	    }		
+	}
+
+	public boolean updateContinuousItem(Item item, int studentID) {
+		ConnectionManager cManager = null;
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+	        conn = cManager.getConnection();
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("set usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+            selectQuery.setString(1, item.getName());
+            selectQuery.setInt(2, studentID);
+	        int rowsUpdated = selectQuery.executeUpdate();
+	        if(rowsUpdated == 0){
+	        	return false;
+	        }
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } catch (ConnectionNotAvailableException cE){
+	    	cE.printStackTrace();;
+	    } finally {
+	        if(conn != null){
+	            cManager.releaseConnection(conn);
+	        }
+	    }
+        addToWaitList(item.getName(), studentID);
+		return true;
 	}
 	
 }
