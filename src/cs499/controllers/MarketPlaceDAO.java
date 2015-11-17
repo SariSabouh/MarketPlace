@@ -592,7 +592,7 @@ public class MarketPlaceDAO {
 			cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 	        conn = cManager.getConnection();
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select usage, expiry_date from dt_purchaseinfo where item_pk1 = (select item_pk1 from item where name = ?) and student_id = ?");
+	        queryString.append("select usage, expiry_date from dt_purchaseinfo where name = ? and student_id = ?");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setInt(2, studentID);
             selectQuery.setString(1, item.getName());
