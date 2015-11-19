@@ -17,8 +17,17 @@ import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
 import cs499.util.WaitListPojo;
 
+/**
+ * The Class MarketPlaceDAO. This is the class that controls the database
+ * accessing and modifying of this blackboard module using blackboard's OpenDb
+ */
 public class MarketPlaceDAO {
 	
+	/**
+	 * Load all @{link Item} from the database.
+	 *
+	 * @return the list of @{link Item}
+	 */
 	public List<Item> loadItems(){
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -42,7 +51,6 @@ public class MarketPlaceDAO {
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
-		        	item.setId(rSet.getInt("item_pk1"));
 		        	itemList.add(item);
 	        	}
 	        }
@@ -60,6 +68,12 @@ public class MarketPlaceDAO {
         return itemList;
 	}
 	
+	/**
+	 * Gets one specific @{link Item} from the database.
+	 *
+	 * @param itemName the @{link Item} name
+	 * @return the @{link Item}
+	 */
 	public Item loadItem(String itemName){
 		ConnectionManager cManager = null;	
         Connection conn = null;
@@ -88,7 +102,6 @@ public class MarketPlaceDAO {
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
-		        	item.setId(rSet.getInt("item_pk1"));
 	        	}
 	        }
 	        rSet.close();
@@ -107,6 +120,14 @@ public class MarketPlaceDAO {
         return item;
 	}
 	
+	/**
+	 * Initilize database. If this is the very first time this is ran
+	 * or if the database was cleared, it will load a starting list
+	 * of items from a resource file in this project.
+	 *
+	 * @param content the content
+	 * @return the list
+	 */
 	public List<Item> initilizeDatabase(String content){
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -149,12 +170,25 @@ public class MarketPlaceDAO {
         return itemContr.getItemList();
 	}
 	
+	/**
+	 * Gets the data seed from the resource file and converts it
+	 * to a list of @{link Item} in @{link ItemController}.
+	 *
+	 * @param content the content
+	 * @return the data seed
+	 */
 	private ItemController getDataSeed(String content){
 		ItemController itemContr = new ItemController();
 		itemContr.createItemListFromContents(content);
 		return itemContr;
 	}
 
+	/**
+	 * Persist purhcase of @{link Item} in the database.
+	 *
+	 * @param studentID the {@link Student} id
+	 * @param itemName the @{link Item} name
+	 */
 	public void persistPurhcase(int studentID, String itemName) {
 		System.out.print("Persist Items");
 		ConnectionManager cManager = null;
@@ -186,6 +220,12 @@ public class MarketPlaceDAO {
 	    }		
 	}
 	
+	/**
+	 * Deletes all purchases from the table.
+	 * NEVER use except if a clean slate is required.
+	 * It also calls other delete methods which ends up in
+	 * a complete truncation of all database tables for this module.
+	 */
 	public void deletePurhcases() { // VERY DANGEROUS METHOD REMOVES ALL ITEMS IN ALL TABLES IN DB USE WISELY
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -211,6 +251,10 @@ public class MarketPlaceDAO {
         System.out.println("Deleted Purchase Info");
 	}
 	
+	/**
+	 * Deletes all @{link Item} from wait list.
+	 * It is only called by {@link #deletePurhcases()}
+	 */
 	private void deleteWaitList() {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -236,6 +280,10 @@ public class MarketPlaceDAO {
         System.out.println("Deleted Wait List");
 	}
 	
+	/**
+	 * Delete @{link Item} list from table.
+	 * It is only called bye {@link #deletePurhcases()}
+	 */
 	private void deleteItemList() {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -260,6 +308,13 @@ public class MarketPlaceDAO {
         System.out.println("Deleted Item List");
 	}
 
+	/**
+	 * Load new purchases that were purchased while
+	 * instructor was offline.
+	 *
+	 * @param studentID the {@link Student}
+	 * @return the list
+	 */
 	public List<String> loadNewPurchases(int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -304,6 +359,12 @@ public class MarketPlaceDAO {
         return itemList;
 	}
 	
+	/**
+	 * Load unused {@link Item}.
+	 *
+	 * @param studentID the student id
+	 * @return the list
+	 */
 	public List<String> loadUnusedItems(int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -336,6 +397,13 @@ public class MarketPlaceDAO {
         return itemList;
 	}
 
+	/**
+	 * Expire @{link Item} that is only used once and expires.
+	 *
+	 * @param name the name of the @{link Item}
+	 * @param studentID the @{link Student} id
+	 * @return true, if successful
+	 */
 	public boolean expireInstantItem(String name, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -370,6 +438,13 @@ public class MarketPlaceDAO {
 		return true;
 	}
 	
+	/**
+	 * Expire @{link Item} that is continuous or passive.
+	 *
+	 * @param name the @{link Item} name
+	 * @param studentID the @{link Student} id
+	 * @return true, if successful
+	 */
 	private boolean expireItem(String name, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -403,6 +478,12 @@ public class MarketPlaceDAO {
 		return true;
 	}
 	
+	/**
+	 * Adds the @{link Item} to wait list.
+	 *
+	 * @param name the @{link Item} name
+	 * @param studentID the @{link Student} id
+	 */
 	private void addToWaitList(String name, int studentID){
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -429,6 +510,11 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Load @{link Item} wait list.
+	 *
+	 * @return the list of @{link Item}
+	 */
 	public List<WaitListPojo> loadWaitList() {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -461,6 +547,11 @@ public class MarketPlaceDAO {
         return itemStudent;
 	}
 
+	/**
+	 * Removes the @{link Item} from wait list.
+	 *
+	 * @param primaryKey the primary key of @{link Item} from dt_purchaseinfo table
+	 */
 	public void removeItemWaitList(int primaryKey) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -487,6 +578,13 @@ public class MarketPlaceDAO {
         System.out.println("Item removed from wait list");
 	}
 
+	/**
+	 * Increment the usage of the item in the database table
+	 *
+	 * @param name the @{link Item} name
+	 * @param studentID the @{link Student} id
+	 * @return true, if successful
+	 */
 	public boolean updateUsageItem(String name, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -519,6 +617,13 @@ public class MarketPlaceDAO {
 		return true;
 	}
 
+	/**
+	 * Checks if the @{link Item} is out of supply.
+	 *
+	 * @param item the @{link Item}
+	 * @param studentID the @{link Student} id
+	 * @return true, if is out of supply
+	 */
 	public boolean isOutOfSupply(Item item, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -555,6 +660,12 @@ public class MarketPlaceDAO {
 		return outOfSupply;
 	}
 	
+	/**
+	 * Sets the used date of the @{link Item}.
+	 *
+	 * @param name the @{link Item} name
+	 * @param studentID the @{link Student} id
+	 */
 	private void setUsedDate(String name, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -583,6 +694,13 @@ public class MarketPlaceDAO {
 	    }
 	}
 
+	/**
+	 * Checks if the @{link Item} is expired.
+	 *
+	 * @param item the item
+	 * @param studentID the student id
+	 * @return true, if is expired
+	 */
 	public boolean isExpired(Item item, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -626,6 +744,12 @@ public class MarketPlaceDAO {
 		return expired;
 	}
 
+	/**
+	 * Sets the used and expiry date for @{link Item}.
+	 *
+	 * @param item the item
+	 * @param studentID the student id
+	 */
 	private void setUsedExpiryDate(Item item, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;
@@ -656,6 +780,13 @@ public class MarketPlaceDAO {
 	    }		
 	}
 
+	/**
+	 * Update continuous @{link Item}.
+	 *
+	 * @param item the @{link Item}
+	 * @param studentID the @{link Student} id
+	 * @return true, if successful
+	 */
 	public boolean updateContinuousItem(Item item, int studentID) {
 		ConnectionManager cManager = null;
         Connection conn = null;

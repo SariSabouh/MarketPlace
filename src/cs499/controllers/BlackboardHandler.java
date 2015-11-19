@@ -31,17 +31,48 @@ import cs499.util.Student;
 import cs499.util.WaitListPojo;
 import cs499.util.Grade.Condition;
 
+/**
+ * The Class BlackboardHandler. It is our version of Blackboard, as it holds the necessary
+ * information to connect and do everything blackboard does.
+ */
 public class BlackboardHandler {
 	
+	/** The gradebook manager.*/
 	private GradebookManager gradebookManager;
+	
+	/** The book data taken from the gradebook. */
 	private BookData bookData;
+	
+	/** A list of gradable items. One is any column that can have a grade, like a test or an assignment.*/
 	private List<GradableItem> gradableItemList;
+	
+	/** The {@link Student} list. */
 	private List<Student> students;
+	
+	/** The session user. */
 	private User sessionUser;
+	
+	/** The {@link Item} list in the Market Place. */
 	private List<Item> itemList;
+	
+	/** The person logged in is student. */
 	private boolean isStudent;
+	
+	/** The course id. */
 	private Id courseID;
 
+	/**
+	 * Instantiates a new blackboard handler. It also sets all students in the course
+	 * to the student list and updates their gold column after activating any item that is pending.
+	 *
+	 * @param courseID the course id
+	 * @param sessionUser the session user
+	 * @param itemList the item list
+	 * @throws GradebookException the gradebook exception
+	 * @throws BbSecurityException the blackboard security exception
+	 * @throws KeyNotFoundException the key not found exception
+	 * @throws PersistenceException the persistence exception
+	 */
 	public BlackboardHandler(Id courseID, User sessionUser, List<Item> itemList) throws GradebookException, BbSecurityException, KeyNotFoundException, PersistenceException{
 		this.courseID = courseID;
 		this.itemList = itemList;
@@ -62,6 +93,11 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Processes item purchase for the student that is logged in.
+	 *
+	 * @param itemName the item name
+	 */
 	public void processItem(String itemName){
 		if(isStudent){
 			Student student = getStudent();
@@ -77,6 +113,12 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Uses the @{link Item} that is requested by the student that is currently logged in.
+	 *
+	 * @param item the item
+	 * @return true, if successful
+	 */
 	public boolean useItem(Item item){
 		if(isStudent){
 			Student student = getStudent();
@@ -88,6 +130,11 @@ public class BlackboardHandler {
 		return false;
 	}
 	
+	/**
+	 * Gets the @{link Student} that is currently logged in.
+	 *
+	 * @return the student
+	 */
 	public Student getStudent(){
 		for(Student student : students){
 			if(student.getStudentID() == Integer.parseInt(sessionUser.getStudentId())){
@@ -97,6 +144,11 @@ public class BlackboardHandler {
 		return null;
 	}
 	
+	/**
+	 * Sets the @{link Student} list for this course.
+	 *
+	 * @param i the new students list
+	 */
 	private void setStudentsList(Iterator<CourseMembership> i){
 		while(i.hasNext()){
 			CourseMembership selectedMember = (CourseMembership) i.next();
@@ -116,6 +168,11 @@ public class BlackboardHandler {
 		setStudentsGold();
 	}
 	
+	/**
+	 * Activates @{link Item} in the wait list when the teacher logs in.
+	 * It is automatically called when this class is instantiated
+	 * when the teacher logs in. Then it removes the items from the wait list.
+	 */
 	private void activateWaitList(){
 		MarketPlaceDAO dbController = new MarketPlaceDAO();
 		List<WaitListPojo> itemStudent = dbController.loadWaitList();
@@ -131,6 +188,12 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Gets the @{link Student} from the students list by his student id.
+	 *
+	 * @param id the id
+	 * @return the student by id
+	 */
 	private Student getStudentById(int id){
 		for(Student student : students){
 			if(student.getStudentID() == id){
@@ -140,6 +203,9 @@ public class BlackboardHandler {
 		return null;
 	}
 	
+	/**
+	 * Updates the @{link Student} gold.
+	 */
 	private void updateStudentGold() {
 		MarketPlaceDAO dbController = new MarketPlaceDAO();
 		for(Student student: students){
@@ -168,6 +234,14 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Gets the grade detail object from the blackboard database
+	 * by passing the gradable item and the @{link Student} we are trying to update.
+	 *
+	 * @param gradeItem the grade item
+	 * @param @{link Student} the student
+	 * @return the grade detail
+	 */
 	private GradeDetail getGradeDetail(GradableItem gradeItem, Student student){
 		GradeDetail gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
 		List<AttemptDetail> attemptList = gradeDetail.getAttempts();
@@ -192,6 +266,14 @@ public class BlackboardHandler {
 		return gradeDetail;
 	}
 	
+	/**
+	 * Passes condition to get the benefit from an item.
+	 * It is not yet used
+	 *
+	 * @param score the score
+	 * @param grade the {@link Grade} object
+	 * @return true, if successful
+	 */
 	private boolean passesCondition(double score, Grade grade){
 		Condition condition = grade.getCondition();
 		switch(condition){
@@ -214,6 +296,9 @@ public class BlackboardHandler {
 		return false;
 	}
 	
+	/**
+	 * Sets the @{link Student} gold.
+	 */
 	private void setStudentsGold(){
 		for(Student student: students){
 			for (GradableItem gradeItem : gradableItemList) {
@@ -237,6 +322,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Activate @{link Item}.
+	 *
+	 * @param item the @{link Item}
+	 * @param student the @{link Student}
+	 * @return true, if successful
+	 */
 	private boolean activateItem(Item item, Student student) {
 		System.out.println("In activate Item");
 		AssessmentType type = item.getType(); // HOW WOULD IT DIFFERENTIATE BETWEEN EXAM AND ASSIGN... etc Also discuss structure and item attrs
@@ -254,6 +346,12 @@ public class BlackboardHandler {
 		return true;
 	}
 	
+	/**
+	 * Adjust gradebook column due date.
+	 *
+	 * @param effectMagnitude the effect magnitude
+	 * @param columnName the column name
+	 */
 	private void adjustColumnDueDate(float effectMagnitude, String columnName){
 		System.out.println("In Adjust Column Due Date Step");
 		for (int i = 0; i<gradableItemList.size(); i ++) {
@@ -274,6 +372,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Adjust gradebook column grade.
+	 *
+	 * @param effectMagnitude the effect magnitude
+	 * @param columnName the column name
+	 * @param student the @{link Student}
+	 */
 	private void adjustColumnGrade(float effectMagnitude, String columnName, Student student){
 		System.out.println("In Adjust Grade Step");
 		for (int i = 0; i<gradableItemList.size(); i ++) {
@@ -297,6 +402,12 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Update @{link Item} status in the database.
+	 *
+	 * @param item the item
+	 * @return true, if successful
+	 */
 	private boolean updateItem(Item item){
 		MarketPlaceDAO dbController = new MarketPlaceDAO();
 		if(item.getDuration() == 0){

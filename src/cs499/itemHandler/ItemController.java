@@ -3,18 +3,37 @@ package cs499.itemHandler;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The Class ItemController.
+ */
 public class ItemController {
 
+	/** The @{link Item} list. */
 	private List<Item> itemList;
 	
+	/**
+	 * Instantiates a new item controller.
+	 */
 	public ItemController(){
 		itemList = new ArrayList<Item>();
 	}
 	
+	/**
+	 * Gets the item list.
+	 *
+	 * @return the item list
+	 */
 	public List<Item> getItemList(){
 		return itemList;
 	}
 	
+	/**
+	 * Gets the @{link Item} by name.
+	 *
+	 * @param itemList the item list
+	 * @param name the name
+	 * @return the item by name
+	 */
 	public Item getItemByName(List<Item> itemList, String name){
 		for(Item item : itemList){
 			if(item.getName().equals(name))
@@ -23,6 +42,13 @@ public class ItemController {
 		return null;
 	}
 	
+	/**
+	 * Creates the item list from contents that is taken
+	 * from the data seed file from the resources,
+	 * and parses it as an XML.
+	 *
+	 * @param content the content
+	 */
 	public void createItemListFromContents(String content){
 		String xml = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n\r";
 		String value = "";

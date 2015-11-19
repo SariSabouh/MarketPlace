@@ -15,11 +15,25 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
+/**
+ * The Class XMLParser. Parses XML @{link Item} list to its objects
+ */
 public class XMLParser extends DefaultHandler {
+	
+	/** The @{link Item}. */
 	private Item item;
+	
+	/** The tmp value. */
 	private String tmpValue;
+	
+	/** The item list. */
 	private ArrayList<Item> itemList;
 
+	/**
+	 * Instantiates a new XML parser.
+	 *
+	 * @param xml the xml
+	 */
 	public XMLParser(String xml) {
 		itemList = new ArrayList<Item>();
 		SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -35,10 +49,18 @@ public class XMLParser extends DefaultHandler {
 		}
 	}
 	
+	/**
+	 * Gets the items list.
+	 *
+	 * @return the items list
+	 */
 	public ArrayList<Item> getItemsList(){
 		return itemList;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#startElement(java.lang.String, java.lang.String, java.lang.String, org.xml.sax.Attributes)
+	 */
 	public void startElement(String s, String s1, String elementName, Attributes attributes) throws SAXException {
 		if(item != null && !itemList.contains(item)){
 			itemList.add(item);
@@ -47,6 +69,9 @@ public class XMLParser extends DefaultHandler {
 		// ELSE
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#endElement(java.lang.String, java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void endElement(String s, String s1, String element)
 			throws SAXException {
@@ -79,6 +104,9 @@ public class XMLParser extends DefaultHandler {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see org.xml.sax.helpers.DefaultHandler#characters(char[], int, int)
+	 */
 	@Override
 	public void characters(char[] ac, int i, int j) throws SAXException {
 		tmpValue = new String(ac, i, j);
