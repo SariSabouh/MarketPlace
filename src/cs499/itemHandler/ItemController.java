@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * @author SabouhS
+ * 
  * The Class ItemController.
  */
 public class ItemController {

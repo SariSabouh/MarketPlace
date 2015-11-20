@@ -3,6 +3,8 @@ package cs499.util;
 import blackboard.platform.gradebook2.GradeWithAttemptScore;
 
 /**
+ * @author SabouhS
+ * 
  * The Class Grade.
  */
 public class Grade extends GradeWithAttemptScore{

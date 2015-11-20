@@ -8,6 +8,8 @@ import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
 
 /**
+ * @author SabouhS
+ * 
  * The Class Student.
  */
 public class Student{

@@ -16,6 +16,8 @@ import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
 
 /**
+ * @author SabouhS
+ * 
  * The Class XMLParser. Parses XML @{link Item} list to its objects
  */
 public class XMLParser extends DefaultHandler {

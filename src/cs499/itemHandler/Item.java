@@ -2,8 +2,9 @@ package cs499.itemHandler;
 
 import java.io.Serializable;
 
-// TODO: Auto-generated Javadoc
 /**
+ * @author SabouhS
+ * 
  * The Class Item.
  */
 public class Item implements Serializable{

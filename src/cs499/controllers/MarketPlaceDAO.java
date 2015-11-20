@@ -18,6 +18,8 @@ import cs499.itemHandler.ItemController;
 import cs499.util.WaitListPojo;
 
 /**
+ * @author SabouhS
+ * 
  * The Class MarketPlaceDAO. This is the class that controls the database
  * accessing and modifying of this blackboard module using blackboard's OpenDb
  */

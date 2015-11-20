@@ -1,6 +1,8 @@
 package cs499.util;
 
 /**
+ * @author SabouhS
+ * 
  * The Class Wait List POJO.
  */
 public class WaitListPojo {
