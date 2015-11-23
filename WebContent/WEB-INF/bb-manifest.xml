@@ -51,6 +51,7 @@
 			<permission type="persist" name="Outcome" actions="load,persist,delete" />
 			<permission type="blackboard.persist.PersistPermission" name="user" actions="create"/>
 			<permission type="blackboard.persist.PersistPermission" name="gradableitem" actions="create, modify"/>
+			<permission type="blackboard.persist.PersistPermission" name="gradebooktype" actions="create"/>
 			<permission type="persist" name="OutcomeDefinition" actions="load,persist,delete" />
 			<permission type="persist" name="outcomedefinitioncategory" actions="load,persist,delete" />
 			<permission type="persist" name="OutcomeDefinitionScale" actions="create,delete,load,persist" />

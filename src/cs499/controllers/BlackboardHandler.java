@@ -5,29 +5,23 @@ import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 
-import blackboard.base.FormattedText;
-import blackboard.data.content.Content;
 import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
 import blackboard.persist.Id;
 import blackboard.persist.KeyNotFoundException;
 import blackboard.persist.PersistenceException;
-import blackboard.persist.RowVersion;
 import blackboard.persist.course.CourseMembershipDbLoader;
 import blackboard.platform.gradebook2.AttemptDetail;
 import blackboard.platform.gradebook2.AttemptStatus;
 import blackboard.platform.gradebook2.BookData;
 import blackboard.platform.gradebook2.BookDataRequest;
 import blackboard.platform.gradebook2.GradableItem;
-import blackboard.platform.gradebook2.GradableItem.AttemptAggregationModel;
-import blackboard.platform.gradebook2.GradableItem.CalculationType;
 import blackboard.platform.gradebook2.GradeDetail;
 import blackboard.platform.gradebook2.GradebookException;
 import blackboard.platform.gradebook2.GradebookManager;
 import blackboard.platform.gradebook2.GradebookManagerFactory;
-import blackboard.platform.gradebook2.GradebookType;
-import blackboard.platform.gradebook2.impl.GradableItemDAO;
 import blackboard.platform.gradebook2.impl.GradeDetailDAO;
+import blackboard.platform.gradebook2.impl.GradingSchemaDAO;
 import blackboard.platform.security.authentication.BbSecurityException;
 import cs499.itemHandler.Item;
 import cs499.itemHandler.Item.AssessmentType;
@@ -166,45 +160,8 @@ public class BlackboardHandler {
 				return;
 			}
 		}
-		GradableItem goldItem = new GradableItem();
-		goldItem.setAggregationModel(AttemptAggregationModel.LAST);
-		goldItem.setCalculatedInd(CalculationType.NON_CALCULATED);
-		goldItem.setCategory(GradebookType.getNoCategoryTitle());
-		goldItem.setCategoryId(Id.generateId(GradebookType.DATA_TYPE, "_200_1"));
-		goldItem.setCourseContentId(Id.generateId(Content.DATA_TYPE, "_200_1"));
-		goldItem.setCourseId(courseID);
-		goldItem.setDateAdded(Calendar.getInstance());
-		goldItem.setDateModified(Calendar.getInstance());
-		goldItem.setDeleted(false);
-		goldItem.setDescription(FormattedText.toFormattedText("Gold for the student"));
-		goldItem.setDisplayTitle("Gold");
-		goldItem.setDueDate(null);
-		goldItem.setExternalAnalysisUrl(null);
-		goldItem.setExternalAttemptHandlerUrl(null);
-		goldItem.setGradingPeriodId(null);
-		goldItem.setGradingSchema(null);
-		goldItem.setHideAttempt(false);
-		goldItem.setId(Id.generateId(GradableItem.DATA_TYPE, "_200_1"));
-		goldItem.setLimitedAttendance(false);
-		goldItem.setLinkId(null);
-		goldItem.setMaxAttempts(0);
-		goldItem.setPoints(9999);
-		goldItem.setPosition(GradableItemDAO.get().getMaxPosition(courseID)+1);
-		goldItem.setScorable(true);
-		goldItem.setScoreProviderHandle(gradableItemList.get(0).getScoreProviderHandle());
-		goldItem.setSecondaryGradingSchemaId(null);
-		goldItem.setShowStatsToStudent(false);
-		goldItem.setSingleAttempt(false);
-		goldItem.setTitle("Gold");
-		goldItem.setVersion(new RowVersion(gradableItemList.get(0).getVersion()));
-		goldItem.setVisibleInBook(true);
-		goldItem.setWeight(0);
-		goldItem.setVisibleToStudents(true);
-		try {
-			gradebookManager.persistGradebookItem(goldItem);
-		} catch (BbSecurityException e) {
-			e.printStackTrace();
-		}
+		
+		gradebookManager.createGradableItem("Gold", courseID, 9999.0D, null, null, "None", GradingSchemaDAO.get().getGradingSchemaByCourse(courseID).get(0).getTitle(), false);
 	}
 	
 	/**
@@ -378,7 +335,6 @@ public class BlackboardHandler {
 						}
 					}catch(NullPointerException e){
 						student.setGold(0);
-						e.printStackTrace();
 					}
 				}
 			}
