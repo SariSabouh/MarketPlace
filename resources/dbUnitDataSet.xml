@@ -1,0 +1,5 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<dataset>      
+	<!--Item Table -->
+	<dt_item name="PickAxe" cost="875" duration="ONCE" type="EXAMS" attribute_affected="DUEDATE" supply="1" effect_magnitude="24" />
+</dataset>
