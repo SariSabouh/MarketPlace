@@ -7,8 +7,8 @@
 <%
 	System.out.println("In UseItemUtil");
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
-	MarketPlaceDAO dbController = new MarketPlaceDAO();
-	Item item = dbController.loadItem("Continuous");
+	MarketPlaceDAO dbController = new MarketPlaceDAO(false);
+	Item item = dbController.loadItem("Once");
 	try{
 		System.out.println("Item loaded: " + item.getName());
 		boolean done = bbHandler.useItem(item);

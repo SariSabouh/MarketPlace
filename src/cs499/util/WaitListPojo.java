@@ -8,10 +8,10 @@ package cs499.util;
 public class WaitListPojo {
 	
 	/** The name. */
-	private String name;
+	private String name, studentID;
 	
 	/** The student id. */
-	private int primaryKey, studentID;
+	private int primaryKey;
 	
 	/**
 	 * Gets the name.
@@ -54,7 +54,7 @@ public class WaitListPojo {
 	 *
 	 * @return the student id
 	 */
-	public int getStudentID() {
+	public String getStudentID() {
 		return studentID;
 	}
 	
@@ -63,7 +63,7 @@ public class WaitListPojo {
 	 *
 	 * @param studentID the new student id
 	 */
-	public void setStudentID(int studentID) {
+	public void setStudentID(String studentID) {
 		this.studentID = studentID;
 	} 
 }

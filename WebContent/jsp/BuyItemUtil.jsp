@@ -6,13 +6,13 @@
 <%
 	System.out.println("In BuyItemUtil");
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
-	MarketPlaceDAO dbController = new MarketPlaceDAO();
+	MarketPlaceDAO dbController = new MarketPlaceDAO(false);
 	try {
-		if(dbController.loadItem("Continuous") == null){ // it is supposed to be request.getParameter("itemName")
+		if(dbController.loadItem("Once") == null){ // it is supposed to be request.getParameter("itemName")
 			System.out.println("Fail to load item");
 			throw new ItemProcessException("Item Purchase Failed. Item is not in Database");
 		}
-		bbHandler.processItem("Continuous");
+		bbHandler.processItem("Once");
 		System.out.println("PURCHASE ENDED");
 	}catch (ItemProcessException e) {
 		e.printStackTrace();

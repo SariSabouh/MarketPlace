@@ -24,7 +24,7 @@
 	String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 	String sessionUserID = sessionUser.getId().toString();	
 	System.out.println("\n\nSession Started for " + sessionUserRole);
-	MarketPlaceDAO dbController = new MarketPlaceDAO();
+	MarketPlaceDAO dbController = new MarketPlaceDAO(false);
 	List<Item> itemList = dbController.loadItems();
 	if(dbController.loadItem("ITEM_INIT") == null){
 		System.out.println("Initializing Database.");

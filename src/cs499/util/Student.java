@@ -15,13 +15,13 @@ import cs499.itemHandler.Item;
 public class Student{
 	
 	/** The user name. */
-	private String fName, lName, userName;
+	private String fName, lName, userName, studentID;
 	
 	/** The @{link Item} list. */
 	private List<Item> itemList;
 	
 	/** The student id. */
-	private int gold, studentID;
+	private int gold;
 	
 	/** The id. */
 	private Id id;
@@ -75,7 +75,7 @@ public class Student{
 	 *
 	 * @param ID the new student id
 	 */
-	public void setStudentID(int ID){
+	public void setStudentID(String ID){
 		this.studentID = ID;
 	}
 
@@ -112,7 +112,7 @@ public class Student{
 	 *
 	 * @return the student id
 	 */
-	public int getStudentID(){
+	public String getStudentID(){
 		return studentID;
 	}
 	
@@ -179,9 +179,9 @@ public class Student{
 	 *
 	 * @param item the item
 	 */
-	public void buyItem(Item item){
+	public void buyItem(Item item, boolean testing){
 		gold = (int) (gold - item.getCost());
-		MarketPlaceDAO dbController = new MarketPlaceDAO();
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		System.out.println("Gold substracted about to persist");
 		dbController.persistPurhcase(studentID, item.getName());
 		itemList.add(item);

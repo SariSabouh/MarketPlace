@@ -25,10 +25,6 @@ public class MarketPlaceDAO {
 	
 	boolean testing;
 	
-	public MarketPlaceDAO(){
-		testing = false;
-	}
-	
 	public MarketPlaceDAO(boolean testing){
 		this.testing = testing;
 	}
@@ -191,7 +187,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the {@link Student} id
 	 * @param itemName the @{link Item} name
 	 */
-	public void persistPurhcase(int studentID, String itemName) {
+	public boolean persistPurhcase(String studentID, String itemName) {
 		System.out.print("Persist Items");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -199,15 +195,15 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
 	        queryString.append("INSERT INTO dt_purchaseinfo");
-            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiry_date, new, usage) ");
+            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiration_date, new, times_used) ");
             queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0) ");
             insertQuery = conn.prepareStatement(queryString.toString());
-            insertQuery.setInt(1, studentID);
+            insertQuery.setString(1, studentID);
             insertQuery.setString(2, itemName);
             insertQuery.setString(3, new DateTime().toString());
-            System.out.println("Before executing persistence");
-            insertQuery.executeUpdate();
-            System.out.println("After execution");
+            if(insertQuery.executeUpdate() > 0){
+            	return true;
+            }
             insertQuery.close();
         } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
@@ -218,6 +214,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
+        return false;
 	}
 	
 	/**
@@ -226,7 +223,7 @@ public class MarketPlaceDAO {
 	 * It also calls other delete methods which ends up in
 	 * a complete truncation of all database tables for this module.
 	 */
-	public void deletePurhcases() { // VERY DANGEROUS METHOD REMOVES ALL ITEMS IN ALL TABLES IN DB USE WISELY
+	public void emptyDatabase() { // VERY DANGEROUS METHOD REMOVES ALL ITEMS IN ALL TABLES IN DB USE WISELY
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -309,7 +306,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the {@link Student}
 	 * @return the list
 	 */
-	public List<String> loadNewPurchases(int studentID) {
+	public List<String> loadNewPurchases(String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         List<String> itemList = new ArrayList<String>();
@@ -321,7 +318,7 @@ public class MarketPlaceDAO {
 	        queryString.append("select name from dt_item where item_pk1 in (");
             queryString.append("select item_pk1 from dt_purchaseinfo where new = \'Y\' and student_id = ?)");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setInt(1, studentID);
+	        selectQuery.setString(1, studentID);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        boolean notEmpty = false;
 	        while(rSet.next()){
@@ -335,7 +332,7 @@ public class MarketPlaceDAO {
 		        queryString.append("update dt_purchaseinfo ");
 	            queryString.append("set new = \'N\' where new = \'Y\' and student_id = ?");
 	            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-		        selectQuery.setInt(1, studentID);
+		        selectQuery.setString(1, studentID);
 		        selectQuery.executeUpdate();
 	        }
 	        selectQuery.close();
@@ -357,7 +354,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the student id
 	 * @return the list
 	 */
-	public List<String> loadUnusedItems(int studentID) {
+	public List<String> loadUnusedItems(String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         List<String> itemList = new ArrayList<String>();
@@ -365,9 +362,9 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
 	        queryString.append("select name from dt_item where item_pk1 in (");
-            queryString.append("select item_pk1 from dt_purchaseinfo where expiry_date = \'NA\' and student_id = ?)");
+            queryString.append("select item_pk1 from dt_purchaseinfo where expiration_date = \'NA\' and student_id = ?)");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setInt(1, studentID);
+	        selectQuery.setString(1, studentID);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
 	        	String itemName = rSet.getString("name");
@@ -394,22 +391,22 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean expireInstantItem(String name, int studentID) {
+	public boolean expireInstantItem(String name, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set used_date = ?, expiry_date = ?, usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used+1 where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, new DateTime().toString());
             selectQuery.setString(3, name);
-            selectQuery.setInt(4, studentID);
+            selectQuery.setString(4, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
-	        if(rowsUpdated == 0){
+	        if(rowsUpdated < 1){
 	        	return false;
 	        }
 	        selectQuery.close();
@@ -433,19 +430,19 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	private boolean expireItem(String name, int studentID) {
+	private boolean expireItem(String name, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set expiry_date = ?, usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("set expiration_date = ?, times_used = times_used+1 where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, name);
-            selectQuery.setInt(3, studentID);
+            selectQuery.setString(3, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated == 0){
 	        	return false;
@@ -470,7 +467,7 @@ public class MarketPlaceDAO {
 	 * @param name the @{link Item} name
 	 * @param studentID the @{link Student} id
 	 */
-	private void addToWaitList(String name, int studentID){
+	private void addToWaitList(String name, String studentID){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -480,7 +477,7 @@ public class MarketPlaceDAO {
 	        queryString.append("values(?, ?)");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(2, name);
-            selectQuery.setInt(1, studentID);
+            selectQuery.setString(1, studentID);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
         } catch (java.sql.SQLException sE){
@@ -513,7 +510,7 @@ public class MarketPlaceDAO {
 	        	WaitListPojo waitList = new WaitListPojo();
 	        	waitList.setName(rSet.getString("name"));
 	        	waitList.setPrimaryKey(rSet.getInt("waitlist_pk1"));
-	        	waitList.setStudentID(rSet.getInt("student_id"));
+	        	waitList.setStudentID(rSet.getString("student_id"));
 	        	itemStudent.add(waitList);
 	        }
 	        selectQuery.close();
@@ -565,18 +562,18 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean updateUsageItem(String name, int studentID) {
+	public boolean updateUsageItem(String name, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("set times_used = times_used+1 where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, name);
-            selectQuery.setInt(2, studentID);
+            selectQuery.setString(2, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated == 0){
 	        	return false;
@@ -602,23 +599,23 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if is out of supply
 	 */
-	public boolean isOutOfSupply(Item item, int studentID) {
+	public boolean isOutOfSupply(Item item, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         boolean outOfSupply = false;
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select usage from dt_purchaseinfo where name = ? and student_id = ?");
+	        queryString.append("select times_used from dt_purchaseinfo where name = ? and student_id = ?");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setInt(2, studentID);
+            selectQuery.setString(2, studentID);
             selectQuery.setString(1, item.getName());
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
-	        	if(rSet.getInt("usage") == 0){
+	        	if(rSet.getInt("times_used") == 0){
 	        		setUsedDate(item.getName(), studentID);
 	        	}
-	        	if(item.getSupply() <= rSet.getInt("usage")){
+	        	if(item.getSupply() <= rSet.getInt("times_used")){
 	        		outOfSupply = true;
 	        		expireItem(item.getName(), studentID);
 	        	}
@@ -642,7 +639,7 @@ public class MarketPlaceDAO {
 	 * @param name the @{link Item} name
 	 * @param studentID the @{link Student} id
 	 */
-	private void setUsedDate(String name, int studentID) {
+	private void setUsedDate(String name, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -654,7 +651,7 @@ public class MarketPlaceDAO {
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, name);
-            selectQuery.setInt(3, studentID);
+            selectQuery.setString(3, studentID);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
         } catch (java.sql.SQLException sE){
@@ -675,23 +672,23 @@ public class MarketPlaceDAO {
 	 * @param studentID the student id
 	 * @return true, if is expired
 	 */
-	public boolean isExpired(Item item, int studentID) {
+	public boolean isExpired(Item item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         boolean expired = true;
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select usage, expiry_date from dt_purchaseinfo where item_pk1 = (select item_pk1 from item where name = ?) and student_id = ?");
+	        queryString.append("select times_used, expiration_date from dt_purchaseinfo where item_pk1 = (select item_pk1 from dt_item where name = ?) and student_id = ?");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setInt(2, studentID);
+            selectQuery.setString(2, studentID);
             selectQuery.setString(1, item.getName());
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
-	        	if(rSet.getInt("usage") == 0){
+	        	if(rSet.getInt("times_used") == 0){
 	        		setUsedExpiryDate(item, studentID);
 	        	}
-	        	String date = rSet.getString("expiry_date");
+	        	String date = rSet.getString("expiration_date");
 	        	if(date.equals("NA")){
 	        		expired = false;
 	        	}
@@ -722,21 +719,21 @@ public class MarketPlaceDAO {
 	 * @param item the item
 	 * @param studentID the student id
 	 */
-	private void setUsedExpiryDate(Item item, int studentID) {
+	private void setUsedExpiryDate(Item item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set used_date = ?, expiry_date = ?, usage = usage + 1 where item_pk1 = ( ");
+	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used + 1 where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        DateTime date = new DateTime();
             selectQuery.setString(1, date.toString());
             selectQuery.setString(2, date.plusHours(item.getDuration()).toString());
             selectQuery.setString(3, item.getName());
-            selectQuery.setInt(4, studentID);
+            selectQuery.setString(4, studentID);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -757,18 +754,18 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean updateContinuousItem(Item item, int studentID) {
+	public boolean updateContinuousItem(Item item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set usage = usage+1 where item_pk1 = ( ");
+	        queryString.append("set times_used = times_used+1 where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, item.getName());
-            selectQuery.setInt(2, studentID);
+            selectQuery.setString(2, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated == 0){
 	        	return false;

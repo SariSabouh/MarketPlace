@@ -18,11 +18,11 @@ public class Item implements Serializable{
 	public enum AssessmentType {
 		
 		/** The assignment. */
-		ASSIGNMENT, 
- /** The exams. */
- EXAMS, 
- /** The all. */
- ALL
+		ASSIGNMENT,
+		/** The exams. */
+		EXAMS,
+		/** The all. */
+		ALL
 	};
 	
 	/**

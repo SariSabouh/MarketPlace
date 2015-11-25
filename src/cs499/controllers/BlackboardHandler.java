@@ -63,6 +63,9 @@ public class BlackboardHandler {
 	
 	/** The course id. */
 	private Id courseID;
+	
+	/** The flag that defines if this is for testing or not. */
+	private boolean testing;
 
 	/**
 	 * Instantiates a new blackboard handler. It also sets all students in the course
@@ -97,6 +100,9 @@ public class BlackboardHandler {
 		}
 	}
 	
+	public void setTestingFlag(boolean testing){
+		this.testing = testing;
+	}
 
 	/**
 	 * Processes item purchase for the student that is logged in.
@@ -112,7 +118,7 @@ public class BlackboardHandler {
 				Item item = itemController.getItemByName(itemList, itemName);
 				if(student.canAfford(item.getCost())){
 					System.out.println("Student can afford");
-					student.buyItem(item);
+					student.buyItem(item, testing);
 				}
 			}
 		}
@@ -142,7 +148,7 @@ public class BlackboardHandler {
 	 */
 	public Student getStudent(){
 		for(Student student : students){
-			if(student.getStudentID() == Integer.parseInt(sessionUser.getStudentId())){
+			if(student.getStudentID().equals(sessionUser.getStudentId())){
 				return student;
 			}
 		}
@@ -176,7 +182,7 @@ public class BlackboardHandler {
 			Student student = new Student();
 			student.setFirstName(currentUser.getGivenName());
 			student.setLastName(currentUser.getFamilyName());
-			student.setStudentID(Integer.parseInt(currentUser.getStudentId()));
+			student.setStudentID(currentUser.getStudentId());
 			student.setUserName(currentUser.getUserName());
 			student.setId(selectedMember.getId());
 			students.add(student);
@@ -194,10 +200,10 @@ public class BlackboardHandler {
 	 * when the teacher logs in. Then it removes the items from the wait list.
 	 */
 	private void activateWaitList(){
-		MarketPlaceDAO dbController = new MarketPlaceDAO();
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		List<WaitListPojo> itemStudent = dbController.loadWaitList();
 		for(WaitListPojo waitList : itemStudent){
-			int studentID = waitList.getStudentID();
+			String studentID = waitList.getStudentID();
 			String itemName = waitList.getName();
 			ItemController itemController = new ItemController();
 			boolean done = activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
@@ -214,9 +220,9 @@ public class BlackboardHandler {
 	 * @param id the id
 	 * @return the student by id
 	 */
-	private Student getStudentById(int id){
+	private Student getStudentById(String id){
 		for(Student student : students){
-			if(student.getStudentID() == id){
+			if(student.getStudentID().equals(id)){
 				return student;
 			}
 		}
@@ -227,7 +233,7 @@ public class BlackboardHandler {
 	 * Updates the @{link Student} gold.
 	 */
 	private void updateStudentGold() {
-		MarketPlaceDAO dbController = new MarketPlaceDAO();
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		for(Student student: students){
 			boolean purchased = false;
 			List<String> itemList = dbController.loadNewPurchases(student.getStudentID());
@@ -325,7 +331,7 @@ public class BlackboardHandler {
 				Grade grade = new Grade(bookData.get(student.getId(), gradeItem.getId()));
 				if (gradeItem.getTitle().equals("Gold")){
 					try{
-						MarketPlaceDAO dbController = new MarketPlaceDAO();
+						MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 						student.setGold(grade.getScoreValue().intValue());
 						List<String> itemList = dbController.loadUnusedItems(student.getStudentID());
 						for(Item item : this.itemList){
@@ -428,7 +434,7 @@ public class BlackboardHandler {
 	 * @return true, if successful
 	 */
 	private boolean updateItem(Item item){
-		MarketPlaceDAO dbController = new MarketPlaceDAO();
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		if(item.getDuration() == 0){
 			System.out.println("Attempting to expire instant item");
 			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID())){
