@@ -11,6 +11,7 @@ import cs499.itemHandler.Item;
 
 import java.io.FileInputStream;
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -82,6 +83,8 @@ public class MarketPlaceDAOTest {
 			itemsList.add(item.getName());
 		}
 		assertEquals(itemsList.toString(), "[Twice, Cont]");
+		Item item = marketPlaceDao.loadItem("ITEM_INIT");
+		assertEquals("ITEM_INIT", item.getName());
 	}
 	
 	@Test
@@ -130,9 +133,140 @@ public class MarketPlaceDAOTest {
 	public void testExpireInstantItem(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
 		assertEquals(true, marketPlaceDao.expireInstantItem("Once", "00111"));
-		assertEquals("[]", marketPlaceDao.loadUnusedItems("0111").toString());
-		assertEquals("[]", marketPlaceDao.loadNewPurchases("0111").toString());
+		assertEquals("[]", marketPlaceDao.loadUnusedItems("00111").toString());
 	}
+	
+	@Test
+	public void testExpireInstantItemWithWrongName(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(false, marketPlaceDao.expireInstantItem("UNO", "00111"));
+		assertEquals("[Once]", marketPlaceDao.loadUnusedItems("00111").toString());
+	}
+	
+	@Test
+	public void testLoadWaitListWithItems(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.expireInstantItem("Once", "00111"));
+		assertEquals("Once", marketPlaceDao.loadWaitList().get(0).getName());
+		assertEquals("00111", marketPlaceDao.loadWaitList().get(0).getStudentID());
+	}
+	
+	@Test
+	public void testLoadWaitListWithoutItems(){
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+	}
+	
+	@Test
+	public void testRemoveFromWaitList() throws SQLException{
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.expireInstantItem("Once", "00111"));
+		int primaryKey = marketPlaceDao.loadWaitList().get(0).getPrimaryKey();
+		marketPlaceDao.removeItemWaitList(primaryKey);
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+	}
+	
+	@Test
+	public void testRemoveFromWaitListWithWrongPrimarykey(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.expireInstantItem("Once", "00111"));
+		marketPlaceDao.removeItemWaitList(1252134123);
+		assertEquals(1, marketPlaceDao.loadWaitList().size());
+	}
+	
+	@Test
+	public void testUpdateItemUsage(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.updateUsageItem("Once", "00111"));
+	}
+	
+	@Test
+	public void testUpdateItemUsageWithWrongName(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(false, marketPlaceDao.updateUsageItem("UNO", "00111"));
+	}
+	
+	@Test
+	public void testNotOfSupply() throws SQLException{
+		Item item = new Item("Once");
+		item.setSupply(5);
+		assertEquals(false, marketPlaceDao.isOutOfSupply(item));
+	}
+	
+	@Test
+	public void testIsOutOfSupplyWithOnePurchase(){
+		Item item = new Item("Once");
+		item.setSupply(1);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.isOutOfSupply(item));
+	}
+	
+	@Test
+	public void testIsOutOfSupplyWithMultiplePurchase(){
+		Item item = new Item("Once");
+		item.setSupply(3);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(true, marketPlaceDao.isOutOfSupply(item));
+	}
+	
+	@Test
+	public void testIsNotExpiredWithNoUsage(){
+		Item item = new Item("Once");
+		item.setDuration(20);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+		
+	}
+	
+	@Test
+	public void testIsNotExpiredWithUsage(){
+		Item item = new Item("Continuous");
+		item.setDuration(20);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
+		assertEquals(true, marketPlaceDao.updateUsageItem("Continuous", "00111"));
+		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+	}
+	
+	@Test
+	public void testIsNotExpiredWithDate(){
+		Item item = new Item("Continuous");
+		item.setDuration(20);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
+		assertEquals(true, marketPlaceDao.updateUsageItem("Continuous", "00111"));
+		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+	}
+	
+	@Test
+	public void testIsExpired(){
+		Item item = new Item("Continuous");
+		item.setDuration(-20);
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
+		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+		assertEquals(true, marketPlaceDao.isExpired(item, "00111"));
+	}
+	
+	@Test
+	public void testUpdateContinuousItem(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+		assertEquals(true, marketPlaceDao.updateContinuousItem("Continuous", "00111"));
+		assertEquals("Continuous", marketPlaceDao.loadWaitList().get(0).getName());
+		assertEquals("00111", marketPlaceDao.loadWaitList().get(0).getStudentID());
+	}
+	
+	@Test
+	public void testUpdateWrongContinuousItem(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+		assertEquals(false, marketPlaceDao.updateContinuousItem("Conti", "00111"));
+		assertEquals(0, marketPlaceDao.loadWaitList().size());
+
+	}
+	
 	
 
 }

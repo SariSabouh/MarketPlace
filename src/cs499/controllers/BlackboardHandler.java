@@ -117,8 +117,10 @@ public class BlackboardHandler {
 				ItemController itemController = new ItemController();
 				Item item = itemController.getItemByName(itemList, itemName);
 				if(student.canAfford(item.getCost())){
-					System.out.println("Student can afford");
-					student.buyItem(item, testing);
+					if(new MarketPlaceDAO(testing).isOutOfSupply(item)){
+						System.out.println("Student can afford and store has supply");
+						student.buyItem(item, testing);
+					}
 				}
 			}
 		}
@@ -366,6 +368,7 @@ public class BlackboardHandler {
 			adjustColumnDueDate(item.getEffectMagnitude(), "Exam 1");
 			break;
 		case NUMATTEMPTS:
+			adjustColumnNumberOfAttempts(item.getEffectMagnitude(), "Exam 1");
 			break;
 		}
 		return true;
@@ -428,6 +431,33 @@ public class BlackboardHandler {
 	}
 	
 	/**
+	 * Adjust gradebook column number of attempts.
+	 *
+	 * @param effectMagnitude the effect magnitude
+	 * @param columnName the column name
+	 * @param student the @{link Student}
+	 */
+	private void adjustColumnNumberOfAttempts(float effectMagnitude, String columnName){
+		System.out.println("In Adjust Column Number of Attempts Step");
+		for (int i = 0; i<gradableItemList.size(); i ++) {
+			GradableItem gradeItem = gradableItemList.get(i);
+			if(gradeItem.getTitle().equals(columnName)){
+				int maxAttempts = gradeItem.getMaxAttempts();
+				int newMaxAttemps = (int) (maxAttempts+effectMagnitude);
+				System.out.println("Number of Attempts to adjust to is: " + newMaxAttemps);
+				gradeItem.setMaxAttempts(newMaxAttemps);
+				try {
+					gradebookManager.persistGradebookItem(gradeItem);
+					System.out.println("Persisted GradableItem");
+				} catch (BbSecurityException e) {
+					e.printStackTrace();
+				}
+				break;
+			}
+		}
+	}
+	
+	/**
 	 * Update @{link Item} status in the database.
 	 *
 	 * @param item the item
@@ -443,10 +473,8 @@ public class BlackboardHandler {
 		}
 		else if(item.getDuration() == -1){
 			System.out.println("Attempting to update passive item");
-			if(!dbController.isOutOfSupply(item, getStudent().getStudentID())){
-				if(dbController.updateUsageItem(item.getName(), getStudent().getStudentID())){
-					return true;
-				}
+			if(dbController.updateUsageItem(item.getName(), getStudent().getStudentID())){
+				return true;
 			}
 		}
 		else{
@@ -457,7 +485,7 @@ public class BlackboardHandler {
 				}
 			}
 			else{
-				if(dbController.updateContinuousItem(item, getStudent().getStudentID())){
+				if(dbController.updateContinuousItem(item.getName(), getStudent().getStudentID())){
 					return true;
 				}
 			}
