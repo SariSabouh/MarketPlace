@@ -20,6 +20,7 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
+import org.joda.time.DateTime;
 
 public class MarketPlaceDAOTest {
 
@@ -71,7 +72,7 @@ public class MarketPlaceDAOTest {
 		for(Item item : marketPlaceDao.loadItems()){
 			itemsList.add(item.getName());
 		}
-		assertEquals(itemsList.toString(), "[Once, Continuous, OnceTwo]");
+		assertEquals(itemsList.toString(), "[Once, Continuous, OnceTwo, Passive]");
 	}
 	
 	@Test
@@ -120,27 +121,47 @@ public class MarketPlaceDAOTest {
 	@Test
 	public void testUnusedItems(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
-		assertEquals("[Once]", marketPlaceDao.loadUnusedItems("00111").toString());
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("Once", marketPlaceDao.loadNotExpiredItems(itemList, "00111").get(0).getName());
+	}
+	
+	@Test
+	public void testLoadUnusedItemsThatAreUsed(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
+		marketPlaceDao.expireInstantItem("Once", "00111");
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("[]", marketPlaceDao.loadNotExpiredItems(itemList, "00111").toString());
+	}
+	
+	@Test
+	public void testLoadUnusedItemsThatArePassive(){
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Passive"));
+		assertEquals(true, marketPlaceDao.updateItemUsage("Passive", "00111"));
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("Passive", marketPlaceDao.loadNotExpiredItems(itemList, "00111").get(0).getName());
 	}
 
 	@Test
 	public void testUnusedItemsWithWrongStudentId(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
-		assertEquals("[]", marketPlaceDao.loadUnusedItems("0111").toString());
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("[]", marketPlaceDao.loadNotExpiredItems(itemList, "0111").toString());
 	}
 	
 	@Test
 	public void testExpireInstantItem(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
 		assertEquals(true, marketPlaceDao.expireInstantItem("Once", "00111"));
-		assertEquals("[]", marketPlaceDao.loadUnusedItems("00111").toString());
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("[]", marketPlaceDao.loadNotExpiredItems(itemList, "00111").toString());
 	}
 	
 	@Test
 	public void testExpireInstantItemWithWrongName(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
 		assertEquals(false, marketPlaceDao.expireInstantItem("UNO", "00111"));
-		assertEquals("[Once]", marketPlaceDao.loadUnusedItems("00111").toString());
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("Once", marketPlaceDao.loadNotExpiredItems(itemList, "00111").get(0).getName());
 	}
 	
 	@Test
@@ -177,13 +198,13 @@ public class MarketPlaceDAOTest {
 	@Test
 	public void testUpdateItemUsage(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
-		assertEquals(true, marketPlaceDao.updateUsageItem("Once", "00111"));
+		assertEquals(true, marketPlaceDao.updateItemUsage("Once", "00111"));
 	}
 	
 	@Test
 	public void testUpdateItemUsageWithWrongName(){
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
-		assertEquals(false, marketPlaceDao.updateUsageItem("UNO", "00111"));
+		assertEquals(false, marketPlaceDao.updateItemUsage("UNO", "00111"));
 	}
 	
 	@Test
@@ -213,60 +234,28 @@ public class MarketPlaceDAOTest {
 	}
 	
 	@Test
-	public void testIsNotExpiredWithNoUsage(){
-		Item item = new Item("Once");
-		item.setDuration(20);
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Once"));
-		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
-		
-	}
-	
-	@Test
-	public void testIsNotExpiredWithUsage(){
+	public void testSetUsedExpiryDate(){
 		Item item = new Item("Continuous");
-		item.setDuration(20);
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
-		assertEquals(true, marketPlaceDao.updateUsageItem("Continuous", "00111"));
-		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+		item.setDuration(24);
+		marketPlaceDao.persistPurhcase("00111", "Continuous");
+		marketPlaceDao.setUsedExpiryDate(item, "00111");
+		List<Item> items = new ArrayList<Item>();
+		items.add(item);
+		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
+		assertEquals(new DateTime().plusHours(24).toString().substring(0, 10), items.get(0).getExpirationDate().substring(0, 10));
 	}
 	
 	@Test
-	public void testIsNotExpiredWithDate(){
+	public void testLoadTimesUsed(){
 		Item item = new Item("Continuous");
-		item.setDuration(20);
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
-		assertEquals(true, marketPlaceDao.updateUsageItem("Continuous", "00111"));
-		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
-		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
+		List<Item> items = new ArrayList<Item>();
+		item.setDuration(24);
+		items.add(item);
+		marketPlaceDao.persistPurhcase("00111", "Continuous");
+		marketPlaceDao.setUsedExpiryDate(item, "00111");
+		marketPlaceDao.updateItemUsage("Continuous", "00111");
+		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
+		assertEquals(1, items.get(0).getTimesUsed());
 	}
 	
-	@Test
-	public void testIsExpired(){
-		Item item = new Item("Continuous");
-		item.setDuration(-20);
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
-		assertEquals(false, marketPlaceDao.isExpired(item, "00111"));
-		assertEquals(true, marketPlaceDao.isExpired(item, "00111"));
-	}
-	
-	@Test
-	public void testUpdateContinuousItem(){
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
-		assertEquals(0, marketPlaceDao.loadWaitList().size());
-		assertEquals(true, marketPlaceDao.updateContinuousItem("Continuous", "00111"));
-		assertEquals("Continuous", marketPlaceDao.loadWaitList().get(0).getName());
-		assertEquals("00111", marketPlaceDao.loadWaitList().get(0).getStudentID());
-	}
-	
-	@Test
-	public void testUpdateWrongContinuousItem(){
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", "Continuous"));
-		assertEquals(0, marketPlaceDao.loadWaitList().size());
-		assertEquals(false, marketPlaceDao.updateContinuousItem("Conti", "00111"));
-		assertEquals(0, marketPlaceDao.loadWaitList().size());
-
-	}
-	
-	
-
 }

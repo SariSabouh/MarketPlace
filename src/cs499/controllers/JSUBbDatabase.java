@@ -7,6 +7,7 @@ import java.util.Map;
 
 import blackboard.base.InitializationException;
 import blackboard.db.BbDatabase;
+import blackboard.db.ConnectionManager;
 import blackboard.db.ConnectionNotAvailableException;
 import blackboard.db.DataStoreDescriptor;
 
@@ -15,6 +16,8 @@ public class JSUBbDatabase extends BbDatabase {
 	protected JSUBbDatabase(DataStoreDescriptor arg0, Map<String, BbDatabase> arg1) throws InitializationException {
 		super(arg0, arg1);
 	}
+	
+	static ConnectionManager cManager;
 
 	public static Connection getConnection(boolean testing) {
 		if (testing) {
@@ -25,7 +28,10 @@ public class JSUBbDatabase extends BbDatabase {
 			}
 		} else {
 			try {
-				return  BbDatabase.getDefaultInstance().getConnectionManager().getConnection();
+				cManager = BbDatabase.getDefaultInstance().getConnectionManager();
+				cManager.cleanPinnedConnections();
+				cManager.cleanUnreleasedConnections();
+				return  cManager.getConnection();
 			} catch (ConnectionNotAvailableException e) {
 				e.printStackTrace();
 			}
@@ -33,10 +39,12 @@ public class JSUBbDatabase extends BbDatabase {
 		return null;
 	}
 	
-	public static void closeConnection(boolean testing){
+	public static boolean closeConnection(boolean testing){
 		if(!testing){
-			BbDatabase.getDefaultInstance().getConnectionManager().close();
+			cManager.close();
+			return true;
 		}
+		return false;
 	}
 	
 }

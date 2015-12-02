@@ -49,8 +49,14 @@ public class Item implements Serializable{
 	/** The name. */
 	private String name;
 	
+	/** The Expiration Date. */
+	private String expirationDate;
+
 	/** The effect magnitude. */
 	private float effectMagnitude;
+	
+	/** The times this item was used. */
+	private int timesUsed;
 
 	/**
 	 * Instantiates a new item by name.
@@ -78,7 +84,7 @@ public class Item implements Serializable{
 	 */
 	public void setSupply(int supply) {
 		if(supply > 9){
-			supply = 9999999;
+			this.supply = 9999;
 		}
 		else{
 			this.supply = supply;
@@ -108,7 +114,19 @@ public class Item implements Serializable{
 	 *
 	 * @param duration the new duration
 	 */
-	public void setDuration(int duration) {
+	public void setDuration(String duration) {
+		if(duration.equals("PASSIVE")){
+			this.duration = -1;
+		}
+		else if(duration.equals("ONCE")){
+			this.duration = 0;
+		}
+		else{
+			this.duration = Integer.parseInt(duration);
+		}
+	}
+	
+	public void setDuration(int duration){
 		this.duration = duration;
 	}
 	
@@ -182,6 +200,22 @@ public class Item implements Serializable{
 	 */
 	public void setAttributeAffected(AttributeAffected attributeAffected) {
 		this.attributeAffected = attributeAffected;
+	}	
+	
+	public String getExpirationDate() {
+		return expirationDate;
+	}
+
+	public void setExpirationDate(String expirationDate) {
+		this.expirationDate = expirationDate;
+	}
+	
+	public void setTimesUsed(int timesUsed) {
+		this.timesUsed = timesUsed;
+	}
+	
+	public int getTimesUsed(){
+		return timesUsed;
 	}
 	
 	/** 
@@ -208,4 +242,6 @@ public class Item implements Serializable{
         }
         return false;
     }
+	
+	
 }

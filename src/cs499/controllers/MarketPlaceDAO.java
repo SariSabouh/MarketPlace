@@ -9,10 +9,12 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.itemHandler.Item;
 import cs499.itemHandler.Item.AssessmentType;
 import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
+import cs499.util.GradebookColumnPojo;
 import cs499.util.WaitListPojo;
 
 /**
@@ -51,7 +53,7 @@ public class MarketPlaceDAO {
 		        	Item item = new Item(rSet.getString("name"));
 		        	item.setAttributeAffected(AttributeAffected.valueOf(rSet.getString("attribute_affected")));
 		        	item.setCost(rSet.getInt("cost"));
-		        	item.setDuration(rSet.getInt("duration"));
+		        	item.setDuration(rSet.getString("duration"));
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
@@ -64,7 +66,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	        try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -100,7 +102,7 @@ public class MarketPlaceDAO {
 		        	item = new Item(rSet.getString("name"));
 		        	item.setAttributeAffected(AttributeAffected.valueOf(rSet.getString("attribute_affected")));
 		        	item.setCost(rSet.getInt("cost"));
-		        	item.setDuration(rSet.getInt("duration"));
+		        	item.setDuration(rSet.getString("duration"));
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
@@ -112,7 +114,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -160,7 +162,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -209,7 +211,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -237,7 +239,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -248,7 +250,7 @@ public class MarketPlaceDAO {
 	
 	/**
 	 * Deletes all @{link Item} from wait list.
-	 * It is only called by {@link #deletePurhcases()}
+	 * It is only called bye {@link #emptyDatabase()}
 	 */
 	private void deleteWaitList() {
         Connection conn = null;
@@ -264,7 +266,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -275,7 +277,7 @@ public class MarketPlaceDAO {
 	
 	/**
 	 * Delete @{link Item} list from table.
-	 * It is only called bye {@link #deletePurhcases()}
+	 * It is only called bye {@link #emptyDatabase()}
 	 */
 	private void deleteItemList() {
         Connection conn = null;
@@ -291,12 +293,39 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 	    }
         System.out.println("Deleted Item List");
+        deleteGradebookColumn();
+	}
+	
+	/**
+	 * Truncates the GradebookColumn table.
+	 * It is only called bye {@link #emptyDatabase()}
+	 */
+	private void deleteGradebookColumn() {
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from dt_gradebook ");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Deleted Gradebook Columns");
 	}
 
 	/**
@@ -313,8 +342,6 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        System.out.println("Updating gold for studentid: " + studentID);
-	        
 	        queryString.append("select name from dt_item where item_pk1 in (");
             queryString.append("select item_pk1 from dt_purchaseinfo where new = \'Y\' and student_id = ?)");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -340,7 +367,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -354,29 +381,48 @@ public class MarketPlaceDAO {
 	 * @param studentID the student id
 	 * @return the list
 	 */
-	public List<String> loadUnusedItems(String studentID) {
+	public List<Item> loadNotExpiredItems(List<Item> items, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
-        List<String> itemList = new ArrayList<String>();
+        List<Item> itemList = new ArrayList<Item>();
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select name from dt_item where item_pk1 in (");
-            queryString.append("select item_pk1 from dt_purchaseinfo where expiration_date = \'NA\' and student_id = ?)");
+	        queryString.append("select a.name, b.expiration_date, b.times_used from dt_item a, dt_purchaseinfo b ");
+            queryString.append("where b.student_id = ? and a.item_pk1 = b.item_pk1");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, studentID);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
-	        	String itemName = rSet.getString("name");
-	        	System.out.println("Item found: " + itemName);
-	        	itemList.add(itemName);
+	        	ItemController itemCont = new ItemController();
+	        	String expirationString = rSet.getString("expiration_date");
+	        	if(expirationString.equals("NA")){
+	        		String itemName = rSet.getString("name");
+		        	System.out.println("Item found: " + itemName);
+		        	Item item = itemCont.getItemByName(items, itemName);
+		        	item.setExpirationDate("NA");
+		        	item.setTimesUsed(rSet.getInt("times_used"));
+		        	itemList.add(item);
+	        	}
+	        	else{
+	        		DateTime expirationDate = new DateTime(expirationString);
+	        		if(expirationDate.isAfterNow()){
+	        			String itemName = rSet.getString("name");
+	    	        	System.out.println("Item found: " + itemName);
+	    	        	Item item = itemCont.getItemByName(items, itemName);
+			        	item.setExpirationDate(expirationString);
+			        	item.setTimesUsed(rSet.getInt("times_used"));
+			        	itemList.add(item);
+	        		}
+	        	}
 	        }
 	        selectQuery.close();
+	        rSet.close();
         } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -414,47 +460,13 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 	    }
         addToWaitList(name, studentID);
 		return true;
-	}
-	
-	/**
-	 * Expire @{link Item} that is continuous or passive.
-	 *
-	 * @param name the @{link Item} name
-	 * @param studentID the @{link Student} id
-	 * @return true, if successful
-	 */
-	private void expireItem(String name, String studentID) {
-        Connection conn = null;
-        StringBuffer queryString = new StringBuffer("");
-        try {
-			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set expiration_date = ?, times_used = times_used+1 where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
-	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setString(1, new DateTime().toString());
-            selectQuery.setString(2, name);
-            selectQuery.setString(3, studentID);
-	        selectQuery.executeUpdate();
-	        selectQuery.close();
-        } catch (java.sql.SQLException sE){
-	    	sE.printStackTrace();
-	    } finally {
-	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-	    }
-        addToWaitList(name, studentID);
 	}
 	
 	/**
@@ -480,7 +492,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -514,7 +526,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -543,7 +555,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -558,7 +570,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean updateUsageItem(String name, String studentID) {
+	public boolean updateItemUsage(String name, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -580,7 +592,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -616,7 +628,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -650,7 +662,7 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
@@ -659,67 +671,19 @@ public class MarketPlaceDAO {
 	}
 
 	/**
-	 * Checks if the @{link Item} is expired.
-	 *
-	 * @param item the item
-	 * @param studentID the student id
-	 * @return true, if is expired
-	 */
-	public boolean isExpired(Item item, String studentID) {
-        Connection conn = null;
-        StringBuffer queryString = new StringBuffer("");
-        boolean expired = true;
-        try {
-			conn = JSUBbDatabase.getConnection(testing);
-	        PreparedStatement selectQuery = null;
-	        queryString.append("select times_used, expiration_date from dt_purchaseinfo where item_pk1 = (select item_pk1 from dt_item where name = ?) and student_id = ?");
-            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setString(2, studentID);
-            selectQuery.setString(1, item.getName());
-	        ResultSet rSet = selectQuery.executeQuery();
-	        while(rSet.next()){
-	        	if(rSet.getInt("times_used") == 0){
-	        		setUsedExpiryDate(item, studentID);
-	        	}
-	        	String date = rSet.getString("expiration_date");
-	        	if(date.equals("NA")){
-	        		expired = false;
-	        	}
-	        	else if(new DateTime(date).isAfterNow()){
-	        		expired = false;
-	        	}
-	        	else{
-	        		expired = true;
-	        		expireItem(item.getName(), studentID);
-	        	}
-	        }
-	        selectQuery.close();
-	    } catch (java.sql.SQLException sE){
-	    	sE.printStackTrace();
-	    } finally {
-	    	try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-	    }
-		return expired;
-	}
-
-	/**
 	 * Sets the used and expiry date for @{link Item}.
 	 *
 	 * @param item the item
 	 * @param studentID the student id
 	 */
-	private void setUsedExpiryDate(Item item, String studentID) {
+	public void setUsedExpiryDate(Item item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used + 1 where item_pk1 = ( ");
+	        queryString.append("set used_date = ?, expiration_date = ? where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        DateTime date = new DateTime();
@@ -731,50 +695,98 @@ public class MarketPlaceDAO {
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
+	    }		
+	}
+	
+	public GradebookColumnPojo getGradebookColumnByNameAndStudentId(String title, String studentID){
+		Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        PreparedStatement selectQuery = null;
+        GradebookColumnPojo gradebook = null;
+        try {
+        	conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("SELECT * ");
+	        queryString.append("FROM ");
+	        queryString.append("dt_gradebook where student_id = ? and name = ?");
+	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, studentID);
+	        selectQuery.setString(2, title);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	gradebook = new GradebookColumnPojo();
+	        	gradebook.setGrade(rSet.getInt("grade"));
+	        	gradebook.setLastDate(rSet.getString("last_date"));
+	        	gradebook.setName(rSet.getString("name"));
+	        	gradebook.setStudentID(rSet.getString("student_id"));
+	        }
+	        rSet.close();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
 	    } finally {
 	        try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
-	    }		
+	    }
+        return gradebook;
 	}
 
-	/**
-	 * Update continuous @{link Item}.
-	 *
-	 * @param item the @{link Item}
-	 * @param studentID the @{link Student} id
-	 * @return true, if successful
-	 */
-	public boolean updateContinuousItem(String name, String studentID) {
-        Connection conn = null;
+	public boolean updateGradebookColumn(AttemptDetail attempt, String studentID) {
+		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
+        PreparedStatement selectQuery = null;
         try {
-			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set times_used = times_used+1 where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
-	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setString(1, name);
-            selectQuery.setString(2, studentID);
-	        int rowsUpdated = selectQuery.executeUpdate();
-	        if(rowsUpdated == 0){
-	        	return false;
+        	conn = JSUBbDatabase.getConnection(testing);
+        	queryString.append("update dt_gradebook ");
+	        queryString.append("set last_date = ?, grade = ? ");
+	        queryString.append("where name = ? and student_id = ?");
+	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, new DateTime().toString());
+	        selectQuery.setInt(2, (int) attempt.getScore());
+	        selectQuery.setString(4, studentID);
+	        selectQuery.setString(3, attempt.getGradebookItem().getTitle());
+	        if(selectQuery.executeUpdate() > 0){
+	        	return true;
 	        }
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
 	    } finally {
 	        try {
-				conn.close(); JSUBbDatabase.closeConnection(testing);
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
 	    }
-        addToWaitList(name, studentID);
-		return true;
+        return false;
+	}
+	
+	public void insertGradebookColumn(AttemptDetail attempt, String studentID) {
+		Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        PreparedStatement selectQuery = null;
+        try {
+        	conn = JSUBbDatabase.getConnection(testing);
+        	queryString.append("insert into dt_gradebook(name, last_date, grade, student_id) ");
+	        queryString.append("VALUES (?, ?, ?, ?)");
+	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(2, new DateTime().toString());
+	        selectQuery.setInt(3, (int) attempt.getScore());
+	        selectQuery.setString(4, studentID);
+	        selectQuery.setString(1, attempt.getGradebookItem().getTitle());
+	        selectQuery.executeUpdate();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	        try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
 	}
 	
 }

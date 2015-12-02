@@ -49,6 +49,18 @@
     </primary-key>
   </table>
 
+  <table name="dt_gradebook">
+  	<column name="gradebook_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence dt_item_seq which will be created automatically" />
+  	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that Attempted the column." />
+  	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
+  	<column name="last_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Last attempt date." />
+  	<column name="grade" data-type="int" nullable="false" identity="false" comment="Column Grade." />
+  	
+  	<primary-key name="dt_gradebook_id" comment="Unique primary key">
+      <columnref name="gradebook_pk1" />
+    </primary-key>
+  </table>
+
  
 
 </schema>
