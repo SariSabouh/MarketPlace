@@ -1,19 +1,11 @@
-add click event to the whole list of items for example id=TEST
-ready funcition jQuery
-
-Notes:
-Add check to check if item is expired or not like the method isOutOfSupply
-Move methods to new util class if needed 
-Add functionality for all possible items
-
 Ask:
 	If module active then add Gold Column? T Done
 	Supply and Duration with Passive and Continuous (If continuous then it is dependant on duration\Passive never ends as long as it is purchased) SUPPLY means how many in the store DONE
-	UnitTests? T
+	UnitTests? T Done
 	Javadoc? T Done
 	Structure? T Done
 	MarketPlaceItem? Remove Done
-	I think it will be better if the student cannot own the same item multiple times(Only be able to purchase)
+	I think it will be better if the student cannot own the same item multiple times(Only be able to purchase) Done
 	Next semester? T
 
 Next:

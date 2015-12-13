@@ -22,7 +22,7 @@ public class JSUBbDatabase extends BbDatabase {
 	public static Connection getConnection(boolean testing) {
 		if (testing) {
 			try {
-				return DriverManager.getConnection("jdbc:mysql://localhost:3306/marketplace", "root", "root");
+				return DriverManager.getConnection("jdbc:mysql://localhost:3306/dt_marketplace", "root", "root");
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}

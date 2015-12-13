@@ -8,12 +8,13 @@
 	System.out.println("In UseItemUtil");
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
 	MarketPlaceDAO dbController = new MarketPlaceDAO(false);
-	Item item = dbController.loadItem("Continuous");
+	String itemName = request.getParameter("itemName");
+	Item item = dbController.loadItem(itemName);
 	try{
 		System.out.println("Item loaded: " + item.getName());
 		boolean done = bbHandler.useItem(item);
 		if(!done){
-			throw new ItemUseException("Item was not successfully used.");
+			throw new ItemUseException("Item " + itemName + " was not successfully used.");
 		}
 	}catch(ItemUseException e){
 		e.printStackTrace();

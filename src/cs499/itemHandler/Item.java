@@ -224,12 +224,12 @@ public class Item implements Serializable{
 	 */
 	@Override
 	public String toString(){
-		String output = "Item Name: " + name
-				+ "<br />Item Duration: " + duration
-				+ "<br />Item Supply: " + supply
-				+ "<br />Item Attribute Affected: " + attributeAffected
-				+ "<br />Item Effect Mangnitue: " + effectMagnitude
-				+ "<br />Item Type: " + type;
+		String output = "Duration: " + duration
+				+ ", Cost: " + cost
+				+ ", Supply: " + supply
+				+ ", Attribute Affected: " + attributeAffected
+				+ ", Effect Mangnitue: " + effectMagnitude
+				+ ", Type: " + type;
 		return output;
 	}
 	

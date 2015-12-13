@@ -698,6 +698,14 @@ public class MarketPlaceDAO {
 	    }		
 	}
 	
+	/**
+	 * Gets the {@link GradebookColumnPojo} from database by Name and StudentId
+	 *
+	 * @param title the title of the Gradebook Column
+	 * @param studentID the student id
+	 * 
+	 * @return {@link GradebookColumnPojo}
+	 */	
 	public GradebookColumnPojo getGradebookColumnByNameAndStudentId(String title, String studentID){
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -733,6 +741,14 @@ public class MarketPlaceDAO {
         return gradebook;
 	}
 
+	/**
+	 * Updates the {@link GradebookColumnPojo} in database
+	 *
+	 * @param attempt the AttemptDetail object
+	 * @param studentID the student id
+	 * 
+	 * @return true if success
+	 */
 	public boolean updateGradebookColumn(AttemptDetail attempt, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -746,7 +762,12 @@ public class MarketPlaceDAO {
 	        selectQuery.setString(1, new DateTime().toString());
 	        selectQuery.setInt(2, (int) attempt.getScore());
 	        selectQuery.setString(4, studentID);
-	        selectQuery.setString(3, attempt.getGradebookItem().getTitle());
+	        if(testing){
+	        	selectQuery.setString(3, "TEST");
+	        }
+	        else{
+	        	selectQuery.setString(3, attempt.getGradebookItem().getTitle());
+	        }
 	        if(selectQuery.executeUpdate() > 0){
 	        	return true;
 	        }
@@ -763,6 +784,13 @@ public class MarketPlaceDAO {
         return false;
 	}
 	
+	/**
+	 * Inserts a {@link GradebookColumnPojo} to the database
+	 *
+	 * @param attempt the AttemptDetail object
+	 * @param studentID the student id
+	 * 
+	 */
 	public void insertGradebookColumn(AttemptDetail attempt, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -775,7 +803,12 @@ public class MarketPlaceDAO {
 	        selectQuery.setString(2, new DateTime().toString());
 	        selectQuery.setInt(3, (int) attempt.getScore());
 	        selectQuery.setString(4, studentID);
-	        selectQuery.setString(1, attempt.getGradebookItem().getTitle());
+	        if(testing){
+	        	selectQuery.setString(1, "TEST");
+	        }
+	        else{
+	        	selectQuery.setString(1, attempt.getGradebookItem().getTitle());
+	        }
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){

@@ -295,11 +295,9 @@ public class BlackboardHandler {
 			String studentID = waitList.getStudentID();
 			String itemName = waitList.getName();
 			ItemController itemController = new ItemController();
-			boolean done = activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
-			if(done){
-				int primaryKey = waitList.getPrimaryKey();
-				dbController.removeItemWaitList(primaryKey);
-			}
+			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
+			int primaryKey = waitList.getPrimaryKey();
+			dbController.removeItemWaitList(primaryKey);
 		}
 	}
 	
@@ -438,14 +436,14 @@ public class BlackboardHandler {
 	 * @param student the @{link Student}
 	 * @return true, if successful
 	 */
-	private boolean activateItem(Item item, Student student) {
+	private void activateItem(Item item, Student student) {
 		System.out.println("In activate Item");
 		AssessmentType type = item.getType(); // HOW WOULD IT DIFFERENTIATE BETWEEN EXAM AND ASSIGN... etc Also discuss structure and item attrs
 		AttributeAffected attribute = item.getAttributeAffected();
 		if(item.getDuration() == 0){
 			switch(attribute){
 			case GRADE:
-				adjustColumnGrade(item.getEffectMagnitude(), "Assignment 1", student);
+				adjustColumnGrade(item.getEffectMagnitude(), "Exam 1", student);
 				break;
 			case DUEDATE:
 				adjustColumnDueDate(item.getEffectMagnitude(), "Exam 1");
@@ -455,7 +453,6 @@ public class BlackboardHandler {
 				break;
 			}
 		}
-		return true;
 	}
 	
 	/**

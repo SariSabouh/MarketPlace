@@ -7,6 +7,7 @@
 <%@page import="blackboard.platform.gradebook2.*"%>
 <%@page import="blackboard.platform.gradebook2.impl.*"%>
 <%@page import="java.util.List"%>
+<%@page import="java.util.ArrayList"%>
 <%@page import="java.util.Scanner"%>
 <%@page import="cs499.controllers.*"%>
 <%@page import="cs499.itemHandler.Item"%>
@@ -15,6 +16,9 @@
 <%@page import="blackboard.platform.plugin.PlugInUtil"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/fmt" prefix="fmt" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <bbNG:includedPage ctxId="ctx">
 
 <%
@@ -38,26 +42,28 @@
 	// get Gold for student
 	boolean isStudent = false;
 	String role = sessionUserRole.trim().toLowerCase();
-	String myItems = "";
+	List<Item> myItems = new ArrayList<Item>();
 	int myGold = 0;
 	if (role.contains("student")) {
 		isStudent = true;
 		Student student = bbHandler.getStudent();
 		myGold = student.getGold();
-		for(Item item : student.getItemList()){
-			myItems += item.getName() + "<br />";
+		for(Item item: student.getItemList()){
+			myItems.add(item);
 		}
+		pageContext.setAttribute("myItems", myItems);
 		
 	}
 	
 	session.setAttribute("itemList", itemList);
-	String allItems = "";
+	List<Item> allItems = new ArrayList<Item>();
 	for(Item item: itemList){
-		allItems += item.toString() + "<br /><br />";
+		allItems.add(item);
 	}
+	pageContext.setAttribute("allItems", allItems);
 	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/BuyItemUtil.jsp");
 	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/UseItemUtil.jsp");
-
+	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/TRUNCATE.jsp");
 %>
 
 <!doctype html>
@@ -84,6 +90,8 @@
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
 <input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
 <input type="hidden" id="useItemURL" name="useItemURL" value="<%=useItemURL%>"/>
+<input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
+
 
 	<div id="tabs">
 
@@ -99,8 +107,14 @@
 
 		<div id="tabs-1">
 
-			<p><% out.print(myItems); %></p>
-			<a class="MyItems" name="PickAxe" href="#">USE</a>
+			<c:forEach items="${myItems}" var="item">  
+				<TR>  
+				    <td><a title="${item}" class="Items" href="#" 
+				    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
+				    <td><p></p></td>             
+				</TR>
+			</c:forEach>
+						
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 
 			</div>
@@ -109,14 +123,20 @@
 
 		<div id="tabs-2">
 
-			<p><% out.print(allItems); %></p>
-			<a class="Items" name="PickAxe" href="#">BUY</a>
+			<c:forEach items="${allItems}" var="item">  
+				<TR>  
+				    <td><a title="${item}" class="Items" href="#" 
+				    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
+				    <td><p></p></td>
+				</TR>
+			</c:forEach>
 
 		</div>
 		
 		<div id="tabs-3">
 
 			<p>add</p>
+			<a class="Items" href="#">DELETE</a>
 
 		</div>
 

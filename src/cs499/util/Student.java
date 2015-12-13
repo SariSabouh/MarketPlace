@@ -6,6 +6,7 @@ import java.util.List;
 import blackboard.persist.Id;
 import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
+import cs499.itemHandler.ItemController;
 
 /**
  * @author SabouhS
@@ -183,7 +184,9 @@ public class Student{
 		gold = (int) (gold - item.getCost());
 		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		System.out.println("Gold substracted about to persist");
-		dbController.persistPurhcase(studentID, item.getName());
+		if(new ItemController().getItemByName(itemList, item.getName()) == null ){
+			dbController.persistPurhcase(studentID, item.getName());
+		}
 		itemList.add(item);
 	}
 

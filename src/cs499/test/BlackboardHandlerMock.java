@@ -209,11 +209,9 @@ public class BlackboardHandlerMock{
 			String studentID = waitList.getStudentID();
 			String itemName = waitList.getName();
 			ItemController itemController = new ItemController();
-			boolean done = activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
-			if(done){
-				int primaryKey = waitList.getPrimaryKey();
-				dbController.removeItemWaitList(primaryKey);
-			}
+			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
+			int primaryKey = waitList.getPrimaryKey();
+			dbController.removeItemWaitList(primaryKey);
 		}
 	}
 	
@@ -342,7 +340,7 @@ public class BlackboardHandlerMock{
 	 * @param student the @{link Student}
 	 * @return true, if successful
 	 */
-	private boolean activateItem(Item item, Student student) {
+	private void activateItem(Item item, Student student) {
 		System.out.println("In activate Item");
 		AttributeAffected attribute = item.getAttributeAffected();
 		if(item.getDuration() == 0){
@@ -358,7 +356,6 @@ public class BlackboardHandlerMock{
 				break;
 			}
 		}
-		return true;
 	}
 	
 	/**

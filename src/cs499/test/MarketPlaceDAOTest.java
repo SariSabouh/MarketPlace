@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
 
+import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
@@ -256,6 +257,22 @@ public class MarketPlaceDAOTest {
 		marketPlaceDao.updateItemUsage("Continuous", "00111");
 		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
 		assertEquals(1, items.get(0).getTimesUsed());
+	}
+	
+	@Test
+	public void testGetGradebookColumnAfterInsert(){
+		AttemptDetail attempt = new AttemptDetail();
+		attempt.setScore(10);
+		marketPlaceDao.insertGradebookColumn(attempt, "00111");
+		assertEquals(10, marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
+	}
+	
+	@Test
+	public void testUpdateGradebookColumnAfterInsert(){
+		AttemptDetail attempt = new AttemptDetail();
+		attempt.setScore(10);
+		marketPlaceDao.insertGradebookColumn(attempt, "00111");
+		assertEquals(true, marketPlaceDao.updateGradebookColumn(attempt, "00111"));
 	}
 	
 }
