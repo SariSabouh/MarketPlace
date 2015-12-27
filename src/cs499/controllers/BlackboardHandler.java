@@ -548,6 +548,9 @@ public class BlackboardHandler {
 			if(gradeItem.getTitle().equals(columnName)){
 				try {
 					GradeDetail gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+					if(gradeDetail == null){
+						gradeDetail = createGradeDetail(gradeItem, student);
+					}
 					String manualGrade = gradeDetail.getManualGrade();
 					manualGrade = (Double.parseDouble(manualGrade) + effectMagnitude) + "";
 					double manualScore = gradeDetail.getManualScore();
@@ -623,6 +626,18 @@ public class BlackboardHandler {
 		}
 		System.out.println("Could not update item");
 		return false;
+	}
+	
+	public GradeDetail createGradeDetail(GradableItem gradableItem, Student student){
+		GradeDetail gradeDetail = new GradeDetail();
+		gradeDetail.setCourseUserId(student.getId());
+		gradeDetail.setGradableItem(gradableItem);
+		gradeDetail.setGradableItemId(gradableItem.getId());
+		gradeDetail.setGradingRequired(false);
+		gradeDetail.setId(Id.newId(GradeDetail.DATA_TYPE));
+		gradeDetail.setManualGrade("0");
+		gradeDetail.setManualScore(0.0d);
+		return gradeDetail;
 	}
 	
 }

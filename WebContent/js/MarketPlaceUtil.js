@@ -33,20 +33,19 @@ jQuery.noConflict();
 	    		}
 		    });
 		}
-		else{
-			$.ajax({
-		    	url: $("#TRUNCATE").val(),
-	    		type: "GET",
-	    		data: {itemName: $(this).text()},
-	    		success: function(result){
-	    			alert("SUCCESS");
-	    			location.reload();
-	    		},
-	    		error: function(result){
-	    			alert("FAILED");
-	    		}
-		    });
-		}
+	});
+    $(".Truncate").click(function() {
+    	$.ajax({
+	    	url: $("#TRUNCATE").val(),
+    		type: "GET",
+    		success: function(result){
+    			alert("SUCCESS");
+    			location.reload();
+    		},
+    		error: function(result){
+    			alert("FAILED");
+    		}
+	    });
 	});
     $(".MyItems").click(function() {
     	var nameItemRadio = $('input[name=itemRadio]:checked', '#myRadioButtons').parent().text().trim();
@@ -153,9 +152,23 @@ jQuery.noConflict();
 				location.reload();
     		},
     		error: function(result){
-    			alert("Failed To Add Item. Contact Admin.");
+    			alert("Failed To Add Item. Make Sure All Fields Are Filled. If It Failed, Contact Admin.");
     		}
 	    });
     });
+    $("#addGold").click(function() {
+		$.ajax({
+	    	url: $("#addGoldURL").val(),
+    		type: "GET",
+    		data: {gold: $('#addGoldField').val()},
+    		success: function(result){
+    			alert("Gold Added");
+    			location.reload();
+    		},
+    		error: function(result){
+    			alert("Gold Adding Failed. Contact Admin.");
+    		}
+	    });
+	});
 })
 (jQuery);

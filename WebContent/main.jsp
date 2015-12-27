@@ -71,6 +71,7 @@
 	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/UseItemUtil.jsp");
 	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/TRUNCATE.jsp");
 	String getListURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetListUtil.jsp");
+	String addGoldURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddGoldUtil.jsp");
 %>
 
 <!doctype html>
@@ -102,7 +103,7 @@
 <input type="hidden" id="useItemURL" name="useItemURL" value="<%=useItemURL%>"/>
 <input type="hidden" id="getListURL" name="getListURL" value="<%=getListURL%>"/>
 <input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
-
+<input type="hidden" id="addGoldURL" name="addGoldURL" value="<%=addGoldURL%>"/>
 
 	<div id="tabs">
 
@@ -168,6 +169,7 @@
 			<p></p>
 			Duration: 
             <select id="newItemDuration">
+            	<option class="Duration">NONE</option>
            		<option class="Duration">ONCE</option>
 	            <option class="Duration">CONTINUOUS</option>
 	            <option class="Duration">PASSIVE</option>
@@ -200,7 +202,9 @@
 		<div id="tabs-4">
 
 			<a class="Truncate" href="#">Erase All Information But The Preset Items.</a>
-
+			<p></p>
+			<input id="addGold" type="button" value="Add Gold To All">
+			<input type="text" id="addGoldField"/>
 		</div>
 
 
