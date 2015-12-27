@@ -8,8 +8,8 @@ package cs499.util;
 public class WaitListPojo {
 	
 	/** The name. */
-	private String name, studentID;
-	
+	private String name, studentID, columnName;
+
 	/** The student id. */
 	private int primaryKey;
 	
@@ -20,6 +20,24 @@ public class WaitListPojo {
 	 */
 	public String getName() {
 		return name;
+	}
+	
+	/**
+	 * Gets the column name.
+	 *
+	 * @return the name
+	 */
+	public String getColumnName() {
+		return columnName;
+	}
+
+	/**
+	 * Sets the column name.
+	 *
+	 * @return the name
+	 */
+	public void setColumnName(String columnName) {
+		this.columnName = columnName;
 	}
 	
 	/**

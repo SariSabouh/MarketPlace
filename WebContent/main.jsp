@@ -58,12 +58,19 @@
 	session.setAttribute("itemList", itemList);
 	List<Item> allItems = new ArrayList<Item>();
 	for(Item item: itemList){
-		allItems.add(item);
+		if(!dbController.isOutOfSupply(item)){
+			allItems.add(item);
+		}
 	}
 	pageContext.setAttribute("allItems", allItems);
-	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/BuyItemUtil.jsp");
-	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/UseItemUtil.jsp");
-	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace",	"jsp/TRUNCATE.jsp");
+	List<String> columnNames = bbHandler.getAllColumnsByType("ALL");
+	pageContext.setAttribute("columnNames", columnNames);
+	String getDurationURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetDurationUtil.jsp");
+	String addItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddItemUtil.jsp");
+	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/BuyItemUtil.jsp");
+	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/UseItemUtil.jsp");
+	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/TRUNCATE.jsp");
+	String getListURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetListUtil.jsp");
 %>
 
 <!doctype html>
@@ -88,8 +95,12 @@
 <body>
 
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
+<input type="hidden" id="columnNames" name="columnNames" value="${columnNames}"/>
 <input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
+<input type="hidden" id="addItemURL" name="addItemURL" value="<%=addItemURL%>"/>
+<input type="hidden" id="getDurationURL" name="getDurationURL" value="<%=getDurationURL%>"/>
 <input type="hidden" id="useItemURL" name="useItemURL" value="<%=useItemURL%>"/>
+<input type="hidden" id="getListURL" name="getListURL" value="<%=getListURL%>"/>
 <input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
 
 
@@ -102,18 +113,35 @@
 			<li><a href="#tabs-2">Market Place</a></li>
 			
 			<li><a href="#tabs-3">Add Item</a></li>
+			
+			<li><a href="#tabs-4">Settings</a></li>
 
 		</ul>
 
 		<div id="tabs-1">
-
+		<form id="myRadioButtons">
 			<c:forEach items="${myItems}" var="item">  
 				<TR>  
-				    <td><a title="${item}" class="Items" href="#" 
-				    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
-				    <td><p></p></td>             
+					<td><label>
+					<input type="radio" name="itemRadio" value="${item.name}">${item.name}</label></td>
+				    <td><p></p></td>
 				</TR>
 			</c:forEach>
+		</form>
+			<p></p>
+			
+			<div id="columnList">
+			  <p>Choose Item To Use. Then...</p>
+              <label>Please Select From the List. After You Choose It Will Get Activated: 
+                <select id="mySelect">
+                	<option>NONE</option>
+	                <c:forEach items="${columnNames}" var="name">
+						<option class="MyItems">${name}</option>
+					</c:forEach>
+					<option>ALL</option>
+                </select>
+              </label>
+            </div>
 						
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 
@@ -122,11 +150,12 @@
 		</div>
 
 		<div id="tabs-2">
-
+		
 			<c:forEach items="${allItems}" var="item">  
 				<TR>  
 				    <td><a title="${item}" class="Items" href="#" 
-				    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
+						    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
+				    <td><a style="position: absolute; right: 0; text-align:right;">Cost: ${item.cost}</a></td>
 				    <td><p></p></td>
 				</TR>
 			</c:forEach>
@@ -134,9 +163,43 @@
 		</div>
 		
 		<div id="tabs-3">
+			<p>Add New Item</p>
+			Name: <input type="text" id="newItemName"/>
+			<p></p>
+			Duration: 
+            <select id="newItemDuration">
+           		<option class="Duration">ONCE</option>
+	            <option class="Duration">CONTINUOUS</option>
+	            <option class="Duration">PASSIVE</option>
+            </select>
+            <input value="Duration Length:0" type="text" id="customDuration" style="position: absolute; right:0; text-align:right;">
+            <p></p>
+            Assessment Type:
+            <select id="newItemAssessment">
+           		<option>ASSIGNMENT</option>
+	            <option>TEST</option>
+	            <option>ALL</option>
+            </select>
+            <p></p>
+            Attribute Affected:
+            <select id="newAttributeAffected">
+           		<option>GRADE</option>
+	            <option>DUEDATE</option>
+	            <option>NUMATTEMPTS</option>
+            </select>
+            <p></p>
+            Cost: <input type="text" id="newItemCost"/>
+            <p></p>
+            Effect Magnitude: <input type="text" id="newItemMagnitude"/>
+            <p></p>
+            Supply: <input type="text" id="newItemSupply"/>
+			<p></p>
+			<input id="addItem" type="button" value="Add Item">
+		</div>
+		
+		<div id="tabs-4">
 
-			<p>add</p>
-			<a class="Items" href="#">DELETE</a>
+			<a class="Truncate" href="#">Erase All Information But The Preset Items.</a>
 
 		</div>
 

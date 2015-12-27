@@ -11,11 +11,13 @@
 	try {
 		if(dbController.loadItem(itemName) == null){
 			System.out.println("Fail to load item " + itemName);
+			response.setStatus(500);
 			throw new ItemProcessException("Item Purchase Failed. Item is not in Database");
 		}
 		bbHandler.processItem(itemName);
 		System.out.println("PURCHASE ENDED");
 	}catch (ItemProcessException e) {
 		e.printStackTrace();
+		response.setStatus(500);
 	}
 %>

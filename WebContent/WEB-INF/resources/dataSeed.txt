@@ -1,25 +1,33 @@
 --
-name=Once
+name=Due Date Elixir
 cost=100
 duration=ONCE
-type=EXAMS
+type=TEST
 attAffected=DUEDATE
-supply=1
+supply=5
 effectMagnitude=24
 --
-name=Continuous
+name=Pearl of Wisdom
 cost=200
 duration=65
-type=ASSIGNMENT
+type=ALL
 attAffected=GRADE
 supply=10
 effectMagnitude=20
 --
-name=Passive
-cost=300
-duration=PASSIVE
+name=The Let Me Try Again Solution
+cost=150
+duration=ONCE
 type=ALL
 attAffected=NUMATTEMPTS
 supply=2
-effectMagnitude=2 
+effectMagnitude=2
+--
+name=Talk To The Middle Man
+cost=200
+duration=ONCE
+type=ALL
+attAffected=GRADE
+supply=5
+effectMagnitude=5
 --

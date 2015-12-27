@@ -19,8 +19,8 @@ public class Item implements Serializable{
 		
 		/** The assignment. */
 		ASSIGNMENT,
-		/** The exams. */
-		EXAMS,
+		/** The tests. */
+		TEST,
 		/** The all. */
 		ALL
 	};
@@ -122,7 +122,7 @@ public class Item implements Serializable{
 			this.duration = 0;
 		}
 		else{
-			this.duration = Integer.parseInt(duration);
+			this.duration = Integer.parseInt(duration.replaceAll("[^0-9]", ""));
 		}
 	}
 	

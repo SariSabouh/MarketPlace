@@ -29,6 +29,7 @@
   	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
   	<column name="new" data-type="nvarchar(100)" nullable="false" identity="false" comment="Is item new." />
   	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
+  	<column name="column_name" data-type="nvarchar(100)" nullable="true" identity="false" comment="The name of the column affected. ALL means all gradable columns." />
   	
   	<primary-key name="dt_purchaseinfo_id2" comment="Unique primary key">
       <columnref name="purchase_info_pk1" />
@@ -43,6 +44,7 @@
   	<column name="waitlist_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence dt_item_seq which will be created automatically" />
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="item name." />
+  	<column name="column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
   	
   	<primary-key name="dt_waitlist_id" comment="Unique primary key">
       <columnref name="waitlist_pk1" />
@@ -60,8 +62,6 @@
       <columnref name="gradebook_pk1" />
     </primary-key>
   </table>
-
- 
 
 </schema>
 

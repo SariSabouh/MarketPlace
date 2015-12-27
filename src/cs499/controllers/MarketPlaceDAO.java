@@ -197,8 +197,8 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
 	        queryString.append("INSERT INTO dt_purchaseinfo");
-            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiration_date, new, times_used) ");
-            queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0) ");
+            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiration_date, new, times_used, column_name) ");
+            queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0, \'NA\') ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.setString(1, studentID);
             insertQuery.setString(2, itemName);
@@ -437,20 +437,21 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean expireInstantItem(String name, String studentID) {
+	public boolean expireInstantItem(String name, String studentID, String columnName) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used+1 where item_pk1 = ( ");
+	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used+1, column_name = ? where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, new DateTime().toString());
-            selectQuery.setString(3, name);
-            selectQuery.setString(4, studentID);
+            selectQuery.setString(3, columnName);
+            selectQuery.setString(4, name);
+            selectQuery.setString(5, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated < 1){
 	        	return false;
@@ -465,7 +466,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        addToWaitList(name, studentID);
+        addToWaitList(name, studentID, columnName);
 		return true;
 	}
 	
@@ -475,16 +476,17 @@ public class MarketPlaceDAO {
 	 * @param name the @{link Item} name
 	 * @param studentID the @{link Student} id
 	 */
-	private void addToWaitList(String name, String studentID){
+	private void addToWaitList(String name, String studentID, String columnName){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Inserting item in waiting list: " + studentID);
-	        queryString.append("insert into dt_waitlist(student_id, name) ");
-	        queryString.append("values(?, ?)");
+	        queryString.append("insert into dt_waitlist(student_id, name, column_name) ");
+	        queryString.append("values(?, ?, ?)");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setString(2, name);
+	        selectQuery.setString(2, name);
+	        selectQuery.setString(3, columnName);
             selectQuery.setString(1, studentID);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
@@ -519,6 +521,7 @@ public class MarketPlaceDAO {
 	        	waitList.setName(rSet.getString("name"));
 	        	waitList.setPrimaryKey(rSet.getInt("waitlist_pk1"));
 	        	waitList.setStudentID(rSet.getString("student_id"));
+	        	waitList.setColumnName(rSet.getString("column_name"));
 	        	itemStudent.add(waitList);
 	        }
 	        selectQuery.close();
@@ -570,7 +573,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean updateItemUsage(String name, String studentID) {
+	public boolean updateItemUsage(String name, String studentID, String columnName) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -578,11 +581,12 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
 	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set times_used = times_used+1 where item_pk1 = ( ");
+	        queryString.append("set times_used = times_used+1, column_name = ? where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-            selectQuery.setString(1, name);
-            selectQuery.setString(2, studentID);
+	        selectQuery.setString(1, name);
+	        selectQuery.setString(2, columnName);
+            selectQuery.setString(3, studentID);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated == 0){
 	        	return false;
@@ -597,7 +601,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        addToWaitList(name, studentID);
+        addToWaitList(name, studentID, columnName);
 		return true;
 	}
 	
@@ -815,6 +819,36 @@ public class MarketPlaceDAO {
 	    	sE.printStackTrace();
 	    } finally {
 	        try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	public void addItem(Item item){
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("INSERT INTO dt_item");
+            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
+            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setString(1, item.getName());
+            insertQuery.setString(2, item.getAttributeAffected().toString());
+            insertQuery.setInt(3, (int)item.getCost());
+            insertQuery.setInt(4, item.getDuration());
+            insertQuery.setInt(5, (int)item.getEffectMagnitude());
+            insertQuery.setInt(6, (int)item.getSupply());
+            insertQuery.setString(7, item.getType().toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
 				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
 				e.printStackTrace();

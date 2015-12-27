@@ -20,7 +20,6 @@ import blackboard.platform.gradebook2.BookData;
 import blackboard.platform.gradebook2.BookDataRequest;
 import blackboard.platform.gradebook2.GradableItem;
 import blackboard.platform.gradebook2.GradeDetail;
-import blackboard.platform.gradebook2.GradeWithAttemptScore;
 import blackboard.platform.gradebook2.GradebookException;
 import blackboard.platform.gradebook2.GradebookManager;
 import blackboard.platform.gradebook2.GradebookManagerFactory;
@@ -29,7 +28,6 @@ import blackboard.platform.gradebook2.impl.GradeDetailDAO;
 import blackboard.platform.gradebook2.impl.GradingSchemaDAO;
 import blackboard.platform.security.authentication.BbSecurityException;
 import cs499.itemHandler.Item;
-import cs499.itemHandler.Item.AssessmentType;
 import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
 import cs499.util.Grade;
@@ -134,15 +132,13 @@ public class BlackboardHandler {
 	 * @param item the item
 	 * @return true, if successful
 	 */
-	public boolean useItem(Item item){
+	public void useItem(Item item, String columnName){
 		if(isStudent){
 			Student student = getStudent();
 			if(student != null){
-				updateItem(item, student);
-				return true;
+				updateItem(item, student, columnName);
 			}
 		}
-		return false;
 	}
 	
 	/**
@@ -161,6 +157,58 @@ public class BlackboardHandler {
 	
 	
 	/**
+	 * Gets all Gradebook columns by type passed in
+	 * 
+	 * @param itemName name of {@link Item}
+	 * @return List of all Gradebook Column names
+	 */
+	public List<String> getAllColumnsByType(String itemName){
+		List<String> columns = new ArrayList<String>();
+		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing);
+		Item item = marketPlaceDAO.loadItem(itemName);
+		String type = itemName;
+		if(item != null){
+			type = item.getType().toString();
+			System.out.println(itemName + " TYPE: " + type);
+			if(item.getDuration() != 0){
+				columns.add("ALL");
+				return columns;
+			}
+		}
+		for(GradableItem grade : gradableItemList){
+			String gradeTitle = grade.getTitle();
+			if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")
+					|| grade.getCategoryId() == null){
+				continue;
+			}
+			String typeId = "";
+			if(type.equals("TEST")){
+				typeId = "_12_1";
+			}
+			else if(type.equals("ASSIGNMENT")){
+				typeId = "_10_1";
+			}
+			if(type.equals("ALL")){
+				columns.add(gradeTitle);
+			}
+			else if(grade.getCategoryId().toExternalString().equals(typeId)){
+				columns.add(gradeTitle);
+			}
+		}
+		return columns;
+	}
+	
+	/**
+	 * Adds Gold to all students with passed parameter.
+	 */
+	public void addGoldToAll(String gold){
+		for(Student student : students){
+			adjustColumnGrade(Float.parseFloat(gold), "Gold", student);
+		}
+	}
+	
+	
+	/**
 	 * Adds the Gold Column to the Gradebook if it is not already there.
 	 * @throws PersistenceException
 	 */
@@ -170,7 +218,7 @@ public class BlackboardHandler {
 				return;
 			}
 		}
-		gradebookManager.createGradableItem("Gold", courseID, 9999.0D, null, null, "None", GradingSchemaDAO.get().getGradingSchemaByCourse(courseID).get(0).getTitle(), false);
+		gradebookManager.createGradableItem("Gold", courseID, 9999.0D, null, null, "None", GradingSchemaDAO.get().getGradingSchemaByCourse(courseID).get(1).getTitle(), false);
 	}
 	
 	/**
@@ -211,51 +259,56 @@ public class BlackboardHandler {
 			if(!isItemExpired(item.getExpirationDate()) && (item.getDuration() != 0 && item.getTimesUsed() > 0)){
 				List<GradeDetail> gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
 				for(GradeDetail gradeDetail : gradeDetails){
-					try {
-						String gradeTitle = gradeDetail.getGradableItem().getTitle();
-						if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
-							continue;
-						}
-						MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing);
-						Id attemptId = gradeDetail.getLastGradedAttemptId();
-						if(attemptId == null){
-							continue;
-						}
-						AttemptDetail attempt = AttemptDAO.get().loadById(attemptId);
-						Calendar attemptDate = attempt.getAttemptDate();
-						GradebookColumnPojo gradebookColumn = dbHandler.getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
-						if(gradebookColumn != null){
-							if(gradebookColumn.getName().equals(gradeTitle)){
-								if(gradebookColumn.getLastDate().before(attemptDate.getTime())){
-									attempt = adjustAttemptGrade(attempt, item);
-									gradeDetail.setManualGrade(attempt.getGrade());
-									gradeDetail.setManualScore(attempt.getScore());
-									System.out.println("UPDATING COLUMN " + gradeTitle);
-									gradebookManager.updateGrade(gradeDetail, true, courseID);
-									dbHandler.updateGradebookColumn(attempt, student.getStudentID());
-								}
-							}
-						}
-						else{
-							attempt = adjustAttemptGrade(attempt, item);
-							List<AttemptDetail> attemptList = gradeDetail.getAttempts();
-							attemptList.add(attempt);
-							gradeDetail.setAttempts(attemptList);
-							gradeDetail.setLastAttemptId(attempt.getId());
-							gradeDetail.setLastGradedAttemptId(attemptId);
-							System.out.println("UPDATING COLUMN " + gradeTitle);
-							gradebookManager.updateGrade(gradeDetail, true, courseID);
-							dbHandler.insertGradebookColumn(attempt, student.getStudentID());
-						}
-					} catch (KeyNotFoundException e) {
-						e.printStackTrace();
-					} catch (PersistenceRuntimeException e) {
-						e.printStackTrace();
-					} catch (BbSecurityException e) {
-						e.printStackTrace();
+					String gradeTitle = gradeDetail.getGradableItem().getTitle();
+					if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
+						continue;
+					}
+					adjustContinuousGrade(gradeDetail, student, item);
+				}
+			}
+		}
+	}
+	
+	private void adjustContinuousGrade(GradeDetail gradeDetail, Student student, Item item){
+		String gradeTitle = gradeDetail.getGradableItem().getTitle();
+		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing);
+		Id attemptId = gradeDetail.getLastGradedAttemptId();
+		if(attemptId == null){
+			return;
+		}
+		try{
+			GradebookColumnPojo gradebookColumn = dbHandler.getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
+			AttemptDetail attempt = AttemptDAO.get().loadById(attemptId);
+			Calendar attemptDate = attempt.getAttemptDate();
+			if(gradebookColumn != null){
+				if(gradebookColumn.getName().equals(gradeTitle)){
+					if(gradebookColumn.getLastDate().before(attemptDate.getTime())){
+						attempt = adjustAttemptGrade(attempt, item);
+						gradeDetail.setManualGrade(attempt.getGrade());
+						gradeDetail.setManualScore(attempt.getScore());
+						System.out.println("UPDATING COLUMN " + gradeTitle);
+						gradebookManager.updateGrade(gradeDetail, true, courseID);
+						dbHandler.updateGradebookColumn(attempt, student.getStudentID());
 					}
 				}
 			}
+			else{
+				attempt = adjustAttemptGrade(attempt, item);
+				List<AttemptDetail> attemptList = gradeDetail.getAttempts();
+				attemptList.add(attempt);
+				gradeDetail.setAttempts(attemptList);
+				gradeDetail.setLastAttemptId(attempt.getId());
+				gradeDetail.setLastGradedAttemptId(attemptId);
+				System.out.println("UPDATING COLUMN " + gradeTitle);
+				gradebookManager.updateGrade(gradeDetail, true, courseID);
+				dbHandler.insertGradebookColumn(attempt, student.getStudentID());
+			}
+		} catch (KeyNotFoundException e) {
+			e.printStackTrace();
+		} catch (PersistenceRuntimeException e) {
+			e.printStackTrace();
+		} catch (BbSecurityException e) {
+			e.printStackTrace();
 		}
 	}
 	
@@ -294,8 +347,9 @@ public class BlackboardHandler {
 		for(WaitListPojo waitList : itemStudent){
 			String studentID = waitList.getStudentID();
 			String itemName = waitList.getName();
+			String columnName = waitList.getColumnName();
 			ItemController itemController = new ItemController();
-			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
+			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID), columnName);
 			int primaryKey = waitList.getPrimaryKey();
 			dbController.removeItemWaitList(primaryKey);
 		}
@@ -436,20 +490,19 @@ public class BlackboardHandler {
 	 * @param student the @{link Student}
 	 * @return true, if successful
 	 */
-	private void activateItem(Item item, Student student) {
+	private void activateItem(Item item, Student student, String columnName) {
 		System.out.println("In activate Item");
-		AssessmentType type = item.getType(); // HOW WOULD IT DIFFERENTIATE BETWEEN EXAM AND ASSIGN... etc Also discuss structure and item attrs
 		AttributeAffected attribute = item.getAttributeAffected();
 		if(item.getDuration() == 0){
 			switch(attribute){
 			case GRADE:
-				adjustColumnGrade(item.getEffectMagnitude(), "Exam 1", student);
+				adjustColumnGrade(item.getEffectMagnitude(), columnName, student);
 				break;
 			case DUEDATE:
-				adjustColumnDueDate(item.getEffectMagnitude(), "Exam 1");
+				adjustColumnDueDate(item.getEffectMagnitude(), columnName);
 				break;
 			case NUMATTEMPTS:
-				adjustColumnNumberOfAttempts(item.getEffectMagnitude(), "Exam 1");
+				adjustColumnNumberOfAttempts(item.getEffectMagnitude(), columnName);
 				break;
 			}
 		}
@@ -544,17 +597,17 @@ public class BlackboardHandler {
 	 * @param item the item
 	 * @return true, if successful
 	 */
-	private boolean updateItem(Item item, Student student){
+	private boolean updateItem(Item item, Student student, String columnName){
 		MarketPlaceDAO dbController = new MarketPlaceDAO(testing);
 		if(item.getDuration() == 0){
 			System.out.println("Attempting to expire instant item");
-			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID())){
+			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID(), columnName)){
 				return true;
 			}
 		}
 		else if(item.getDuration() == -1){
 			System.out.println("Attempting to update passive item");
-			if(dbController.updateItemUsage(item.getName(), getStudent().getStudentID())){
+			if(dbController.updateItemUsage(item.getName(), getStudent().getStudentID(), columnName)){
 				return true;
 			}
 		}
@@ -564,7 +617,7 @@ public class BlackboardHandler {
 			if(item.getTimesUsed() == 0){
 				System.out.println("Setting used expiry date for item " + item.getName());
 				dbController.setUsedExpiryDate(item, student.getStudentID());
-				dbController.updateItemUsage(item.getName(), student.getStudentID());
+				dbController.updateItemUsage(item.getName(), student.getStudentID(), columnName);
 				return true;
 			}
 		}
