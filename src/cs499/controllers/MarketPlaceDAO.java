@@ -15,6 +15,7 @@ import cs499.itemHandler.Item.AssessmentType;
 import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
 import cs499.util.GradebookColumnPojo;
+import cs499.util.Setting;
 import cs499.util.WaitListPojo;
 
 /**
@@ -131,34 +132,59 @@ public class MarketPlaceDAO {
 	 * @return the list
 	 */
 	public List<Item> initilizeDatabase(String content){
-        Connection conn = null;
-        StringBuffer queryString = new StringBuffer("");
-        ItemController itemContr = getDataSeed(content);
-        try {
+		 Connection conn = null;
+	        StringBuffer queryString = new StringBuffer("");
+	        ItemController itemContr = getDataSeed(content);
+	        try {
+				conn = JSUBbDatabase.getConnection(testing);
+		        PreparedStatement insertQuery = null;
+		        queryString.append("INSERT INTO dt_item");
+	            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
+	            queryString.append(" VALUES (\'ITEM_INIT\', \'GRADE\', 0, 0, 0, 0, \'ALL\') ");
+	            insertQuery = conn.prepareStatement(queryString.toString());
+	            insertQuery.executeUpdate();
+		        for(Item item : itemContr.getItemList()){
+		        	queryString = new StringBuffer("");
+		            queryString.append("INSERT INTO dt_item");
+		            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
+		            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
+		            insertQuery = conn.prepareStatement(queryString.toString());
+		            insertQuery.setString(1, item.getName());
+		            insertQuery.setString(2, item.getAttributeAffected().toString());
+		            insertQuery.setInt(3, (int)item.getCost());
+		            insertQuery.setInt(4, item.getDuration());
+		            insertQuery.setInt(5, (int)item.getEffectMagnitude());
+		            insertQuery.setInt(6, (int)item.getSupply());
+		            insertQuery.setString(7, item.getType().toString());
+		            insertQuery.executeUpdate();
+		        }
+	            insertQuery.close();
+	        } catch (java.sql.SQLException sE){
+		    	sE.printStackTrace();
+		    } finally {
+		    	try {
+					if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+		    }
+        setDefaultSettings();
+        return itemContr.getItemList();
+	}
+	
+	private void setDefaultSettings() {
+		Connection conn = null;
+	    StringBuffer queryString = new StringBuffer("");
+	    try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("INSERT INTO dt_item");
-            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
-            queryString.append(" VALUES (\'ITEM_INIT\', \'GRADE\', 0, 0, 0, 0, \'ALL\') ");
-            insertQuery = conn.prepareStatement(queryString.toString());
-            insertQuery.executeUpdate();
-	        for(Item item : itemContr.getItemList()){
-	        	queryString = new StringBuffer("");
-	            queryString.append("INSERT INTO dt_item");
-	            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
-	            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
-	            insertQuery = conn.prepareStatement(queryString.toString());
-	            insertQuery.setString(1, item.getName());
-	            insertQuery.setString(2, item.getAttributeAffected().toString());
-	            insertQuery.setInt(3, (int)item.getCost());
-	            insertQuery.setInt(4, item.getDuration());
-	            insertQuery.setInt(5, (int)item.getEffectMagnitude());
-	            insertQuery.setInt(6, (int)item.getSupply());
-	            insertQuery.setString(7, item.getType().toString());
-	            insertQuery.executeUpdate();
-	        }
-            insertQuery.close();
-        } catch (java.sql.SQLException sE){
+	        queryString.append("INSERT INTO dt_settings");
+	        queryString.append("(name, value) ");
+	        queryString.append(" VALUES (\'visible_columns\', \'Y\') ");
+	        insertQuery = conn.prepareStatement(queryString.toString());
+	        insertQuery.executeUpdate();
+	        insertQuery.close();
+	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
 	    } finally {
 	    	try {
@@ -167,9 +193,93 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        return itemContr.getItemList();
 	}
 	
+	public void updateSetting(Setting setting) {
+		Connection conn = null;
+	    StringBuffer queryString = new StringBuffer("");
+	    try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("UPDATE dt_settings ");
+	        queryString.append("set value = ? where name = ? ");
+	        insertQuery = conn.prepareStatement(queryString.toString());
+	        insertQuery.setString(1, setting.getValue());
+	        insertQuery.setString(2, setting.getName());
+	        insertQuery.executeUpdate();
+	        insertQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	public List<Setting> getDefaultSettings(){
+		List<Setting> settings = new ArrayList<Setting>();
+		Connection conn = null;
+	    StringBuffer queryString = new StringBuffer("");
+	    PreparedStatement selectQuery = null;
+	    try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("SELECT name, value from dt_settings ");
+	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	Setting setting = new Setting();
+	        	setting.setName(rSet.getString("name"));
+	        	setting.setValue(rSet.getString("value"));
+	        	settings.add(setting);
+	        }
+	        rSet.close();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	    return settings;
+	}
+	
+	public Setting getSetting(String name){
+		Setting setting = new Setting();
+		Connection conn = null;
+	    StringBuffer queryString = new StringBuffer("");
+	    PreparedStatement selectQuery = null;
+	    try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("SELECT * from dt_settings where name = ?");
+	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, name);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	setting.setName(rSet.getString("name"));
+	        	setting.setValue(rSet.getString("value"));
+	        }
+	        System.out.println("Setting found:");
+	        System.out.println(setting);
+	        rSet.close();
+	        selectQuery.close();
+	    } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	    return setting;
+	}
+
 	/**
 	 * Gets the data seed from the resource file and converts it
 	 * to a list of @{link Item} in @{link ItemController}.
@@ -326,6 +436,33 @@ public class MarketPlaceDAO {
 			}
 	    }
         System.out.println("Deleted Gradebook Columns");
+        deleteSettings();
+	}
+	
+	/**
+	 * Truncates the Setting table.
+	 * It is only called bye {@link #emptyDatabase()}
+	 */
+	private void deleteSettings() {
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from dt_settings ");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Deleted Settings");
 	}
 
 	/**

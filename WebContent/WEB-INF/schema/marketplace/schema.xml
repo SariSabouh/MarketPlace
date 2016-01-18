@@ -62,6 +62,16 @@
       <columnref name="gradebook_pk1" />
     </primary-key>
   </table>
+  
+  <table name="dt_settings">
+  	<column name="settings_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence dt_item_seq which will be created automatically" />
+  	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Setting." />
+  	<column name="value" data-type="nvarchar(100)" nullable="false" identity="false" comment="Value of Setting." />
+  	
+  	<primary-key name="dt_settings_id" comment="Unique primary key">
+      <columnref name="settings_pk1" />
+    </primary-key>
+  </table>
 
 </schema>
 

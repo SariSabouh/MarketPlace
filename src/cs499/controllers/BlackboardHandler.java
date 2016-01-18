@@ -157,7 +157,9 @@ public class BlackboardHandler {
 	
 	
 	/**
-	 * Gets all Gradebook columns by type passed in
+	 * Gets all Gradebook columns by type passed in. It checks if the
+	 * Instructor specified in the Settings that the Columns have to be
+	 * visible to students or not.
 	 * 
 	 * @param itemName name of {@link Item}
 	 * @return List of all Gradebook Column names
@@ -188,12 +190,24 @@ public class BlackboardHandler {
 			else if(type.equals("ASSIGNMENT")){
 				typeId = "_10_1";
 			}
-			if(type.equals("ALL")){
-				columns.add(gradeTitle);
-			}
-			else if(grade.getCategoryId().toExternalString().equals(typeId)){
-				columns.add(gradeTitle);
-			}
+//			if(marketPlaceDAO.getSetting("visible_columns").getValue().equals("Y")){
+				if(grade.isVisibleToStudents()){
+					if(type.equals("ALL")){
+						columns.add(gradeTitle);
+					}
+					else if(grade.getCategoryId().toExternalString().equals(typeId)){
+						columns.add(gradeTitle);
+					}
+				}
+//			}
+//			else{
+//				if(type.equals("ALL")){
+//					columns.add(gradeTitle);
+//				}
+//				else if(grade.getCategoryId().toExternalString().equals(typeId)){
+//					columns.add(gradeTitle);
+//				}
+//			}
 		}
 		return columns;
 	}

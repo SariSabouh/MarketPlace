@@ -1,5 +1,14 @@
 jQuery.noConflict();
 (function($) {
+	var settingsNames = $("#settingNames").val();
+	var settingsValues = $("#settingValues").val();
+	for(var i = 0; i<settingsNames.length; i++){
+		if(settingsValues[i] == "Y"){
+			$('#visible_columns').prop('checked',true);
+			$('#visible_columns').attr('checked',true);
+		}
+	}
+	
 	$("#mySelect").hide();
 	$("#newAttributeAffected > option").each(function() {
 		$("#newAttributeAffected option:contains("+ this.text+ ")").hide();
@@ -170,5 +179,24 @@ jQuery.noConflict();
     		}
 	    });
 	});
+    $('.CheckBoxes').change(function() {
+        var $check = $(this);
+        var flag = "N";
+        if ($check.prop('checked')) {
+        	flag = "Y";
+        }
+        $.ajax({
+	    	url: $("#checkBoxesURL").val(),
+    		type: "GET",
+    		data: {name: $(this).attr("id"), value: flag},
+    		success: function(result){
+    			alert("Setting Updated");
+    			location.reload();
+    		},
+    		error: function(result){
+    			alert("Setting Updating Failed. Contact Admin.");
+    		}
+	    });
+    });
 })
 (jQuery);

@@ -12,6 +12,7 @@
 <%@page import="cs499.controllers.*"%>
 <%@page import="cs499.itemHandler.Item"%>
 <%@page import="cs499.util.Student"%>
+<%@page import="cs499.util.Setting"%>
 <%@page import="java.io.InputStream"%>
 <%@page import="blackboard.platform.plugin.PlugInUtil"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
@@ -65,6 +66,12 @@
 	pageContext.setAttribute("allItems", allItems);
 	List<String> columnNames = bbHandler.getAllColumnsByType("ALL");
 	pageContext.setAttribute("columnNames", columnNames);
+	List<String> settingNames = new ArrayList<String>();
+	List<String> settingValues = new ArrayList<String>();
+	for(Setting setting : dbController.getDefaultSettings()){
+		settingNames.add(setting.getName());
+		settingValues.add(setting.getValue());
+	}
 	String getDurationURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetDurationUtil.jsp");
 	String addItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddItemUtil.jsp");
 	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/BuyItemUtil.jsp");
@@ -72,6 +79,7 @@
 	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/TRUNCATE.jsp");
 	String getListURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetListUtil.jsp");
 	String addGoldURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddGoldUtil.jsp");
+	String checkBoxesURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/CheckBoxUtil.jsp");
 %>
 
 <!doctype html>
@@ -96,6 +104,8 @@
 <body>
 
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
+<input type="hidden" id="settingNames" name="settingNames" value="<%=settingNames%>"/>
+<input type="hidden" id="settingValues" name="settingValues" value="<%=settingValues%>"/>
 <input type="hidden" id="columnNames" name="columnNames" value="${columnNames}"/>
 <input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
 <input type="hidden" id="addItemURL" name="addItemURL" value="<%=addItemURL%>"/>
@@ -104,6 +114,7 @@
 <input type="hidden" id="getListURL" name="getListURL" value="<%=getListURL%>"/>
 <input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
 <input type="hidden" id="addGoldURL" name="addGoldURL" value="<%=addGoldURL%>"/>
+<input type="hidden" id="checkBoxesURL" name="checkBoxesURL" value="<%=checkBoxesURL%>"/>
 
 	<div id="tabs">
 
@@ -205,6 +216,9 @@
 			<p></p>
 			<input id="addGold" type="button" value="Add Gold To All">
 			<input type="text" id="addGoldField"/>
+			<p></p>
+			<input type="checkbox" class="CheckBoxes" id="visible_columns"/>
+			<span>Only Show Columns Visible To Students While Using Items</span>
 		</div>
 
 
