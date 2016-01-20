@@ -264,8 +264,7 @@ public class MarketPlaceDAO {
 	        	setting.setName(rSet.getString("name"));
 	        	setting.setValue(rSet.getString("value"));
 	        }
-	        System.out.println("Setting found:");
-	        System.out.println(setting);
+	        System.out.println("Setting found: " + setting);
 	        rSet.close();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -932,7 +931,7 @@ public class MarketPlaceDAO {
 	 * @param studentID the student id
 	 * 
 	 */
-	public void insertGradebookColumn(AttemptDetail attempt, String studentID) {
+	public void insertGradebookColumn(int grade, String gradeTitle, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         PreparedStatement selectQuery = null;
@@ -942,13 +941,13 @@ public class MarketPlaceDAO {
 	        queryString.append("VALUES (?, ?, ?, ?)");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(2, new DateTime().toString());
-	        selectQuery.setInt(3, (int) attempt.getScore());
+	        selectQuery.setInt(3, grade);
 	        selectQuery.setString(4, studentID);
 	        if(testing){
 	        	selectQuery.setString(1, "TEST");
 	        }
 	        else{
-	        	selectQuery.setString(1, attempt.getGradebookItem().getTitle());
+	        	selectQuery.setString(1, gradeTitle);
 	        }
 	        selectQuery.executeUpdate();
 	        selectQuery.close();

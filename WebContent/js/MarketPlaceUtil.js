@@ -1,11 +1,18 @@
 jQuery.noConflict();
 (function($) {
+	
 	var settingsNames = $("#settingNames").val();
+	settingsNames = settingsNames.replace('[', '');
+	settingsNames = settingsNames.replace(']', '');
+	var settingsNamesArray = settingsNames.split(',');
 	var settingsValues = $("#settingValues").val();
-	for(var i = 0; i<settingsNames.length; i++){
-		if(settingsValues[i] == "Y"){
-			$('#visible_columns').prop('checked',true);
-			$('#visible_columns').attr('checked',true);
+	settingsValues = settingsValues.replace('[', '');
+	settingsValues = settingsValues.replace(']', '');
+	var settingsValuesArray = settingsValues.split(',');
+	for(var i = 0; i<settingsNamesArray.length; i++){
+		if(settingsValuesArray[i] == "Y"){
+			var settingName = '#'+settingsNamesArray[i];
+			$(settingName).prop('checked',true);
 		}
 	}
 	
@@ -24,6 +31,7 @@ jQuery.noConflict();
     }
     else{
     	$('#tabs > ul li:has(a[href="#tabs-3"])').hide();
+    	$('#tabs > ul li:has(a[href="#tabs-4"])').hide();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
@@ -70,14 +78,6 @@ jQuery.noConflict();
     		}
 	    });
 	});
-    $(".Items").hover(function() {
-        ($(this).data("tooltip")).css({
-            left: e.pageX + 1,
-            top: e.pageY + 1
-        }).stop().show(100);
-    }, function() {
-        $((this).data("tooltip")).hide();
-    });
     $('input[type="radio"]').click(function(){
     	$("#mySelect").hide();
     	$("#mySelect > option").each(function() {
@@ -97,7 +97,7 @@ jQuery.noConflict();
     			for (var i = 0; i < columnNames.length; i++) {
     				var exists = false;
     				for(var k = 0; k < results.length; k++) {
-    					if (columnNames[i].trim() == results[k].trim() || results[k].trim() == "ALL") {
+    					if (columnNames[i].trim() == results[k].trim()) {
     						exists = true;
     						break;
     					}
@@ -106,6 +106,9 @@ jQuery.noConflict();
     					var trimmedName = columnNames[i].trim();
     					$("#mySelect option:contains("+ trimmedName +")").hide();
     				}
+    			}
+    			if(results[0].trim() == "ALL"){
+    				$("#mySelect option:contains(ALL)").show();
     			}
                 $("#mySelect").show();
     		},
