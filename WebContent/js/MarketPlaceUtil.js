@@ -64,12 +64,12 @@ jQuery.noConflict();
     		}
 	    });
 	});
-    $(".MyItems").click(function() {
+    $("#useItem").click(function() {
     	var nameItemRadio = $('input[name=itemRadio]:checked', '#myRadioButtons').parent().text().trim();
 		$.ajax({
 	    	url: $("#useItemURL").val(),
     		type: "GET",
-    		data: {columnName: $(this).text().trim(), itemName: nameItemRadio},
+    		data: {columnName: $('#mySelect :selected').text().trim(), itemName: nameItemRadio},
     		success: function(result){
     			alert("Item Used");
     		},
@@ -78,7 +78,7 @@ jQuery.noConflict();
     		}
 	    });
 	});
-    $('input[type="radio"]').click(function(){
+    $('input[name="itemRadio"]').click(function(){
     	$("#mySelect").hide();
     	$("#mySelect > option").each(function() {
     		$("#mySelect option:contains("+ this.text+ ")").show();

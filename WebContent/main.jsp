@@ -143,16 +143,17 @@
 			<p></p>
 			
 			<div id="columnList">
-			  <p>Choose Item To Use. Then...</p>
-              <label>Please Select From the List. After You Choose It Will Get Activated: 
+              <label>Please Select Item From the List: 
                 <select id="mySelect">
                 	<option>NONE</option>
 	                <c:forEach items="${columnNames}" var="name">
-						<option class="MyItems">${name}</option>
+						<option>${name}</option>
 					</c:forEach>
 					<option>ALL</option>
                 </select>
-              </label>
+                </label>
+              <br/>
+              <input id="useItem" type="button" value="Use Item">
             </div>
 						
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
