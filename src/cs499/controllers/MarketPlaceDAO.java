@@ -46,7 +46,7 @@ public class MarketPlaceDAO {
         	conn = JSUBbDatabase.getConnection(testing);
 	        queryString.append("SELECT * ");
 	        queryString.append("FROM ");
-	        queryString.append("dt_item");
+	        queryString.append("jsu_item");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
@@ -90,7 +90,7 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        queryString.append("SELECT * ");
 	        queryString.append("FROM ");
-	        queryString.append("dt_item ");
+	        queryString.append("jsu_item ");
 	        queryString.append("WHERE name = ?");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, itemName);
@@ -138,14 +138,14 @@ public class MarketPlaceDAO {
 	        try {
 				conn = JSUBbDatabase.getConnection(testing);
 		        PreparedStatement insertQuery = null;
-		        queryString.append("INSERT INTO dt_item");
+		        queryString.append("INSERT INTO jsu_item");
 	            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
 	            queryString.append(" VALUES (\'ITEM_INIT\', \'GRADE\', 0, 0, 0, 0, \'ALL\') ");
 	            insertQuery = conn.prepareStatement(queryString.toString());
 	            insertQuery.executeUpdate();
 		        for(Item item : itemContr.getItemList()){
 		        	queryString = new StringBuffer("");
-		            queryString.append("INSERT INTO dt_item");
+		            queryString.append("INSERT INTO jsu_item");
 		            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
 		            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
 		            insertQuery = conn.prepareStatement(queryString.toString());
@@ -178,7 +178,7 @@ public class MarketPlaceDAO {
 	    try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("INSERT INTO dt_settings");
+	        queryString.append("INSERT INTO jsu_settings");
 	        queryString.append("(name, value) ");
 	        queryString.append(" VALUES (\'visible_columns\', \'Y\') ");
 	        insertQuery = conn.prepareStatement(queryString.toString());
@@ -201,7 +201,7 @@ public class MarketPlaceDAO {
 	    try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("UPDATE dt_settings ");
+	        queryString.append("UPDATE jsu_settings ");
 	        queryString.append("set value = ? where name = ? ");
 	        insertQuery = conn.prepareStatement(queryString.toString());
 	        insertQuery.setString(1, setting.getValue());
@@ -226,7 +226,7 @@ public class MarketPlaceDAO {
 	    PreparedStatement selectQuery = null;
 	    try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        queryString.append("SELECT name, value from dt_settings ");
+	        queryString.append("SELECT name, value from jsu_settings ");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
@@ -256,7 +256,7 @@ public class MarketPlaceDAO {
 	    PreparedStatement selectQuery = null;
 	    try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        queryString.append("SELECT * from dt_settings where name = ?");
+	        queryString.append("SELECT * from jsu_settings where name = ?");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, name);
 	        ResultSet rSet = selectQuery.executeQuery();
@@ -304,9 +304,9 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("INSERT INTO dt_purchaseinfo");
-            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiration_date, new, times_used, column_name) ");
-            queryString.append(" VALUES (?, (select item_pk1 from dt_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0, \'NA\') ");
+	        queryString.append("INSERT INTO jsu_purchaseinfo");
+            queryString.append("(student_id, item_pk1, purchase_date, used_date, expiration_date, new, times_used, gradebook_column_name) ");
+            queryString.append(" VALUES (?, (select item_pk1 from jsu_item where name = ?), ?, \'NOT_USED\', \'NA\', \'Y\', 0, \'NA\') ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.setString(1, studentID);
             insertQuery.setString(2, itemName);
@@ -339,7 +339,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_purchaseinfo ");
+	        queryString.append("delete from jsu_purchaseinfo ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.executeUpdate();
             insertQuery.close();
@@ -366,7 +366,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_waitlist ");
+	        queryString.append("delete from jsu_waitlist ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.executeUpdate();
             insertQuery.close();
@@ -393,7 +393,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_item ");
+	        queryString.append("delete from jsu_item ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.executeUpdate();
             insertQuery.close();
@@ -420,7 +420,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_gradebook ");
+	        queryString.append("delete from jsu_gradebook ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.executeUpdate();
             insertQuery.close();
@@ -447,7 +447,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_settings ");
+	        queryString.append("delete from jsu_settings ");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.executeUpdate();
             insertQuery.close();
@@ -477,8 +477,8 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select name from dt_item where item_pk1 in (");
-            queryString.append("select item_pk1 from dt_purchaseinfo where new = \'Y\' and student_id = ?)");
+	        queryString.append("select name from jsu_item where item_pk1 in (");
+            queryString.append("select item_pk1 from jsu_purchaseinfo where new = \'Y\' and student_id = ?)");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, studentID);
 	        ResultSet rSet = selectQuery.executeQuery();
@@ -490,7 +490,7 @@ public class MarketPlaceDAO {
 	        }
 	        if(notEmpty){
 		        queryString = new StringBuffer("");
-		        queryString.append("update dt_purchaseinfo ");
+		        queryString.append("update jsu_purchaseinfo ");
 	            queryString.append("set new = \'N\' where new = \'Y\' and student_id = ?");
 	            selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 		        selectQuery.setString(1, studentID);
@@ -522,7 +522,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select a.name, b.expiration_date, b.times_used from dt_item a, dt_purchaseinfo b ");
+	        queryString.append("select a.name, b.expiration_date, b.times_used from jsu_item a, jsu_purchaseinfo b ");
             queryString.append("where b.student_id = ? and a.item_pk1 = b.item_pk1");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, studentID);
@@ -577,9 +577,9 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used+1, column_name = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        queryString.append("update jsu_purchaseinfo ");
+	        queryString.append("set used_date = ?, expiration_date = ?, times_used = times_used+1, gradebook_column_name = ? where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from jsu_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, new DateTime().toString());
@@ -600,7 +600,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        addToWaitList(name, studentID, columnName);
+        adjsuoWaitList(name, studentID, columnName);
 		return true;
 	}
 	
@@ -610,13 +610,13 @@ public class MarketPlaceDAO {
 	 * @param name the @{link Item} name
 	 * @param studentID the @{link Student} id
 	 */
-	private void addToWaitList(String name, String studentID, String columnName){
+	private void adjsuoWaitList(String name, String studentID, String columnName){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Inserting item in waiting list: " + studentID);
-	        queryString.append("insert into dt_waitlist(student_id, name, column_name) ");
+	        queryString.append("insert into jsu_waitlist(student_id, item_name, gradebook_column_name) ");
 	        queryString.append("values(?, ?, ?)");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(2, name);
@@ -647,7 +647,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select * from dt_waitlist");
+	        queryString.append("select * from jsu_waitlist");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
@@ -674,7 +674,7 @@ public class MarketPlaceDAO {
 	/**
 	 * Removes the @{link Item} from wait list.
 	 *
-	 * @param primaryKey the primary key of @{link Item} from dt_purchaseinfo table
+	 * @param primaryKey the primary key of @{link Item} from jsu_purchaseinfo table
 	 */
 	public void removeItemWaitList(int primaryKey) {
         Connection conn = null;
@@ -682,7 +682,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("delete from dt_waitlist ");
+	        queryString.append("delete from jsu_waitlist ");
             queryString.append("where waitlist_pk1 = ?");
             insertQuery = conn.prepareStatement(queryString.toString());
             insertQuery.setInt(1, primaryKey);
@@ -714,9 +714,9 @@ public class MarketPlaceDAO {
         	setLastUsedDate(name, studentID);
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
-	        queryString.append("set times_used = times_used+1, column_name = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        queryString.append("update jsu_purchaseinfo ");
+	        queryString.append("set times_used = times_used+1, gradebook_column_name = ? where item_pk1 = ( ");
+	        queryString.append("select item_pk1 from jsu_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, name);
 	        selectQuery.setString(2, columnName);
@@ -735,7 +735,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        addToWaitList(name, studentID, columnName);
+        adjsuoWaitList(name, studentID, columnName);
 		return true;
 	}
 	
@@ -753,9 +753,9 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("update jsu_purchaseinfo ");
 	        queryString.append("set used_date = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        queryString.append("select item_pk1 from jsu_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, new DateTime().toString());
             selectQuery.setString(2, name);
@@ -786,7 +786,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
-	        queryString.append("select count(*) as times from dt_purchaseinfo where item_pk1 = (select item_pk1 from dt_item where name = ?)");
+	        queryString.append("select count(*) as times from jsu_purchaseinfo where item_pk1 = (select item_pk1 from jsu_item where name = ?)");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             selectQuery.setString(1, item.getName());
 	        ResultSet rSet = selectQuery.executeQuery();
@@ -820,9 +820,9 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update dt_purchaseinfo ");
+	        queryString.append("update jsu_purchaseinfo ");
 	        queryString.append("set used_date = ?, expiration_date = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from dt_item where name = ?) and student_id = ?");
+	        queryString.append("select item_pk1 from jsu_item where name = ?) and student_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        DateTime date = new DateTime();
             selectQuery.setString(1, date.toString());
@@ -853,7 +853,7 @@ public class MarketPlaceDAO {
         	conn = JSUBbDatabase.getConnection(testing);
 	        queryString.append("SELECT * ");
 	        queryString.append("FROM ");
-	        queryString.append("dt_gradebook where student_id = ? and name = ?");
+	        queryString.append("jsu_gradebook where student_id = ? and gradebook_column_name = ?");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, studentID);
 	        selectQuery.setString(2, title);
@@ -893,9 +893,9 @@ public class MarketPlaceDAO {
         PreparedStatement selectQuery = null;
         try {
         	conn = JSUBbDatabase.getConnection(testing);
-        	queryString.append("update dt_gradebook ");
+        	queryString.append("update jsu_gradebook ");
 	        queryString.append("set last_date = ?, grade = ? ");
-	        queryString.append("where name = ? and student_id = ?");
+	        queryString.append("where gradebook_column_name = ? and student_id = ?");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, new DateTime().toString());
 	        selectQuery.setInt(2, (int) attempt.getScore());
@@ -935,7 +935,7 @@ public class MarketPlaceDAO {
         PreparedStatement selectQuery = null;
         try {
         	conn = JSUBbDatabase.getConnection(testing);
-        	queryString.append("insert into dt_gradebook(name, last_date, grade, student_id) ");
+        	queryString.append("insert into jsu_gradebook(gradebook_column_name, last_date, grade, student_id) ");
 	        queryString.append("VALUES (?, ?, ?, ?)");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(2, new DateTime().toString());
@@ -971,7 +971,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("INSERT INTO dt_item");
+	        queryString.append("INSERT INTO jsu_item");
             queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type ) ");
             queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?) ");
             insertQuery = conn.prepareStatement(queryString.toString());
@@ -1007,7 +1007,7 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement insertQuery = null;
-	        queryString.append("UPDATE dt_item ");
+	        queryString.append("UPDATE jsu_item ");
             queryString.append("set attribute_affected = ?, cost = ?, duration = ?, effect_magnitude = ?, supply = ?, type = ? ");
             queryString.append("where name = ?");
             insertQuery = conn.prepareStatement(queryString.toString());

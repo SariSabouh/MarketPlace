@@ -10,8 +10,8 @@
 			<bbversion value="9.0.0"/>
 		</requires>
 		<vendor>
-			<id value="dt"/>
-			<name value="David Thornton"/>
+			<id value="jsu"/>
+			<name value="Jacksonville State University"/>
 			<url value="http://www.jsu.edu/mcis/people/thornton.html" />
 			<description value="This module displays the Market Place for possible items to be purchased." />
 		</vendor>
