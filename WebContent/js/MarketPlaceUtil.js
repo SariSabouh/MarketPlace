@@ -35,13 +35,13 @@ jQuery.noConflict();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
-    $(".Items").click(function() {
+    $("#buyItem").click(function() {
 		var student = $("#isStudent").val();
 		if(student == "true"){
 			$.ajax({
 		    	url: $("#buyItemURL").val(),
 	    		type: "GET",
-	    		data: {itemName: $(this).text()},
+	    		data: {itemName: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val()},
 	    		success: function(result){
 	    			alert("Item Purchased");
 	    		},
@@ -256,6 +256,52 @@ jQuery.noConflict();
     			alert("Failed To prefill Item info. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
     		}
 	    });
+    });
+    $('input[name="buyItemRadio"]').click(function(){
+        $.ajax({
+	    	url: $("#getItemDescriptionURL").val(),
+    		type: "GET",
+    		dataType: "json",
+    		contentType:"application/json",
+    		data: {name : $(this).attr("value")},
+    		success: function(results){
+    			$('#itemDescription').val(results[0]);
+    		},
+    		error: function(result){
+    			alert("Could Not Get Information About The Item. Please Contact Admin.");
+    		}
+	    });
+    });
+    $("#directEditItem").click(function () {
+    	$.ajax({
+	    	url: $("#getItemInfoURL").val(),
+    		type: "GET",
+    		data: {name: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val()},
+    		dataType: "json",
+    		success: function(results){
+    			var index = $('#tabs a[href="#tabs-5"]').parent().index();
+    			$('#tabs').tabs('select', index);
+    			$('#editItemCost').val(results[0]);
+    			var duration = results[1];
+    			if(duration == 0){
+    				duration = "ONCE";
+    			}
+    			else if(duration == -1){
+    				duration = "PASSIVE";
+    			}
+    			else{
+    				duration = "CONTINUOUS";
+    			}
+    			$("#editItemDuration").val(duration);
+    			$('#editItemMagnitude').val(results[2]);
+    			$('#editItemSupply').val(results[3]);
+    			$('#editAttributeAffected').val(results[4]);
+    			$('#editItemAssessment').val(results[5]);
+    		},
+    		error: function(result){
+    			alert("Failed To prefill Item info. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
+    		}
+    	});
     });
 })
 (jQuery);

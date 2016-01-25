@@ -224,12 +224,19 @@ public class Item implements Serializable{
 	 */
 	@Override
 	public String toString(){
-		String output = "Duration: " + duration
-				+ ", Cost: " + cost
-				+ ", Supply: " + supply
-				+ ", Attribute Affected: " + attributeAffected
-				+ ", Effect Mangnitue: " + effectMagnitude
-				+ ", Type: " + type;
+		String dur = "CONTINUOUS";
+		if(duration == 0){
+			dur = "ONCE";
+		}
+		else if(duration == -1){
+			dur = "PASSIVE";
+		}
+		String output = "Item Duration is " + dur;
+		if(dur.equals("CONTINUOUS")){
+			output += " with a period of " + duration + " hours.";
+		}
+		output	+= "It costs " + cost + " Gold. The store only has " + supply+ " units available. ";
+		output  += "It only affects " + attributeAffected + " by " + effectMagnitude + ". And it can only target " + type;
 		return output;
 	}
 	

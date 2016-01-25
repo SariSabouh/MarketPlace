@@ -72,16 +72,18 @@
 		settingNames.add(setting.getName());
 		settingValues.add(setting.getValue());
 	}
-	String getDurationURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetDurationUtil.jsp");
-	String addItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddItemUtil.jsp");
-	String editItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/EditItemUtil.jsp");
-	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/BuyItemUtil.jsp");
-	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/UseItemUtil.jsp");
-	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/TRUNCATE.jsp");
-	String getListURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetListUtil.jsp");
-	String addGoldURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddGoldUtil.jsp");
-	String checkBoxesURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/CheckBoxUtil.jsp");
-	String getItemInfoURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
+	String getDurationURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetDurationUtil.jsp");
+	String addItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/AddItemUtil.jsp");
+	String editItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/EditItemUtil.jsp");
+	String buyItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/BuyItemUtil.jsp");
+	String useItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/UseItemUtil.jsp");
+	String TRUNCATEURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/TRUNCATE.jsp");
+	String getListURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetListUtil.jsp");
+	String addGoldURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/AddGoldUtil.jsp");
+	String checkBoxesURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/CheckBoxUtil.jsp");
+	String getItemInfoURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
+	String getItemDescriptionURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemDescriptionUtil.jsp");
+	
 %>
 
 <!doctype html>
@@ -119,6 +121,7 @@
 <input type="hidden" id="addGoldURL" name="addGoldURL" value="<%=addGoldURL%>"/>
 <input type="hidden" id="checkBoxesURL" name="checkBoxesURL" value="<%=checkBoxesURL%>"/>
 <input type="hidden" id="getItemInfoURL" name="getItemInfoURL" value="<%=getItemInfoURL%>"/>
+<input type="hidden" id="getItemDescriptionURL" name="getItemDescriptionURL" value="<%=getItemDescriptionURL%>"/>
 
 	<div id="tabs">
 
@@ -169,16 +172,22 @@
 		</div>
 
 		<div id="tabs-2">
-		
-			<c:forEach items="${allItems}" var="item">  
-				<TR>  
-				    <td><a title="${item}" class="Items" href="#" 
-						    style="background-color:#FFFFFF;color:#000000;text-decoration:none">${item.name}</a></td>
-				    <td><a style="position: absolute; right: 0; text-align:right;">Cost: ${item.cost}</a></td>
-				    <td><p></p></td>
-				</TR>
-			</c:forEach>
-
+			<div style="float: left; width: 70%; border-style: double;">
+				<form id="storeRadioButtons">
+					<c:forEach items="${allItems}" var="item">  
+						<TR>
+						    <td><label><input type="radio" name="buyItemRadio">${item.name}</label></td>
+						    <td><a style="float: right;">Cost: ${item.cost}</a></td>
+						    <td><p></p></td>
+						</TR>
+					</c:forEach>
+				</form>
+			</div>
+			<div style="float: left; width: 27%; border-style: dotted;">
+  				<p id="itemDescription" style="font-size:50%;"></p>
+			</div>
+			<input id="buyItem" type="button" value="Buy Item">
+			<input id="directEditItem" type="button" value="Edit Item">
 		</div>
 		
 		<div id="tabs-3">
