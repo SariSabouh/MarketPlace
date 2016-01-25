@@ -20,7 +20,6 @@ jQuery.noConflict();
 	$("#newAttributeAffected > option").each(function() {
 		$("#newAttributeAffected option:contains("+ this.text+ ")").hide();
 	});
-	$("#durationSpan").hide();
 	$("#customDuration").hide();
 	var student = $("#isStudent").val();
     $( "#tabs" ).tabs();
@@ -32,6 +31,7 @@ jQuery.noConflict();
     else{
     	$('#tabs > ul li:has(a[href="#tabs-3"])').hide();
     	$('#tabs > ul li:has(a[href="#tabs-4"])').hide();
+    	$('#tabs > ul li:has(a[href="#tabs-5"])').hide();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
@@ -72,6 +72,7 @@ jQuery.noConflict();
     		data: {columnName: $('#mySelect :selected').text().trim(), itemName: nameItemRadio},
     		success: function(result){
     			alert("Item Used");
+    			location.reload();
     		},
     		error: function(result){
     			alert("Item Use Failed. Check Option Selected.");
@@ -122,6 +123,9 @@ jQuery.noConflict();
     	$("#newAttributeAffected > option").each(function() {
     		$("#newAttributeAffected option:contains("+ this.text+ ")").hide();
     	});
+    	$("#editAttributeAffected > option").each(function() {
+    		$("#editAttributeAffected option:contains("+ this.text+ ")").hide();
+    	});
 		$.ajax({
 	    	url: $("#getDurationURL").val(),
     		type: "GET",
@@ -131,14 +135,15 @@ jQuery.noConflict();
 					if ($("#newAttributeAffected option:contains("+ results[k].trim() +")")) {
 						$("#newAttributeAffected option:contains("+ results[k].trim() +")").show();
 					}
+					if ($("#editAttributeAffected option:contains("+ results[k].trim() +")")) {
+						$("#editAttributeAffected option:contains("+ results[k].trim() +")").show();
+					}
 				}
                 $("#newAttributeAffected").show();
                 if($('#newItemDuration option:selected' ).text() == "CONTINUOUS"){
-                	$("#durationSpan").show();
                 	$("#customDuration").show();
                 }
                 else{
-                	$("#durationSpan").hide();
                 	$("#customDuration").hide();
                 }
     		},
@@ -198,6 +203,57 @@ jQuery.noConflict();
     		},
     		error: function(result){
     			alert("Setting Updating Failed. Contact Admin.");
+    		}
+	    });
+    });
+    $("#editItem").click(function () {
+        $("#address").focus();
+        var duration = $('#editItemDuration option:selected' ).text();
+        if(duration == "CONTINUOUS"){
+        	duration = $('#editCustomDuration').val();
+        }
+        $.ajax({
+	    	url: $("#editItemURL").val(),
+    		type: "GET",
+    		data: {name: $('#editItemName').val(), cost: $('#editItemCost').val(), attributeAffected: $('#editAttributeAffected option:selected' ).text(),
+    			   effectMagnitude: $('#editItemMagnitude').val(), supply: $('#editItemSupply').val(),
+    			   assessmentType: $('#editItemAssessment option:selected' ).text(), duration: duration},
+    		success: function(results){
+				alert("Item updated");
+				location.reload();
+    		},
+    		error: function(result){
+    			alert("Failed To Edit Item. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
+    		}
+	    });
+    });
+    
+    $(".EditItemClass").click(function () {
+        $.ajax({
+	    	url: $("#getItemInfoURL").val(),
+    		type: "GET",
+    		data: {name: $('#editItemName option:selected' ).text()},
+    		dataType: "json",
+    		success: function(results){
+    			$('#editItemCost').val(results[0]);
+    			var duration = results[1];
+    			if(duration == 0){
+    				duration = "ONCE";
+    			}
+    			else if(duration == -1){
+    				duration = "PASSIVE";
+    			}
+    			else{
+    				duration = "CONTINUOUS";
+    			}
+    			$("#editItemDuration").val(duration);
+    			$('#editItemMagnitude').val(results[2]);
+    			$('#editItemSupply').val(results[3]);
+    			$('#editAttributeAffected').val(results[4]);
+    			$('#editItemAssessment').val(results[5]);
+    		},
+    		error: function(result){
+    			alert("Failed To prefill Item info. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
     		}
 	    });
     });

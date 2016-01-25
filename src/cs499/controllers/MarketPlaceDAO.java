@@ -264,7 +264,6 @@ public class MarketPlaceDAO {
 	        	setting.setName(rSet.getString("name"));
 	        	setting.setValue(rSet.getString("value"));
 	        }
-	        System.out.println("Setting found: " + setting);
 	        rSet.close();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -486,7 +485,6 @@ public class MarketPlaceDAO {
 	        boolean notEmpty = false;
 	        while(rSet.next()){
 	        	String itemName = rSet.getString("name");
-	        	System.out.println("Item found: " + itemName);
 	        	itemList.add(itemName);
 	        	notEmpty = true;
 	        }
@@ -962,6 +960,11 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Adds new {@link Item} to the Database.
+	 * 
+	 * @param {@link Item}
+	 */
 	public void addItem(Item item){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -979,6 +982,42 @@ public class MarketPlaceDAO {
             insertQuery.setInt(5, (int)item.getEffectMagnitude());
             insertQuery.setInt(6, (int)item.getSupply());
             insertQuery.setString(7, item.getType().toString());
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+	}
+	
+	
+	/**
+	 * 
+	 * Edits {@link Item} information and sets it to the Database.
+	 * @param {@link Item}
+	 */
+	public void editItem(Item item){
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("UPDATE dt_item ");
+            queryString.append("set attribute_affected = ?, cost = ?, duration = ?, effect_magnitude = ?, supply = ?, type = ? ");
+            queryString.append("where name = ?");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setString(7, item.getName());
+            insertQuery.setString(1, item.getAttributeAffected().toString());
+            insertQuery.setInt(2, (int)item.getCost());
+            insertQuery.setInt(3, item.getDuration());
+            insertQuery.setInt(4, (int)item.getEffectMagnitude());
+            insertQuery.setInt(5, (int)item.getSupply());
+            insertQuery.setString(6, item.getType().toString());
             insertQuery.executeUpdate();
             insertQuery.close();
         } catch (java.sql.SQLException sE){

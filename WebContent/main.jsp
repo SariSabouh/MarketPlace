@@ -74,12 +74,14 @@
 	}
 	String getDurationURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetDurationUtil.jsp");
 	String addItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddItemUtil.jsp");
+	String editItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/EditItemUtil.jsp");
 	String buyItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/BuyItemUtil.jsp");
 	String useItemURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/UseItemUtil.jsp");
 	String TRUNCATEURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/TRUNCATE.jsp");
 	String getListURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetListUtil.jsp");
 	String addGoldURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/AddGoldUtil.jsp");
 	String checkBoxesURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/CheckBoxUtil.jsp");
+	String getItemInfoURL = PlugInUtil.getUri("dt", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
 %>
 
 <!doctype html>
@@ -109,12 +111,14 @@
 <input type="hidden" id="columnNames" name="columnNames" value="${columnNames}"/>
 <input type="hidden" id="buyItemURL" name="buyItemURL" value="<%=buyItemURL%>"/>
 <input type="hidden" id="addItemURL" name="addItemURL" value="<%=addItemURL%>"/>
+<input type="hidden" id="editItemURL" name="editItemURL" value="<%=editItemURL%>"/>
 <input type="hidden" id="getDurationURL" name="getDurationURL" value="<%=getDurationURL%>"/>
 <input type="hidden" id="useItemURL" name="useItemURL" value="<%=useItemURL%>"/>
 <input type="hidden" id="getListURL" name="getListURL" value="<%=getListURL%>"/>
 <input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
 <input type="hidden" id="addGoldURL" name="addGoldURL" value="<%=addGoldURL%>"/>
 <input type="hidden" id="checkBoxesURL" name="checkBoxesURL" value="<%=checkBoxesURL%>"/>
+<input type="hidden" id="getItemInfoURL" name="getItemInfoURL" value="<%=getItemInfoURL%>"/>
 
 	<div id="tabs">
 
@@ -125,6 +129,8 @@
 			<li><a href="#tabs-2">Market Place</a></li>
 			
 			<li><a href="#tabs-3">Add Item</a></li>
+			
+			<li><a href="#tabs-5">Edit Item</a></li>
 			
 			<li><a href="#tabs-4">Settings</a></li>
 
@@ -220,6 +226,49 @@
 			<p></p>
 			<input type="checkbox" class="CheckBoxes" id="visible_columns"/>
 			<span>Only Show Columns Visible To Students While Using Items</span>
+		</div>
+		
+		<div id="tabs-5">
+
+			<p>Edit Item</p>
+			Name: <select id="editItemName">
+                	<option>NONE</option>
+	                <c:forEach items="${allItems}" var="item">
+						<option  class="EditItemClass">${item.name}</option>
+					</c:forEach>
+                </select>
+			<p></p>
+			<input value="Duration Length:0" type="text" id="editCustomDuration" style="position: absolute; right:0; text-align:right;">
+			Duration: 
+            <select id="editItemDuration">
+            	<option class="Duration">NONE</option>
+           		<option class="Duration">ONCE</option>
+	            <option class="Duration">CONTINUOUS</option>
+	            <option class="Duration">PASSIVE</option>
+            </select>
+            <p></p>
+            Assessment Type:
+            <select id="editItemAssessment">
+           		<option>ASSIGNMENT</option>
+	            <option>TEST</option>
+	            <option>ALL</option>
+            </select>
+            <p></p>
+            Attribute Affected:
+            <select id="editAttributeAffected">
+           		<option>GRADE</option>
+	            <option>DUEDATE</option>
+	            <option>NUMATTEMPTS</option>
+            </select>
+            <p></p>
+            Cost: <input type="text" id="editItemCost"/>
+            <p></p>
+            Effect Magnitude: <input type="text" id="editItemMagnitude"/>
+            <p></p>
+            Supply: <input type="text" id="editItemSupply"/>
+			<p></p>
+			<input id="editItem" type="button" value="Edit Item">
+			
 		</div>
 
 
