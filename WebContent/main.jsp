@@ -172,22 +172,22 @@
 		</div>
 
 		<div id="tabs-2">
-			<div style="float: left; width: 70%; border-style: double;">
+			<div>
 				<form id="storeRadioButtons">
 					<c:forEach items="${allItems}" var="item">  
 						<TR>
-						    <td><label><input type="radio" name="buyItemRadio">${item.name}</label></td>
+						    <td><label><input type="radio" name="buyItemRadio" value="${item.name}">${item.name}</label></td>
 						    <td><a style="float: right;">Cost: ${item.cost}</a></td>
 						    <td><p></p></td>
 						</TR>
 					</c:forEach>
 				</form>
 			</div>
-			<div style="float: left; width: 27%; border-style: dotted;">
-  				<p id="itemDescription" style="font-size:50%;"></p>
-			</div>
 			<input id="buyItem" type="button" value="Buy Item">
 			<input id="directEditItem" type="button" value="Edit Item">
+			<div>
+  				<p id="itemDescription" style="font-size:75%;"></p>
+			</div>
 		</div>
 		
 		<div id="tabs-3">

@@ -235,7 +235,7 @@ public class Item implements Serializable{
 		if(dur.equals("CONTINUOUS")){
 			output += " with a period of " + duration + " hours.";
 		}
-		output	+= "It costs " + cost + " Gold. The store only has " + supply+ " units available. ";
+		output	+= " It costs " + cost + " Gold. The store only has " + supply+ " units available. ";
 		output  += "It only affects " + attributeAffected + " by " + effectMagnitude + ". And it can only target " + type;
 		return output;
 	}

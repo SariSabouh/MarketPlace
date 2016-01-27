@@ -265,7 +265,7 @@ jQuery.noConflict();
     		contentType:"application/json",
     		data: {name : $(this).attr("value")},
     		success: function(results){
-    			$('#itemDescription').val(results[0]);
+    			$('#itemDescription').text(results[0]);
     		},
     		error: function(result){
     			alert("Could Not Get Information About The Item. Please Contact Admin.");
@@ -273,14 +273,15 @@ jQuery.noConflict();
 	    });
     });
     $("#directEditItem").click(function () {
+    	var itemName = $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val();
     	$.ajax({
 	    	url: $("#getItemInfoURL").val(),
     		type: "GET",
-    		data: {name: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val()},
+    		data: {name: itemName},
     		dataType: "json",
     		success: function(results){
     			var index = $('#tabs a[href="#tabs-5"]').parent().index();
-    			$('#tabs').tabs('select', index);
+    			$('#tabs').tabs("option", "active", index);
     			$('#editItemCost').val(results[0]);
     			var duration = results[1];
     			if(duration == 0){
@@ -292,6 +293,7 @@ jQuery.noConflict();
     			else{
     				duration = "CONTINUOUS";
     			}
+    			$("#editItemName").val(itemName);
     			$("#editItemDuration").val(duration);
     			$('#editItemMagnitude').val(results[2]);
     			$('#editItemSupply').val(results[3]);
