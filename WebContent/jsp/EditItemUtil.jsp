@@ -6,7 +6,7 @@
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%
 	System.out.println("In EditItemUtil");
-	MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(false);
+	MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"), (String ) application.getAttribute("instructorId"));
 	Item item = new Item(request.getParameter("name"));
 	item.setAttributeAffected(AttributeAffected.valueOf(request.getParameter("attributeAffected")));
 	item.setCost(Integer.parseInt(request.getParameter("cost")));

@@ -10,6 +10,8 @@
     <column name="effect_magnitude" data-type="int" nullable="false" identity="false" comment="The magnitude of the effect of the Item" />
     <column name="supply" data-type="int" nullable="false" identity="false" comment="Supply of Item" />
     <column name="type" data-type="nvarchar(100)" nullable="false" identity="false" comment="Assessment Type of Item" />
+    <column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />
 
     <primary-key name="jsu_item_id" comment="Unique primary key">
       <columnref name="item_pk1" />
@@ -30,7 +32,9 @@
   	<column name="new" data-type="nvarchar(100)" nullable="false" identity="false" comment="Is item new." />
   	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
   	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="true" identity="false" comment="The name of the column affected. ALL means all gradable columns." />
-  	
+  	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />
+
   	<primary-key name="jsu_purchaseinfo_id2" comment="Unique primary key">
       <columnref name="purchase_info_pk1" />
     </primary-key>
@@ -45,7 +49,9 @@
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="item_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="item name." />
   	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
-  	
+	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
+
   	<primary-key name="jsu_waitlist_id" comment="Unique primary key">
       <columnref name="waitlist_pk1" />
     </primary-key>
@@ -57,6 +63,8 @@
   	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
   	<column name="last_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Last attempt date." />
   	<column name="grade" data-type="int" nullable="false" identity="false" comment="Column Grade." />
+	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
   	
   	<primary-key name="jsu_gradebook_id" comment="Unique primary key">
       <columnref name="gradebook_pk1" />
@@ -67,6 +75,8 @@
   	<column name="settings_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
   	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Setting." />
   	<column name="value" data-type="nvarchar(100)" nullable="false" identity="false" comment="Value of Setting." />
+	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
   	
   	<primary-key name="jsu_settings_id" comment="Unique primary key">
       <columnref name="settings_pk1" />

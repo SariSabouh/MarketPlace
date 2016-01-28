@@ -4,7 +4,7 @@
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%
 	System.out.println("In CheckBoxUtil");
-	MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(false);
+	MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"), (String ) application.getAttribute("instructorId"));
 	try{
 		String name = request.getParameter("name");
 		String value = request.getParameter("value");

@@ -6,7 +6,7 @@
 <%
 	System.out.println("In BuyItemUtil");
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
-	MarketPlaceDAO dbController = new MarketPlaceDAO(false);
+	MarketPlaceDAO dbController = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"), (String ) application.getAttribute("instructorId"));
 	String itemName = request.getParameter("itemName");
 	try {
 		if(dbController.loadItem(itemName) == null){
