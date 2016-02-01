@@ -32,7 +32,6 @@ import cs499.itemHandler.Item.AttributeAffected;
 import cs499.itemHandler.ItemController;
 import cs499.util.Grade;
 import cs499.util.Student;
-import cs499.util.WaitListPojo;
 import cs499.util.Grade.Condition;
 import cs499.util.GradebookColumnPojo;
 
@@ -100,10 +99,6 @@ public class BlackboardHandler {
 			Iterator<CourseMembership> i = cmlist.iterator();
 			addGoldColumn();
 			setStudentsList(i);
-			if(!isStudent){
-				updateStudentGold();
-				activateWaitList();
-			}
 		}
 		else{
 			gradableItemList = new ArrayList<GradableItem>();
@@ -123,9 +118,20 @@ public class BlackboardHandler {
 				ItemController itemController = new ItemController();
 				Item item = itemController.getItemByName(itemList, itemName);
 				if(student.canAfford(item.getCost())){
-					if(!new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString()).isOutOfSupply(item)){
+					if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
 						System.out.println("Student can afford and store has supply");
-						student.buyItem(item, testing, courseID.getExternalString(), sessionUser.getId().getExternalString());
+						student.buyItem(item, testing, courseID.getExternalString());
+						for (GradableItem gradeItem : gradableItemList){
+							if (gradeItem.getTitle().equals("Gold")){
+								try {
+									gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
+									break;
+								} catch (BbSecurityException e) {
+									e.printStackTrace();
+								}
+								System.out.println("Attempted to change grade for student: " + student.getFirstName());
+							}
+						}
 					}
 				}
 			}
@@ -172,7 +178,7 @@ public class BlackboardHandler {
 	 */
 	public List<String> getAllColumnsByType(String itemName){
 		List<String> columns = new ArrayList<String>();
-		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.toExternalString());
 		Item item = marketPlaceDAO.loadItem(itemName);
 		String type = itemName;
 		if(item != null){
@@ -254,7 +260,7 @@ public class BlackboardHandler {
 	 * @param i the new students list
 	 */
 	private void setStudentsList(Iterator<CourseMembership> i){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString());
 		while(i.hasNext()){
 			CourseMembership selectedMember = i.next();
 			User currentUser = selectedMember.getUser();
@@ -302,7 +308,7 @@ public class BlackboardHandler {
 						if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
 							continue;
 						}
-						GradebookColumnPojo gradebookColumn = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString()).getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
+						GradebookColumnPojo gradebookColumn = new MarketPlaceDAO(testing, courseID.toExternalString()).getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
 						if(gradebookColumn.getGrade() == -1){
 							adjustContinuousPendingGrade(gradeDetail, student, item);
 						}
@@ -339,7 +345,7 @@ public class BlackboardHandler {
 	
 	private void adjustContinuousGrade(GradeDetail gradeDetail, Student student, Item item){
 		String gradeTitle = gradeDetail.getGradableItem().getTitle();
-		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString());
 		Id attemptId = gradeDetail.getLastGradedAttemptId();
 		if(attemptId == null || !checkIfAttemptGraded(gradeDetail)){
 			dbHandler.insertGradebookColumn(-1, gradeTitle, student.getStudentID());
@@ -383,7 +389,7 @@ public class BlackboardHandler {
 	
 	private void adjustContinuousPendingGrade(GradeDetail gradeDetail, Student student, Item item){
 		String gradeTitle = gradeDetail.getGradableItem().getTitle();
-		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString());
 		Id attemptId = gradeDetail.getLastGradedAttemptId();
 		if(attemptId == null){
 			return;
@@ -433,71 +439,6 @@ public class BlackboardHandler {
     		}
     	}
 		return true;
-	}
-	
-	/**
-	 * Activates @{link Item} in the wait list when the teacher logs in.
-	 * It is automatically called when this class is instantiated
-	 * when the teacher logs in. Then it removes the items from the wait list.
-	 */
-	private void activateWaitList(){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
-		List<WaitListPojo> itemStudent = dbController.loadWaitList();
-		for(WaitListPojo waitList : itemStudent){
-			String studentID = waitList.getStudentID();
-			String itemName = waitList.getName();
-			String columnName = waitList.getColumnName();
-			ItemController itemController = new ItemController();
-			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID), columnName);
-			int primaryKey = waitList.getPrimaryKey();
-			dbController.removeItemWaitList(primaryKey);
-		}
-	}
-	
-	/**
-	 * Gets the @{link Student} from the students list by his student id.
-	 *
-	 * @param id the id
-	 * @return the student by id
-	 */
-	private Student getStudentById(String id){
-		for(Student student : students){
-			if(student.getStudentID().equals(id)){
-				return student;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Updates the @{link Student} gold.
-	 */
-	private void updateStudentGold() {
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
-		for(Student student: students){
-			boolean purchased = false;
-			List<String> itemList = dbController.loadNewPurchases(student.getStudentID());
-			for(Item item : this.itemList){
-				if(itemList.contains(item.getName())){
-					System.out.println("Gold used is: " + item.getCost());
-					student.substractGold(item);
-					purchased = true;
-				}
-			}
-			if(purchased){
-				for (GradableItem gradeItem : gradableItemList){
-					if (gradeItem.getTitle().equals("Gold")){
-						try {
-							gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
-							break;
-						} catch (BbSecurityException e) {
-							e.printStackTrace();
-						}
-						System.out.println("Attempted to change grade for student: " + student.getFirstName());
-					}
-				}
-			}
-		}
 	}
 	
 	/**
@@ -621,7 +562,7 @@ public class BlackboardHandler {
 				Calendar cal = gradeItem.getDueDate();
 				cal.add(Calendar.HOUR_OF_DAY, (int) effectMagnitude);
 				gradeItem.setDueDate(cal);
-				System.out.println("Due Date to adjust to is: " + cal.toString());
+				System.out.println("Due Date to adjust to is: " + cal.getTime());
 				try {
 					gradebookManager.persistGradebookItem(gradeItem);
 					System.out.println("Persisted GradableItem");
@@ -700,16 +641,19 @@ public class BlackboardHandler {
 	 * @return true, if successful
 	 */
 	private boolean updateItem(Item item, Student student, String columnName){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString());
 		if(item.getDuration() == 0){
 			System.out.println("Attempting to expire instant item");
 			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID(), columnName)){
+				System.out.println("IN UPDATE ITEM");
+				activateItem(item, student, columnName);				
 				return true;
 			}
 		}
 		else if(item.getDuration() == -1){
 			System.out.println("Attempting to update passive item");
 			if(dbController.updateItemUsage(item.getName(), getStudent().getStudentID(), columnName)){
+				activateItem(item, student, columnName);
 				return true;
 			}
 		}
@@ -720,7 +664,11 @@ public class BlackboardHandler {
 				System.out.println("Setting used expiry date for item " + item.getName());
 				dbController.setUsedExpiryDate(item, student.getStudentID());
 				dbController.updateItemUsage(item.getName(), student.getStudentID(), columnName);
+				activateItem(item, student, columnName);
 				return true;
+			}
+			else{
+				System.out.println("Item already activated)");
 			}
 		}
 		System.out.println("Could not update item");

@@ -29,7 +29,8 @@
 	String sessionUserRole = ctx.getCourseMembership().getRoleAsString();	
 	String sessionUserID = sessionUser.getId().toString();	
 	System.out.println("\n\nSession Started for " + sessionUserRole);
-	MarketPlaceDAO dbController = new MarketPlaceDAO(false, courseID.getExternalString(), sessionUser.getId().getExternalString());
+	MarketPlaceDAO dbController = new MarketPlaceDAO(false, courseID.getExternalString());
+	//dbController.changeDatabase();
 	List<Item> itemList = dbController.loadItems();
 	if(dbController.loadItem("ITEM_INIT") == null){
 		System.out.println("Initializing Database.");
@@ -40,7 +41,6 @@
 	BlackboardHandler bbHandler = new BlackboardHandler(courseID, sessionUser, itemList);
 	application.setAttribute("bbHandler", bbHandler);
 	application.setAttribute("courseId", courseID.getExternalString());
-	application.setAttribute("instructorId", sessionUser.getId().getExternalString());
 	
 	// get Gold for student
 	boolean isStudent = false;
@@ -156,7 +156,6 @@
 			<div id="columnList">
               <label>Please Select Item From the List: 
                 <select id="mySelect">
-                	<option>NONE</option>
 	                <c:forEach items="${columnNames}" var="name">
 						<option>${name}</option>
 					</c:forEach>
@@ -166,6 +165,9 @@
               <br/>
               <input id="useItem" type="button" value="Use Item">
             </div>
+            <div>
+  				<p id="myItemDescription" style="font-size:75%;"></p>
+			</div>
 						
 			<div style="position: absolute; bottom: 0; right: 0; width: 100px; text-align:right;">
 				 My Gold: <% out.print(myGold); %> 

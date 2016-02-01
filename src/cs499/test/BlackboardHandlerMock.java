@@ -23,7 +23,6 @@ import cs499.itemHandler.Item.AttributeAffected;
 import cs499.util.Grade;
 import cs499.util.GradebookColumnPojo;
 import cs499.util.Student;
-import cs499.util.WaitListPojo;
 
 public class BlackboardHandlerMock{
 
@@ -90,9 +89,9 @@ public class BlackboardHandlerMock{
 				ItemController itemController = new ItemController();
 				Item item = itemController.getItemByName(itemList, itemName);
 				if(student.canAfford(item.getCost())){
-					if(!new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString()).isOutOfSupply(item)){
+					if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
 						System.out.println("Student can afford and store has supply");
-						student.buyItem(item, testing, courseID.getExternalString(), sessionUser.getId().getExternalString());
+						student.buyItem(item, testing, courseID.getExternalString());
 					}
 				}
 			}
@@ -153,7 +152,7 @@ public class BlackboardHandlerMock{
 	 * @param i the new students list
 	 */
 	public void setStudentsList(Iterator<CourseMembership> i){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString());
 		while(i.hasNext()){
 			CourseMembership selectedMember = i.next();
 			User currentUser = selectedMember.getUser();
@@ -185,9 +184,9 @@ public class BlackboardHandlerMock{
 	 * Updates the @{link Student} gold.
 	 */
 	public void updateStudentGold() {
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString());
 		for(Student student: students){
-			List<String> itemList = dbController.loadNewPurchases(student.getStudentID());
+			List<String> itemList = null;//wtever
 			for(Item item : this.itemList){
 				if(itemList.contains(item.getName())){
 					System.out.println("Gold used is: " + item.getCost());
@@ -197,23 +196,6 @@ public class BlackboardHandlerMock{
 		}
 	}	
 
-	/**
-	 * Activates @{link Item} in the wait list when the teacher logs in.
-	 * It is automatically called when this class is instantiated
-	 * when the teacher logs in. Then it removes the items from the wait list.
-	 */
-	public void activateWaitList(){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
-		List<WaitListPojo> itemStudent = dbController.loadWaitList();
-		for(WaitListPojo waitList : itemStudent){
-			String studentID = waitList.getStudentID();
-			String itemName = waitList.getName();
-			ItemController itemController = new ItemController();
-			activateItem(itemController.getItemByName(itemList, itemName), getStudentById(studentID));
-			int primaryKey = waitList.getPrimaryKey();
-			dbController.removeItemWaitList(primaryKey);
-		}
-	}
 	
 	private void updateColumns(Student student) {
 		for(Item item : student.getItemList()){
@@ -224,7 +206,7 @@ public class BlackboardHandlerMock{
 						if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
 							continue;
 						}
-						MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+						MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString());
 						Id attemptId = gradeDetail.getLastGradedAttemptId();
 						if(attemptId == null){
 							continue;
@@ -428,7 +410,7 @@ public class BlackboardHandlerMock{
 	 * @return true, if successful
 	 */
 	private boolean updateItem(Item item, Student student, String columnName){
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString(), sessionUser.getId().toExternalString());
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseID.toExternalString());
 		if(item.getDuration() == 0){
 			System.out.println("Attempting to expire instant item");
 			if(dbController.expireInstantItem(item.getName(), getStudent().getStudentID(), columnName)){

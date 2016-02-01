@@ -180,12 +180,12 @@ public class Student{
 	 *
 	 * @param item the item
 	 */
-	public void buyItem(Item item, boolean testing, String courseId,String  instructorId){
+	public void buyItem(Item item, boolean testing, String courseId){
 		gold = (int) (gold - item.getCost());
-		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseId, instructorId);
+		MarketPlaceDAO dbController = new MarketPlaceDAO(testing, courseId);
 		System.out.println("Gold substracted about to persist");
 		if(new ItemController().getItemByName(itemList, item.getName()) == null ){
-			dbController.persistPurhcase(studentID, item.getName());
+			dbController.persistPurhcase(studentID, item);
 		}
 		itemList.add(item);
 	}

@@ -44,6 +44,7 @@ jQuery.noConflict();
 	    		data: {itemName: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val()},
 	    		success: function(result){
 	    			alert("Item Purchased");
+	    			location.reload();
 	    		},
 	    		error: function(result){
 	    			alert("Item Purchase FAILED");
@@ -109,13 +110,29 @@ jQuery.noConflict();
     				}
     			}
     			if(results[0].trim() == "ALL"){
-    				$("#mySelect option:contains(ALL)").show();
+    				$("#mySelect option:contains('ALL')").show();
+    			}
+    			else{
+    				$("#mySelect option:contains('ALL')").hide();
     			}
                 $("#mySelect").show();
     		},
     		error: function(result){
     			$("#mySelect").hide();
     			alert("Category is invalid. Please check the category of the Item.");
+    		}
+	    });
+        $.ajax({
+	    	url: $("#getItemDescriptionURL").val(),
+    		type: "GET",
+    		dataType: "json",
+    		contentType:"application/json",
+    		data: {name : name},
+    		success: function(results){
+    			$('#myItemDescription').text(results[0]);
+    		},
+    		error: function(result){
+    			alert("Could Not Get Information About The Item. Please Contact Admin.");
     		}
 	    });
     });

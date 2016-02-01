@@ -5,7 +5,7 @@
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%
 	System.out.println("In GetItemInfoUtil");
-	MarketPlaceDAO marketPlaceDao = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"), (String ) application.getAttribute("instructorId"));
+	MarketPlaceDAO marketPlaceDao = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"));
 	Item item = null;
 	try{
 		item = marketPlaceDao.loadItem(request.getParameter("name"));

@@ -11,7 +11,6 @@
     <column name="supply" data-type="int" nullable="false" identity="false" comment="Supply of Item" />
     <column name="type" data-type="nvarchar(100)" nullable="false" identity="false" comment="Assessment Type of Item" />
     <column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
-    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />
 
     <primary-key name="jsu_item_id" comment="Unique primary key">
       <columnref name="item_pk1" />
@@ -27,34 +26,35 @@
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
   	<column name="purchase_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Purhcase." />
-  	<column name="used_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Use." />
-  	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
-  	<column name="new" data-type="nvarchar(100)" nullable="false" identity="false" comment="Is item new." />
-  	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
-  	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="true" identity="false" comment="The name of the column affected. ALL means all gradable columns." />
+  	<column name="purchase_cost" data-type="int" nullable="false" identity="false" comment="Cost of Purhcase." />
   	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
-    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />
 
   	<primary-key name="jsu_purchaseinfo_id2" comment="Unique primary key">
       <columnref name="purchase_info_pk1" />
     </primary-key>
   	
-  	<foreign-key name="jsu_item_id_fk2" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
+  	<foreign-key name="jsu_item_id_fk3" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
 	  <columnref name="item_pk1" />
 	</foreign-key>
   </table>
-  
-  <table name="jsu_waitlist">
-  	<column name="waitlist_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
-  	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
-  	<column name="item_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="item name." />
-  	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
-	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
-    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
 
-  	<primary-key name="jsu_waitlist_id" comment="Unique primary key">
-      <columnref name="waitlist_pk1" />
+  <table name="jsu_item_use_info">
+  	<column name="item_use_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
+  	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
+  	<column name="used_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Use." />
+  	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
+  	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
+  	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="true" identity="false" comment="The name of the column affected. ALL means all gradable columns." />
+  	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+
+  	<primary-key name="jsu_item_use_info_id1" comment="Unique primary key">
+      <columnref name="item_use_info_pk1" />
     </primary-key>
+  	
+  	<foreign-key name="jsu_item_id_fk4" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
+	  <columnref name="item_pk1" />
+	</foreign-key>
   </table>
 
   <table name="jsu_gradebook">
@@ -64,7 +64,6 @@
   	<column name="last_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Last attempt date." />
   	<column name="grade" data-type="int" nullable="false" identity="false" comment="Column Grade." />
 	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
-    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
   	
   	<primary-key name="jsu_gradebook_id" comment="Unique primary key">
       <columnref name="gradebook_pk1" />
@@ -76,7 +75,6 @@
   	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Setting." />
   	<column name="value" data-type="nvarchar(100)" nullable="false" identity="false" comment="Value of Setting." />
 	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
-    <column name="instructor_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Instructor ID" />  	
   	
   	<primary-key name="jsu_settings_id" comment="Unique primary key">
       <columnref name="settings_pk1" />
