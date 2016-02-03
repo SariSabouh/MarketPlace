@@ -956,6 +956,5 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-	}
-		
+	}		
 }

@@ -15,10 +15,6 @@
     <primary-key name="jsu_item_id" comment="Unique primary key">
       <columnref name="item_pk1" />
     </primary-key>
-    
-    <index name="jsu_name_ui1" unique="true">
-        <columnref name="name"/>
-    </index>
   </table>
   
   <table name="jsu_purchaseinfo">
@@ -33,7 +29,7 @@
       <columnref name="purchase_info_pk1" />
     </primary-key>
   	
-  	<foreign-key name="jsu_item_id_fk3" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
+  	<foreign-key name="jsu_item_id_fk1" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
 	  <columnref name="item_pk1" />
 	</foreign-key>
   </table>
@@ -52,7 +48,7 @@
       <columnref name="item_use_info_pk1" />
     </primary-key>
   	
-  	<foreign-key name="jsu_item_id_fk4" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
+  	<foreign-key name="jsu_item_id_fk2" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
 	  <columnref name="item_pk1" />
 	</foreign-key>
   </table>
