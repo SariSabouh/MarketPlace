@@ -725,7 +725,7 @@ public class MarketPlaceDAO {
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Expiring item for studentid: " + studentID);
+	        System.out.println("\nExpiring item for studentid: " + studentID);
 	        queryString.append("if exists (select * from jsu_item_use_info where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ? and student_id = ?) ");
 	        queryString.append("update jsu_item_use_info ");
@@ -748,9 +748,9 @@ public class MarketPlaceDAO {
             selectQuery.setString(11, studentID);
             selectQuery.setString(12, item.getName());
             selectQuery.setString(13, courseId);
-            selectQuery.setString(13, date.toString());
-            selectQuery.setString(14, date.plusHours(item.getDuration()).toString());
-            selectQuery.setString(15, courseId);
+            selectQuery.setString(14, date.toString());
+            selectQuery.setString(15, date.plusHours(item.getDuration()).toString());
+            selectQuery.setString(16, courseId);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -785,7 +785,7 @@ public class MarketPlaceDAO {
 	        	gradebook = new GradebookColumnPojo();
 	        	gradebook.setGrade(rSet.getInt("grade"));
 	        	gradebook.setLastDate(rSet.getString("last_date"));
-	        	gradebook.setName(rSet.getString("name"));
+	        	gradebook.setName(rSet.getString("gradebook_column_name"));
 	        	gradebook.setStudentID(rSet.getString("student_id"));
 	        }
 	        rSet.close();
