@@ -20,6 +20,7 @@ import blackboard.platform.gradebook2.BookData;
 import blackboard.platform.gradebook2.BookDataRequest;
 import blackboard.platform.gradebook2.GradableItem;
 import blackboard.platform.gradebook2.GradeDetail;
+import blackboard.platform.gradebook2.GradeWithAttemptScore;
 import blackboard.platform.gradebook2.GradebookException;
 import blackboard.platform.gradebook2.GradebookManager;
 import blackboard.platform.gradebook2.GradebookManagerFactory;
@@ -89,7 +90,12 @@ public class BlackboardHandler {
 		isStudent = false;
 		this.sessionUser = sessionUser;
 		students = new ArrayList<Student>();
-		if(!testing){
+		if(sessionUser.getFamilyName().equals("LAST") && sessionUser.getGivenName().equals("FIRST") && sessionUser.getUserName().equals("username")){
+			gradableItemList = new ArrayList<GradableItem>();
+			testing = true;
+			System.out.println("Testing");
+		}
+		else{
 			gradebookManager = GradebookManagerFactory.getInstanceWithoutSecurityCheck();
 			bookData = gradebookManager.getBookData(new BookDataRequest(courseID));
 			gradableItemList = gradebookManager.getGradebookItems(courseID);
@@ -99,9 +105,6 @@ public class BlackboardHandler {
 			Iterator<CourseMembership> i = cmlist.iterator();
 			addGoldColumn();
 			setStudentsList(i);
-		}
-		else{
-			gradableItemList = new ArrayList<GradableItem>();
 		}
 	}
 
@@ -124,7 +127,9 @@ public class BlackboardHandler {
 						for (GradableItem gradeItem : gradableItemList){
 							if (gradeItem.getTitle().equals("Gold")){
 								try {
-									gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
+									if(!testing){
+										gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
+									}
 									break;
 								} catch (BbSecurityException e) {
 									e.printStackTrace();
@@ -291,7 +296,13 @@ public class BlackboardHandler {
 		for(Item item : student.getItemList()){
 			if(item.getDuration() != 0 && item.getTimesUsed() > 0){
 				if (!isItemExpired(item.getExpirationDate())){
-					List<GradeDetail> gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
+					List<GradeDetail> gradeDetails = new ArrayList<GradeDetail>();
+					if(testing){
+						gradeDetails.add(createGradeDetail(gradableItemList.get(0), student));
+					}
+					else{
+						gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
+					}
 					for(GradeDetail gradeDetail : gradeDetails){
 						String gradeTitle = gradeDetail.getGradableItem().getTitle();
 						if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
@@ -302,7 +313,13 @@ public class BlackboardHandler {
 				}
 
 				else{
-					List<GradeDetail> gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
+					List<GradeDetail> gradeDetails = new ArrayList<GradeDetail>();
+					if(testing){
+						gradeDetails.add(createGradeDetail(gradableItemList.get(0), student));
+					}
+					else{
+						gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
+					}
 					for(GradeDetail gradeDetail : gradeDetails){
 						String gradeTitle = gradeDetail.getGradableItem().getTitle();
 						if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")){
@@ -325,8 +342,16 @@ public class BlackboardHandler {
 		if(attemptId != null){
 			if(gradedAttemptId != null){
 				try {
-					AttemptDetail gradedAttempt = AttemptDAO.get().loadById(gradedAttemptId);
-					AttemptDetail attempt = AttemptDAO.get().loadById(attemptId);
+					AttemptDetail gradedAttempt = null;
+					AttemptDetail attempt = null;
+					if(testing){
+						gradedAttempt = gradeDetail.getAttempts().get(0);
+						attempt = gradeDetail.getAttempts().get(1);
+					}
+					else{
+						gradedAttempt = AttemptDAO.get().loadById(gradedAttemptId);
+						attempt = AttemptDAO.get().loadById(attemptId);
+					}
 					if(attempt.getAttemptDate().after(gradedAttempt.getAttemptDate())){
 						return false;
 					}
@@ -353,7 +378,13 @@ public class BlackboardHandler {
 		}
 		try{
 			GradebookColumnPojo gradebookColumn = dbHandler.getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
-			AttemptDetail attempt = AttemptDAO.get().loadById(attemptId);
+			AttemptDetail attempt = null;
+			if(testing){
+				attempt = gradeDetail.getAttempts().get(0);
+			}
+			else{
+				attempt = AttemptDAO.get().loadById(attemptId);
+			}
 			Calendar attemptDate = attempt.getAttemptDate();
 			if(gradebookColumn != null){
 				if(gradebookColumn.getName().equals(gradeTitle)){
@@ -362,7 +393,9 @@ public class BlackboardHandler {
 						gradeDetail.setManualGrade(attempt.getGrade());
 						gradeDetail.setManualScore(attempt.getScore());
 						System.out.println("UPDATING COLUMN " + gradeTitle);
-						gradebookManager.updateGrade(gradeDetail, true, courseID);
+						if(!testing){
+							gradebookManager.updateGrade(gradeDetail, true, courseID);
+						}
 						dbHandler.updateGradebookColumn(attempt, student.getStudentID());
 					}
 				}
@@ -375,7 +408,9 @@ public class BlackboardHandler {
 				gradeDetail.setLastAttemptId(attempt.getId());
 				gradeDetail.setLastGradedAttemptId(attemptId);
 				System.out.println("UPDATING COLUMN " + gradeTitle);
-				gradebookManager.updateGrade(gradeDetail, true, courseID);
+				if(!testing){
+					gradebookManager.updateGrade(gradeDetail, true, courseID);
+				}
 				dbHandler.insertGradebookColumn((int) attempt.getScore(), gradeTitle, student.getStudentID());
 			}
 		} catch (KeyNotFoundException e) {
@@ -396,7 +431,13 @@ public class BlackboardHandler {
 		}
 		try{
 			GradebookColumnPojo gradebookColumn = dbHandler.getGradebookColumnByNameAndStudentId(gradeTitle, student.getStudentID());
-			AttemptDetail attempt = AttemptDAO.get().loadById(attemptId);
+			AttemptDetail attempt = null;
+			if(testing){
+				attempt = gradeDetail.getAttempts().get(0);
+			}
+			else{
+				attempt = AttemptDAO.get().loadById(attemptId);
+			}			
 			Calendar attemptDate = attempt.getAttemptDate();
 			if(gradebookColumn.getName().equals(gradeTitle)){
 				if(gradebookColumn.getLastDate().before(attemptDate.getTime())){
@@ -404,7 +445,9 @@ public class BlackboardHandler {
 					gradeDetail.setManualGrade(attempt.getGrade());
 					gradeDetail.setManualScore(attempt.getScore());
 					System.out.println("UPDATING COLUMN " + gradeTitle);
-					gradebookManager.updateGrade(gradeDetail, true, courseID);
+					if(!testing){
+						gradebookManager.updateGrade(gradeDetail, true, courseID);
+					}
 					dbHandler.updateGradebookColumn(attempt, student.getStudentID());
 				}
 			}
@@ -450,7 +493,14 @@ public class BlackboardHandler {
 	 * @return the grade detail
 	 */
 	private GradeDetail getGradeDetail(GradableItem gradeItem, Student student){
-		GradeDetail gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+		GradeDetail gradeDetail = createGradeDetail(gradeItem, student);
+		if(!testing){
+			gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+		}
+		else{
+			List<AttemptDetail> attempts = new ArrayList<AttemptDetail>();
+			gradeDetail.setAttempts(attempts);
+		}
 		List<AttemptDetail> attemptList = gradeDetail.getAttempts();
 		AttemptDetail attemptDetail = new AttemptDetail();
 		attemptDetail.setAttemptDate(Calendar.getInstance());
@@ -459,7 +509,12 @@ public class BlackboardHandler {
 		attemptDetail.setGrade(student.getGold() + "");
 		attemptDetail.setGradeId(gradeItem.getId());
 		try {
-			attemptDetail.setId(Id.generateId(AttemptDetail.DATA_TYPE, "_22_"));
+			if(testing){
+				attemptDetail.setId(Id.newId(AttemptDetail.DATA_TYPE));
+			}
+			else{
+				attemptDetail.setId(Id.generateId(AttemptDetail.DATA_TYPE, "_22_"));
+			}
 		} catch (PersistenceException e) {
 			e.printStackTrace();
 		}
@@ -510,7 +565,16 @@ public class BlackboardHandler {
 		for(Student student: students){
 			for (GradableItem gradeItem : gradableItemList) {
 				if (gradeItem.getTitle().equals("Gold")){
-					Grade grade = new Grade(bookData.get(student.getId(), gradeItem.getId()));
+					Grade grade = null;
+					if(testing){
+						GradeWithAttemptScore gradeWithAttempt = new GradeWithAttemptScore();
+						gradeWithAttempt.setManualScore(1000.0);
+						gradeWithAttempt.setAttemptScore(1000.0);
+						grade = new Grade(gradeWithAttempt);
+					}
+					else{
+						grade = new Grade(bookData.get(student.getId(), gradeItem.getId()));
+					}
 					try{
 						student.setGold(grade.getScoreValue().intValue());
 						break;
@@ -564,7 +628,9 @@ public class BlackboardHandler {
 				gradeItem.setDueDate(cal);
 				System.out.println("Due Date to adjust to is: " + cal.getTime());
 				try {
-					gradebookManager.persistGradebookItem(gradeItem);
+					if(!testing){
+						gradebookManager.persistGradebookItem(gradeItem);
+					}
 					System.out.println("Persisted GradableItem");
 				} catch (BbSecurityException e) {
 					e.printStackTrace();
@@ -587,7 +653,10 @@ public class BlackboardHandler {
 			GradableItem gradeItem = gradableItemList.get(i);
 			if(gradeItem.getTitle().equals(columnName)){
 				try {
-					GradeDetail gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+					GradeDetail gradeDetail = null;
+					if(!testing){
+						gradeDetail = GradeDetailDAO.get().getGradeDetail(gradeItem.getId(), student.getId());
+					}
 					if(gradeDetail == null){
 						gradeDetail = createGradeDetail(gradeItem, student);
 					}
@@ -597,7 +666,9 @@ public class BlackboardHandler {
 					manualScore = manualScore + effectMagnitude;
 					gradeDetail.setManualGrade(manualGrade);
 					gradeDetail.setManualScore(manualScore);
-					gradebookManager.updateGrade(gradeDetail, true, courseID);
+					if(!testing){
+						gradebookManager.updateGrade(gradeDetail, true, courseID);
+					}
 					break;
 				} catch (BbSecurityException e) {
 					e.printStackTrace();
@@ -624,7 +695,9 @@ public class BlackboardHandler {
 				System.out.println("Number of Attempts to adjust to is: " + newMaxAttemps);
 				gradeItem.setMaxAttempts(newMaxAttemps);
 				try {
-					gradebookManager.persistGradebookItem(gradeItem);
+					if(!testing){
+						gradebookManager.persistGradebookItem(gradeItem);
+					}
 					System.out.println("Persisted GradableItem");
 				} catch (BbSecurityException e) {
 					e.printStackTrace();
@@ -693,6 +766,19 @@ public class BlackboardHandler {
 	 */
 	public void addGradableItem(GradableItem gradableItem){
 		gradableItemList.add(gradableItem);
+	}
+	
+	public List<GradableItem> getGradableItemList(){
+		return gradableItemList;
+	}
+	
+	public void testingConstructor(Iterator<CourseMembership> i, boolean addGold) throws PersistenceException{
+		if(addGold){
+			addGoldColumn();
+		}
+		if(i != null){
+			setStudentsList(i);
+		}
 	}
 	
 }

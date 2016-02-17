@@ -593,22 +593,27 @@ public class MarketPlaceDAO {
 	 * @param studentID the @{link Student} id
 	 * @return true, if successful
 	 */
-	public boolean updateItemUsage(String name, String studentID, String columnName) {
+	public boolean updateItemUsage(String name, String studentID, String columnName) { // Cannot Be Tested because MySQL Syntax is different than Oracle/SQL Server
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
         	setLastUsedDate(name, studentID);
+        	List<Item> items = new ArrayList<Item>();
+        	Item item = new Item(name);
+        	items.add(item);
+        	int timesUsed = loadNotExpiredItems(items, studentID).get(0).getTimesUsed();
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update jsu_purchaseinfo ");
-	        queryString.append("set times_used = times_used+1, gradebook_column_name = ? where item_pk1 = ( ");
+	        queryString.append("update jsu_item_use_info ");
+	        queryString.append("set times_used = ?, gradebook_column_name = ? where item_pk1 = ( ");
 	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(2, name);
-	        selectQuery.setString(1, columnName);
-	        selectQuery.setString(3, courseId);
-            selectQuery.setString(4, studentID);
-            selectQuery.setString(5, courseId);
+	        selectQuery.setInt(1, timesUsed+1);
+	        selectQuery.setString(2, columnName);
+	        selectQuery.setString(3, name);
+	        selectQuery.setString(4, courseId);
+            selectQuery.setString(5, studentID);
+            selectQuery.setString(6, courseId);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated == 0){
 	        	return false;
@@ -640,35 +645,47 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("if exists (select * from jsu_item_use_info where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ? and student_id = ?) ");
-	        queryString.append("update jsu_item_use_info ");
-	        queryString.append("set used_date = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
-	        queryString.append("ELSE insert into jsu_item_use_info (student_id, item_pk1, used_date, expiration_date, times_used, gradebook_column_name, course_id) ");
-	        queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 0, \"NA\", ?");
-	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(1, name);
-	        selectQuery.setString(2, courseId);
-	        selectQuery.setString(3, courseId);
-            selectQuery.setString(4, studentID);
-            selectQuery.setString(5, new DateTime().toString());
-            selectQuery.setString(6, name);
-            selectQuery.setString(7, courseId);
-            selectQuery.setString(8, studentID);
-            selectQuery.setString(9, courseId);
-            selectQuery.setString(10, studentID);
-            selectQuery.setString(11, name);
-            selectQuery.setString(12, courseId);
-            selectQuery.setString(13, new DateTime().toString());
-            selectQuery.setString(14, "NA");
-            selectQuery.setString(15, courseId);
-
+	        if(testing){
+	        	queryString = getLastUsedTestQuery(name, studentID);
+	        }
+	        else{
+		        queryString.append("if exists (select * from jsu_item_use_info where item_pk1 = ( ");
+		        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ? and student_id = ?) ");
+		        queryString.append("update jsu_item_use_info ");
+		        queryString.append("set used_date = ? where item_pk1 = ( ");
+		        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
+		        queryString.append("ELSE insert into jsu_item_use_info (student_id, item_pk1, used_date, gradebook_column_name, course_id) ");
+		        queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, \'NA\', ?)");
+	        }
+		    PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+		    if(testing){
+		    	selectQuery.setString(1, studentID);
+	    		selectQuery.setString(2, name);
+	    		selectQuery.setString(3, courseId);
+	    		selectQuery.setString(4, new DateTime().toString());
+	            selectQuery.setString(5, courseId);
+	            selectQuery.setString(6, new DateTime().toString());
+		    }
+		    else{
+		        selectQuery.setString(1, name);
+		        selectQuery.setString(2, courseId);
+		        selectQuery.setString(3, courseId);
+	            selectQuery.setString(4, studentID);
+	            selectQuery.setString(5, new DateTime().toString());
+	            selectQuery.setString(6, name);
+	            selectQuery.setString(7, courseId);
+	            selectQuery.setString(8, studentID);
+	            selectQuery.setString(9, courseId);
+	            selectQuery.setString(10, studentID);
+	            selectQuery.setString(11, name);
+	            selectQuery.setString(12, courseId);
+	            selectQuery.setString(13, new DateTime().toString());
+	            selectQuery.setString(14, courseId);
+		    }
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
         } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
-	    } finally {
 	    	try {
 				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
 			} catch (SQLException e) {
@@ -720,37 +737,54 @@ public class MarketPlaceDAO {
 	 * @param item the item
 	 * @param studentID the student id
 	 */
-	public void setUsedExpiryDate(Item item, String studentID) {
+	public void setUsedExpiryDate(Item item, String studentID) { // Cannot Be Tested because MySQL Syntax is different than Oracle/SQL Server
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("\nExpiring item for studentid: " + studentID);
-	        queryString.append("if exists (select * from jsu_item_use_info where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ? and student_id = ?) ");
-	        queryString.append("update jsu_item_use_info ");
-	        queryString.append("set used_date = ?, expiration_date = ? where item_pk1 = ( ");
-	        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
-	        queryString.append("ELSE insert into jsu_item_use_info (student_id, item_pk1, used_date, expiration_date, times_used, gradebook_column_name, course_id) ");
-	        queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 0, \"NA\", ?");
+	        if(testing){
+	        	queryString = getUsedExpiryTestQuery(item, studentID);
+	        }
+	        else{
+		        queryString.append("if exists (select * from jsu_item_use_info where item_pk1 = ( ");
+		        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ? and student_id = ?) ");
+		        queryString.append("update jsu_item_use_info ");
+		        queryString.append("set used_date = ?, expiration_date = ? where item_pk1 = ( ");
+		        queryString.append("select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
+		        queryString.append("ELSE insert into jsu_item_use_info (student_id, item_pk1, used_date, expiration_date, gradebook_column_name, course_id) ");
+		        queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, \'NA\', ?)");
+	        }
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        DateTime date = new DateTime();
-	        selectQuery.setString(1, item.getName());
-	        selectQuery.setString(2, courseId);
-	        selectQuery.setString(3, courseId);
-	        selectQuery.setString(4, studentID);
-            selectQuery.setString(5, date.toString());
-            selectQuery.setString(6, date.plusHours(item.getDuration()).toString());
-            selectQuery.setString(7, item.getName());
-            selectQuery.setString(8, courseId);
-            selectQuery.setString(9, studentID);
-            selectQuery.setString(10, courseId);
-            selectQuery.setString(11, studentID);
-            selectQuery.setString(12, item.getName());
-            selectQuery.setString(13, courseId);
-            selectQuery.setString(14, date.toString());
-            selectQuery.setString(15, date.plusHours(item.getDuration()).toString());
-            selectQuery.setString(16, courseId);
+	        if(testing){
+	        	selectQuery.setString(1, studentID);
+	    		selectQuery.setString(2, item.getName());
+	    		selectQuery.setString(3, courseId);
+	    		selectQuery.setString(4, date.toString());
+	            selectQuery.setString(5, date.plusHours(item.getDuration()).toString());
+	            selectQuery.setString(6, courseId);
+	            selectQuery.setString(7, date.toString());
+	            selectQuery.setString(8, date.plusHours(item.getDuration()).toString());
+	        }
+	        else{
+		        selectQuery.setString(1, item.getName());
+		        selectQuery.setString(2, courseId);
+		        selectQuery.setString(3, courseId);
+		        selectQuery.setString(4, studentID);
+	            selectQuery.setString(5, date.toString());
+	            selectQuery.setString(6, date.plusHours(item.getDuration()).toString());
+	            selectQuery.setString(7, item.getName());
+	            selectQuery.setString(8, courseId);
+	            selectQuery.setString(9, studentID);
+	            selectQuery.setString(10, courseId);
+	            selectQuery.setString(11, studentID);
+	            selectQuery.setString(12, item.getName());
+	            selectQuery.setString(13, courseId);
+	            selectQuery.setString(14, date.toString());
+	            selectQuery.setString(15, date.plusHours(item.getDuration()).toString());
+	            selectQuery.setString(16, courseId);
+	        }
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
@@ -956,5 +990,23 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-	}		
+	}
+	
+	private StringBuffer getLastUsedTestQuery(String name, String studentID){
+		StringBuffer queryString = new StringBuffer("");
+		queryString.append("insert into jsu_item_use_info ");
+		queryString.append("(student_id, item_pk1, used_date, gradebook_column_name, course_id) ");
+		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, \'NA\', ?) ");
+		queryString.append("ON DUPLICATE KEY UPDATE used_date = ?");
+		return queryString;
+	}
+	
+	private StringBuffer getUsedExpiryTestQuery(Item item, String studentID){
+		StringBuffer queryString = new StringBuffer("");
+		queryString.append("insert into jsu_item_use_info ");
+		queryString.append("(student_id, item_pk1, used_date, expiration_date, gradebook_column_name, course_id) ");
+		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, \'NA\', ?) ");
+		queryString.append("ON DUPLICATE KEY UPDATE used_date=?, expiration_date=?");
+		return queryString;
+	}
 }

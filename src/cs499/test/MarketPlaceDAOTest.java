@@ -12,6 +12,9 @@ import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
+import cs499.itemHandler.Item.AssessmentType;
+import cs499.itemHandler.Item.AttributeAffected;
+import cs499.util.Setting;
 
 import java.io.FileInputStream;
 import java.sql.Connection;
@@ -175,11 +178,11 @@ public class MarketPlaceDAOTest {
 		assertEquals(true, marketPlaceDao.updateItemUsage("Once", "00111", "Test"));
 	}
 	
-	@Test
+	@Test(expected=NullPointerException.class)
 	public void testUpdateItemUsageWithWrongName(){
 		Item item = marketPlaceDao.loadItem("Once");
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
-		assertEquals(true, marketPlaceDao.updateItemUsage("UNO", "00111", "Test"));
+		marketPlaceDao.updateItemUsage("UNO", "00111", "Test");
 	}
 	
 	@Test
@@ -209,35 +212,6 @@ public class MarketPlaceDAOTest {
 		assertEquals(true, marketPlaceDao.isOutOfSupply(item));
 	}
 	
-	@Test // Cannot Be Tested because MySQL Syntax is different than Oracle/SQL Server
-	@Ignore
-	public void testSetUsedExpiryDate(){
-		Item item = new Item("Continuous");
-		item.setCost(100);
-		item.setDuration(24);
-		marketPlaceDao.persistPurhcase("00111", item);
-		marketPlaceDao.setUsedExpiryDate(item, "00111");
-		List<Item> items = new ArrayList<Item>();
-		items.add(item);
-		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
-		assertEquals(new DateTime().plusHours(24).toString().substring(0, 10), items.get(0).getExpirationDate().substring(0, 10));
-	}
-	
-	@Test // Cannot Be Tested because MySQL Syntax is different than Oracle/SQL Server
-	@Ignore
-	public void testLoadTimesUsed(){
-		Item item = new Item("Continuous");
-		item.setCost(100);
-		List<Item> items = new ArrayList<Item>();
-		item.setDuration(24);
-		items.add(item);
-		marketPlaceDao.persistPurhcase("00111", item);
-		marketPlaceDao.setUsedExpiryDate(item, "00111");
-		marketPlaceDao.updateItemUsage("Continuous", "00111", "Test");
-		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
-		assertEquals(1, items.get(0).getTimesUsed());
-	}
-	
 	@Test
 	public void testGetGradebookColumnAfterInsert(){
 		marketPlaceDao.insertGradebookColumn(10, "TEST", "00111");
@@ -250,6 +224,80 @@ public class MarketPlaceDAOTest {
 		attempt.setScore(10);
 		marketPlaceDao.insertGradebookColumn(10, "TEST", "00111");
 		assertEquals(true, marketPlaceDao.updateGradebookColumn(attempt, "00111"));
+	}
+	
+	@Test
+	public void testUpdateSetting(){
+		Setting setting = new Setting();
+		setting.setName("visible_columns");
+		setting.setValue("N");
+		marketPlaceDao.updateSetting(setting);
+		setting = marketPlaceDao.getSetting("visible_columns");
+		assertEquals("N", setting.getValue());
+	}
+	
+	@Test
+	public void testGetSetting(){
+		Setting setting = marketPlaceDao.getSetting("visible_columns");
+		assertEquals("Y", setting.getValue());
+	}
+	
+	@Test
+	public void testGetDefaultSetting(){
+		List<Setting> settings = marketPlaceDao.getDefaultSettings();
+		assertEquals("Y", settings.get(0).getValue());
+		assertEquals("visible_columns", settings.get(0).getName());
+	}
+	
+	@Test
+	public void testAddItem(){
+		Item item = new Item("New Item");
+		item.setCost(100);
+		item.setDuration(0);
+		item.setEffectMagnitude(19);
+		item.setSupply(1);
+		item.setTimesUsed(0);
+		item.setType(AssessmentType.ALL);
+		item.setAttributeAffected(AttributeAffected.DUEDATE);
+		marketPlaceDao.addItem(item);
+		assertEquals("New Item", marketPlaceDao.loadItem("New Item").getName());
+	}
+	
+	@Test
+	public void testEditItem(){
+		Item item = marketPlaceDao.loadItem("Once");
+		assertEquals("875.0", item.getCost() + "");
+		item.setCost(999);
+		marketPlaceDao.editItem(item);
+		item = marketPlaceDao.loadItem("Once");
+		assertEquals("999.0", item.getCost() + "");
+	}
+	
+	@Test 
+	public void testSetUsedExpiryDate(){
+		Item item = new Item("Continuous");
+		item.setCost(100);
+		item.setDuration(24);
+		marketPlaceDao.persistPurhcase("00111", item);
+		marketPlaceDao.setUsedExpiryDate(item, "00111");
+		List<Item> items = new ArrayList<Item>();
+		items.add(item);
+		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
+		assertEquals(new DateTime().plusHours(24).toString().substring(0, 10), items.get(0).getExpirationDate().substring(0, 10));
+	}
+	
+	@Test 
+	public void testLoadTimesUsed(){
+		Item item = new Item("Continuous");
+		item.setCost(100);
+		List<Item> items = new ArrayList<Item>();
+		item.setDuration(24);
+		items.add(item);
+		marketPlaceDao.persistPurhcase("00111", item);
+		marketPlaceDao.setUsedExpiryDate(item, "00111");
+		marketPlaceDao.updateItemUsage("Continuous", "00111", "Test");
+		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
+		assertEquals(1, items.get(0).getTimesUsed());
 	}
 	
 }

@@ -5,6 +5,10 @@
 	<jsu_item name="Continuous" cost="115" duration="65" type="ASSIGNMENT" attribute_affected="GRADE" supply="10" effect_magnitude="20" course_id="10_1"/>
 	<jsu_item name="OnceTwo" cost="200" duration="ONCE" type="ALL" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" course_id="10_1"/>
 	<jsu_item name="Passive" cost="200" duration="PASSIVE" type="ALL" attribute_affected="NUMATTEMPTS" supply="10" effect_magnitude="2" course_id="10_1"/>
+	<jsu_item name="Once" cost="875" duration="0" type="TEST" attribute_affected="DUEDATE" supply="1" effect_magnitude="24" course_id="8"/>
+	<jsu_item name="Continuous" cost="115" duration="65" type="ASSIGNMENT" attribute_affected="GRADE" supply="10" effect_magnitude="20" course_id="8"/>
+	<jsu_item name="OnceTwo" cost="200" duration="ONCE" type="ALL" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" course_id="8"/>
+	<jsu_item name="Passive" cost="200" duration="PASSIVE" type="ALL" attribute_affected="NUMATTEMPTS" supply="10" effect_magnitude="2" course_id="8"/>
 	
 	<!--PurchaseInfo Table -->
 	<jsu_purchaseinfo />
@@ -13,7 +17,7 @@
 	<jsu_item_use_info />
 	
 	<!--Settings Table -->
-	<jsu_settings />
+	<jsu_settings name="visible_columns" value="Y" course_id="10_1"/>
 	
 	<!--Gradebook Table -->
 	<jsu_gradebook />
