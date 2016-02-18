@@ -117,24 +117,21 @@ public class BlackboardHandler {
 		if(isStudent){
 			Student student = getStudent();
 			System.out.print("In process");
-			if(student != null){
-				ItemController itemController = new ItemController();
-				Item item = itemController.getItemByName(itemList, itemName);
-				if(student.canAfford(item.getCost())){
-					if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
-						System.out.println("Student can afford and store has supply");
-						student.buyItem(item, testing, courseID.getExternalString());
-						for (GradableItem gradeItem : gradableItemList){
-							if (gradeItem.getTitle().equals("Gold")){
-								try {
-									if(!testing){
-										gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
-									}
-									break;
-								} catch (BbSecurityException e) {
-									e.printStackTrace();
+			ItemController itemController = new ItemController();
+			Item item = itemController.getItemByName(itemList, itemName);
+			if(student.canAfford(item.getCost())){
+				if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
+					System.out.println("Student can afford and store has supply");
+					student.buyItem(item, testing, courseID.getExternalString());
+					for (GradableItem gradeItem : gradableItemList){
+						if (gradeItem.getTitle().equals("Gold")){
+							try {
+								if(!testing){
+									gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
 								}
-								System.out.println("Attempted to change grade for student: " + student.getFirstName());
+								break;
+							} catch (BbSecurityException e) {
+								e.printStackTrace();
 							}
 						}
 					}
@@ -152,9 +149,7 @@ public class BlackboardHandler {
 	public void useItem(Item item, String columnName){
 		if(isStudent){
 			Student student = getStudent();
-			if(student != null){
-				updateItem(item, student, columnName);
-			}
+			updateItem(item, student, columnName);
 		}
 	}
 	
@@ -623,17 +618,21 @@ public class BlackboardHandler {
 		for (int i = 0; i<gradableItemList.size(); i ++) {
 			GradableItem gradeItem = gradableItemList.get(i);
 			if(gradeItem.getTitle().equals(columnName)){
-				Calendar cal = gradeItem.getDueDate();
-				cal.add(Calendar.HOUR_OF_DAY, (int) effectMagnitude);
-				gradeItem.setDueDate(cal);
-				System.out.println("Due Date to adjust to is: " + cal.getTime());
-				try {
-					if(!testing){
-						gradebookManager.persistGradebookItem(gradeItem);
+				if(gradeItem.isDueDateSet()){
+					Calendar cal = gradeItem.getDueDate();
+					cal.add(Calendar.HOUR_OF_DAY, (int) effectMagnitude);
+					gradeItem.setDueDate(cal);
+					System.out.println("Due Date to adjust to is: " + cal.getTime());
+					try {
+						if(!testing){
+							gradebookManager.persistGradebookItem(gradeItem);
+						}
+						System.out.println("Persisted GradableItem");
+					} catch (BbSecurityException e) {
+						e.printStackTrace();
 					}
-					System.out.println("Persisted GradableItem");
-				} catch (BbSecurityException e) {
-					e.printStackTrace();
+				}else{
+					System.out.println("It does not have a Due Date");
 				}
 				break;
 			}
@@ -690,6 +689,10 @@ public class BlackboardHandler {
 		for (int i = 0; i<gradableItemList.size(); i ++) {
 			GradableItem gradeItem = gradableItemList.get(i);
 			if(gradeItem.getTitle().equals(columnName)){
+				if(gradeItem.isAllowUnlimitedAttempts()){
+					System.out.println("Grade Item has unlimited Attempts!");
+					break;
+				}
 				int maxAttempts = gradeItem.getMaxAttempts();
 				int newMaxAttemps = (int) (maxAttempts+effectMagnitude);
 				System.out.println("Number of Attempts to adjust to is: " + newMaxAttemps);
