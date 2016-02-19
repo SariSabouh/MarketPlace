@@ -247,7 +247,7 @@ public class BlackboardHandlerTest {
 	}
 	
 	@Test
-	public void testContinuousGradeItem(){
+	public void testContinuousGradeItemFirstInsert(){
 		createStudents("00111");
 		GradableItem gradableItem = new GradableItem();
 		gradableItem.setTitle("Test");
@@ -256,9 +256,20 @@ public class BlackboardHandlerTest {
 		bbHandler.processItem("Continuous");
 		bbHandler.useItem(item, "Test");
 		createStudents("00111");
-		//Continue Update Column section
 	}
-
+	
+	@Test
+	public void testContinuousGradeItemSecondRun(){
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("Test");
+		bbHandler.addGradableItem(gradableItem);
+		Item item = marketPlaceDao.loadItem("Continuous");
+		bbHandler.processItem("Continuous");
+		bbHandler.useItem(item, "Test");
+		createStudents("00111");
+		createStudents("00111");
+	}
 	
 	@Test
 	public void testGetStudentIfInstructor(){

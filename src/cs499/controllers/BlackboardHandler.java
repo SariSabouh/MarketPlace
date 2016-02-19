@@ -294,6 +294,8 @@ public class BlackboardHandler {
 					List<GradeDetail> gradeDetails = new ArrayList<GradeDetail>();
 					if(testing){
 						gradeDetails.add(createGradeDetail(gradableItemList.get(0), student));
+						gradeDetails.add(createGradeDetail(gradableItemList.get(1), student));
+						gradeDetails.add(createGradeDetailWithAttempt(gradableItemList.get(1), student));
 					}
 					else{
 						gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
@@ -758,8 +760,39 @@ public class BlackboardHandler {
 		gradeDetail.setGradableItemId(gradableItem.getId());
 		gradeDetail.setGradingRequired(false);
 		gradeDetail.setId(Id.newId(GradeDetail.DATA_TYPE));
-		gradeDetail.setManualGrade("0");
-		gradeDetail.setManualScore(0.0d);
+		gradeDetail.setManualGrade("100");
+		gradeDetail.setManualScore(100.0d);
+		return gradeDetail;
+	}
+	
+	public GradeDetail createGradeDetailWithAttempt(GradableItem gradableItem, Student student){
+		GradeDetail gradeDetail = new GradeDetail();
+		gradeDetail.setCourseUserId(student.getId());
+		gradeDetail.setGradableItem(gradableItem);
+		gradeDetail.setGradableItemId(gradableItem.getId());
+		gradeDetail.setGradingRequired(false);
+		gradeDetail.setId(Id.newId(GradeDetail.DATA_TYPE));
+		gradeDetail.setManualGrade("100");
+		gradeDetail.setManualScore(100.0d);
+		List<AttemptDetail> attempts = new ArrayList<AttemptDetail>();
+		AttemptDetail attempt2 = new AttemptDetail();
+		attempt2.setId(Id.newId(AttemptDetail.DATA_TYPE));
+		attempt2.setAttemptDate(Calendar.getInstance());
+		attempt2.setGrade("100");
+		attempts.add(attempt2);
+		AttemptDetail attempt = new AttemptDetail();
+		attempt.setId(Id.newId(AttemptDetail.DATA_TYPE));
+		attempt.setAttemptDate(Calendar.getInstance());
+		attempt.setGrade("100");
+		attempts.add(attempt);
+		gradeDetail.setAttempts(attempts);
+		gradeDetail.setLastGradedAttemptId(attempt.getId());
+		gradeDetail.setFirstAttemptId(attempt.getId());
+		gradeDetail.setFirstGradedAttemptId(attempt.getId());
+		gradeDetail.setLastAttemptId(attempt2.getId());
+		gradeDetail.setLowestAttemptId(attempt.getId());
+		gradeDetail.setGradableItem(gradableItem);
+		gradeDetail.setGradableItemId(gradableItem.getId());
 		return gradeDetail;
 	}
 	
