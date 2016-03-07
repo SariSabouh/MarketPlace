@@ -17,24 +17,24 @@ import org.dbunit.database.IDatabaseConnection;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
+import org.joda.time.DateTime;
+import org.joda.time.LocalDate;
 import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import blackboard.data.course.Course;
 import blackboard.data.course.CourseMembership;
 import blackboard.data.user.User;
-import blackboard.persist.DataType;
 import blackboard.persist.Id;
 import blackboard.persist.PersistenceException;
+import blackboard.platform.gradebook2.AttemptDetail;
 import blackboard.platform.gradebook2.GradableItem;
 import cs499.controllers.BlackboardHandler;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
-import cs499.util.Student;
+import cs499.util.GradebookColumnPojo;
 
 public class BlackboardHandlerTest {
 	
@@ -204,7 +204,7 @@ public class BlackboardHandlerTest {
 		gradableItem.setTitle("Test");
 		bbHandler.addGradableItem(gradableItem);
 		Item item = marketPlaceDao.loadItem("Once");
-		bbHandler.useItem(item, "Test");
+		bbHandler.useItem(item, "TEST");
 		assertEquals(false, bbHandler.getGradableItemList().get(1).isDueDateSet());
 	}
 	
@@ -250,25 +250,29 @@ public class BlackboardHandlerTest {
 	public void testContinuousGradeItemFirstInsert(){
 		createStudents("00111");
 		GradableItem gradableItem = new GradableItem();
-		gradableItem.setTitle("Test");
+		gradableItem.setTitle("TEST");
 		bbHandler.addGradableItem(gradableItem);
 		Item item = marketPlaceDao.loadItem("Continuous");
 		bbHandler.processItem("Continuous");
-		bbHandler.useItem(item, "Test");
+		bbHandler.useItem(item, "TEST");
 		createStudents("00111");
+		assertEquals("TEST" ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getName());
+		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
 	}
 	
 	@Test
-	public void testContinuousGradeItemSecondRun(){
+	public void testContinuousGradeItemSecondRunWhenDateIsNotBefore(){
 		createStudents("00111");
 		GradableItem gradableItem = new GradableItem();
-		gradableItem.setTitle("Test");
+		gradableItem.setTitle("TEST");
 		bbHandler.addGradableItem(gradableItem);
 		Item item = marketPlaceDao.loadItem("Continuous");
 		bbHandler.processItem("Continuous");
-		bbHandler.useItem(item, "Test");
+		bbHandler.useItem(item, "TEST");
 		createStudents("00111");
 		createStudents("00111");
+		assertEquals("TEST" ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getName());
+		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
 	}
 	
 	@Test

@@ -31,3 +31,11 @@ attAffected=GRADE
 supply=5
 effectMagnitude=5
 --
+name=The Please Reply
+cost=1000
+duration=PASSIVE
+type=ALL
+attAffected=GRADE
+supply=10
+effectMagnitude=999
+--

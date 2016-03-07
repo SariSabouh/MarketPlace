@@ -294,7 +294,6 @@ public class BlackboardHandler {
 					List<GradeDetail> gradeDetails = new ArrayList<GradeDetail>();
 					if(testing){
 						gradeDetails.add(createGradeDetail(gradableItemList.get(0), student));
-						gradeDetails.add(createGradeDetail(gradableItemList.get(1), student));
 						gradeDetails.add(createGradeDetailWithAttempt(gradableItemList.get(1), student));
 					}
 					else{
@@ -344,6 +343,9 @@ public class BlackboardHandler {
 					if(testing){
 						gradedAttempt = gradeDetail.getAttempts().get(0);
 						attempt = gradeDetail.getAttempts().get(1);
+						Calendar cal = attempt.getAttemptDate();
+						cal.set(2015, 3, 6);
+						attempt.setAttemptDate(cal);
 					}
 					else{
 						gradedAttempt = AttemptDAO.get().loadById(gradedAttemptId);
@@ -378,6 +380,10 @@ public class BlackboardHandler {
 			AttemptDetail attempt = null;
 			if(testing){
 				attempt = gradeDetail.getAttempts().get(0);
+				Calendar cal = Calendar.getInstance();
+				cal.set(2017, 02, 02);
+				attempt.setAttemptDate(cal);
+				dbHandler.updateGradebookColumn(attempt, "00111");
 			}
 			else{
 				attempt = AttemptDAO.get().loadById(attemptId);
@@ -779,17 +785,19 @@ public class BlackboardHandler {
 		attempt2.setId(Id.newId(AttemptDetail.DATA_TYPE));
 		attempt2.setAttemptDate(Calendar.getInstance());
 		attempt2.setGrade("100");
+		attempt2.setScore(100.0d);
 		attempts.add(attempt2);
 		AttemptDetail attempt = new AttemptDetail();
 		attempt.setId(Id.newId(AttemptDetail.DATA_TYPE));
 		attempt.setAttemptDate(Calendar.getInstance());
 		attempt.setGrade("100");
+		attempt.setScore(100.0d);
 		attempts.add(attempt);
 		gradeDetail.setAttempts(attempts);
-		gradeDetail.setLastGradedAttemptId(attempt.getId());
+		gradeDetail.setLastGradedAttemptId(attempt2.getId());
 		gradeDetail.setFirstAttemptId(attempt.getId());
 		gradeDetail.setFirstGradedAttemptId(attempt.getId());
-		gradeDetail.setLastAttemptId(attempt2.getId());
+		gradeDetail.setLastAttemptId(attempt.getId());
 		gradeDetail.setLowestAttemptId(attempt.getId());
 		gradeDetail.setGradableItem(gradableItem);
 		gradeDetail.setGradableItemId(gradableItem.getId());

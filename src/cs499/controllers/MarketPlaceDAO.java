@@ -854,15 +854,16 @@ public class MarketPlaceDAO {
 	        queryString.append("set last_date = ?, grade = ? ");
 	        queryString.append("where gradebook_column_name = ? and student_id = ? and course_id = ?");
 	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(1, new DateTime().toString());
 	        selectQuery.setInt(2, (int) attempt.getScore());
 	        selectQuery.setString(4, studentID);
 	        selectQuery.setString(5, courseId);
 	        if(testing){
 	        	selectQuery.setString(3, "TEST");
+	        	selectQuery.setString(1, new DateTime(attempt.getAttemptDate().getTime()).toString());
 	        }
 	        else{
 	        	selectQuery.setString(3, attempt.getGradebookItem().getTitle());
+	        	selectQuery.setString(1, new DateTime().toString());
 	        }
 	        if(selectQuery.executeUpdate() > 0){
 	        	return true;
@@ -900,12 +901,7 @@ public class MarketPlaceDAO {
 	        selectQuery.setInt(3, grade);
 	        selectQuery.setString(4, studentID);
 	        selectQuery.setString(5, courseId);
-	        if(testing){
-	        	selectQuery.setString(1, "TEST");
-	        }
-	        else{
-	        	selectQuery.setString(1, gradeTitle);
-	        }
+        	selectQuery.setString(1, gradeTitle);
 	        selectQuery.executeUpdate();
 	        selectQuery.close();
 	    } catch (java.sql.SQLException sE){
