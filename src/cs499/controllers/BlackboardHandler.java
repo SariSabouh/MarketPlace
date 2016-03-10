@@ -201,6 +201,9 @@ public class BlackboardHandler {
 			else if(type.equals("ASSIGNMENT")){
 				typeId = "_10_1";
 			}
+			if(testing){
+				typeId = itemName;
+			}
 			if(marketPlaceDAO.getSetting("visible_columns").getValue().equals("Y")){
 				if(grade.isVisibleToStudents()){
 					if(type.equals("ALL")){
@@ -312,6 +315,7 @@ public class BlackboardHandler {
 					List<GradeDetail> gradeDetails = new ArrayList<GradeDetail>();
 					if(testing){
 						gradeDetails.add(createGradeDetail(gradableItemList.get(0), student));
+						gradeDetails.add(createGradeDetailWithAttempt(gradableItemList.get(1), student));
 					}
 					else{
 						gradeDetails = GradeDetailDAO.get().getGradeDetailByCourseUser(student.getId());
@@ -676,6 +680,9 @@ public class BlackboardHandler {
 					if(!testing){
 						gradebookManager.updateGrade(gradeDetail, true, courseID);
 					}
+					else{
+						student.setGold((int) manualScore);
+					}
 					break;
 				} catch (BbSecurityException e) {
 					e.printStackTrace();
@@ -745,7 +752,7 @@ public class BlackboardHandler {
 			List<Item> items = student.getItemList();
 			item = new ItemController().getItemByName(items, item.getName());
 			if(item.getTimesUsed() == 0){
-				System.out.println("Setting used expiry date for item " + item.getName());
+				System.out.println("\nSetting used expiry date for item " + item.getName());
 				dbController.setUsedExpiryDate(item, student.getStudentID());
 				dbController.updateItemUsage(item.getName(), student.getStudentID(), columnName);
 				activateItem(item, student, columnName);
@@ -766,8 +773,8 @@ public class BlackboardHandler {
 		gradeDetail.setGradableItemId(gradableItem.getId());
 		gradeDetail.setGradingRequired(false);
 		gradeDetail.setId(Id.newId(GradeDetail.DATA_TYPE));
-		gradeDetail.setManualGrade("100");
-		gradeDetail.setManualScore(100.0d);
+		gradeDetail.setManualGrade(student.getGold() + "");
+		gradeDetail.setManualScore((double)student.getGold());
 		return gradeDetail;
 	}
 	

@@ -57,6 +57,10 @@ public class Item implements Serializable{
 	
 	/** The times this item was used. */
 	private int timesUsed;
+	
+	/** Decides if item is specific for only one Column or only NOT that column. 
+	 *  If empty then its for any. */
+	private String specific;
 
 	/**
 	 * Instantiates a new item by name.
@@ -65,6 +69,7 @@ public class Item implements Serializable{
 	 */
 	public Item(String name) {
 		this.name = name;
+		this.specific = "NULL";
 	}
 	
 
@@ -216,6 +221,15 @@ public class Item implements Serializable{
 	
 	public int getTimesUsed(){
 		return timesUsed;
+	}
+	
+	public String getSpecific() {
+		return specific;
+	}
+
+
+	public void setSpecific(String specific) {
+		this.specific = specific;
 	}
 	
 	/** 

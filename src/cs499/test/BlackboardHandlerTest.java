@@ -18,7 +18,6 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
 import org.dbunit.operation.DatabaseOperation;
 import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -34,7 +33,6 @@ import cs499.controllers.BlackboardHandler;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
 import cs499.itemHandler.Item;
-import cs499.util.GradebookColumnPojo;
 
 public class BlackboardHandlerTest {
 	
@@ -276,6 +274,61 @@ public class BlackboardHandlerTest {
 	}
 	
 	@Test
+	public void testInstantItemWithUpdateColumns(){
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		bbHandler.addGradableItem(gradableItem);
+		bbHandler.processItem("Once");
+		createStudents("00111");
+		assertEquals(null ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111"));
+	}
+	
+	@Test
+	public void testNotActivatedContinuousItemWithUpdateColumns(){
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		bbHandler.addGradableItem(gradableItem);
+		bbHandler.processItem("Continuous");
+		createStudents("00111");
+		assertEquals(null ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111"));
+	}
+	
+	@Test
+	public void testContinuousItemWithUpdateColumnsWhenItemExpiredAndPending(){
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		bbHandler.addGradableItem(gradableItem);
+		Item item = marketPlaceDao.loadItem("Continuous");
+		bbHandler.processItem("Continuous");
+		bbHandler.useItem(item, "TEST");
+		createStudents("00111");
+		marketPlaceDao.editItemUseInfoExpDate("00111", "Continuous", new DateTime().minusDays(2).toString());
+		AttemptDetail attempt = new AttemptDetail();
+		attempt.setScore(-1);
+		attempt.setAttemptDate(Calendar.getInstance());
+		marketPlaceDao.updateGradebookColumn(attempt, "00111");
+		createStudents("00111");
+		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
+	}
+	
+	@Test
+	public void testUsePassiveItem(){ // Passives are used not automatically but more like Teacher has to reply to email
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		gradableItem.setMaxAttempts(2);
+		bbHandler.addGradableItem(gradableItem);
+		Item item = marketPlaceDao.loadItem("Passive");
+		assertEquals(2, gradableItem.getMaxAttempts());
+		bbHandler.processItem("Passive");
+		bbHandler.useItem(item, "TEST");
+		assertEquals(2, gradableItem.getMaxAttempts());
+	}
+	
+	@Test
 	public void testGetStudentIfInstructor(){
 		assertNull(bbHandler.getStudent());
 	}
@@ -291,7 +344,74 @@ public class BlackboardHandlerTest {
 		createStudents("0011");
 		assertNull(bbHandler.getStudent());
 	}
-
+	
+	@Test
+	public void testGetAllColumnsByTypeWhenContinuous(){
+		List<String> columns = bbHandler.getAllColumnsByType("Continuous");
+		assertEquals(1, columns.size());
+		assertEquals("ALL", columns.get(0));
+	}
+	
+	@Test
+	public void testGetAllColumnsByTypeWhenAll(){
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setCategory("_12_1");
+		gradableItem.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem.setTitle("Test");
+		gradableItem.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem);
+		GradableItem gradableItem2 = new GradableItem();
+		gradableItem2.setCategory("_10_1");
+		gradableItem2.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem2.setTitle("Assignment");
+		gradableItem2.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem2);
+		List<String> columns = bbHandler.getAllColumnsByType("OnceTwo");
+		assertEquals(2, columns.size());
+		assertEquals("[Test, Assignment]", columns.toString());
+	}
+	
+	@Test
+	public void testGetAllColumnsByTypeWhenAssignment(){
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem.setTitle("Test");
+		gradableItem.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem);
+		GradableItem gradableItem2 = new GradableItem();
+		gradableItem2.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem2.setTitle("Assignment");
+		gradableItem2.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem2);
+		List<String> columns = bbHandler.getAllColumnsByType(gradableItem2.getCategoryId().getExternalString());
+		assertEquals(1, columns.size());
+		assertEquals("[Assignment]", columns.toString());
+	}
+	
+	@Test
+	public void testGetAllColumnsByTypeWhenTest(){
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem.setTitle("Test");
+		gradableItem.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem);
+		GradableItem gradableItem2 = new GradableItem();
+		gradableItem2.setCategoryId(Id.newId(GradableItem.DATA_TYPE));
+		gradableItem2.setTitle("Assignment");
+		gradableItem2.setVisibleToStudents(true);
+		bbHandler.addGradableItem(gradableItem2);
+		List<String> columns = bbHandler.getAllColumnsByType(gradableItem.getCategoryId().getExternalString());
+		assertEquals(1, columns.size());
+		assertEquals("[Test]", columns.toString());
+	}
+	
+	@Test
+	public void testAddGoldToAll(){
+		createStudents("00111");
+		assertEquals(1000, bbHandler.getStudent().getGold());
+		bbHandler.addGoldToAll("1000");
+		assertEquals(2000, bbHandler.getStudent().getGold());
+	}
 	
 	@After
 	public void tearDown(){

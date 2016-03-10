@@ -2,11 +2,9 @@ package cs499.test;
 
 import static org.junit.Assert.*;
 
+import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-
-import com.google.gson.annotations.Expose;
 
 import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.controllers.JSUBbDatabase;
@@ -16,11 +14,15 @@ import cs499.itemHandler.Item.AssessmentType;
 import cs499.itemHandler.Item.AttributeAffected;
 import cs499.util.Setting;
 
+import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -56,9 +58,10 @@ public class MarketPlaceDAOTest {
 	@Before
 	public void setUp() throws Exception
     {
+		courseId = "10_1";
+        updateDatabaseInfo();
         IDatabaseConnection connection = getConnection();
         IDataSet dataSet = getDataSet();
-        courseId = "10_1";
         marketPlaceDao = new MarketPlaceDAO(true, courseId);
         DatabaseOperation.CLEAN_INSERT.execute(connection, dataSet);
         connection.close();
@@ -82,7 +85,7 @@ public class MarketPlaceDAOTest {
 		for(Item item : marketPlaceDao.loadItems()){
 			itemsList.add(item.getName());
 		}
-		assertEquals(itemsList.toString(), "[Once, Continuous, OnceTwo, Passive]");
+		assertEquals(itemsList.toString(), "[Once, Continuous, OnceTwo, OnceThree, Passive, SpecificOnly, SpecificNot]");
 	}
 	
 	@Test
@@ -114,7 +117,7 @@ public class MarketPlaceDAOTest {
 	public void testEmptyDatabase(){
 		Item item = marketPlaceDao.loadItem("Once");
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
-		assertEquals(4, marketPlaceDao.loadItems().size());
+		assertEquals(7, marketPlaceDao.loadItems().size());
 		marketPlaceDao.emptyDatabase();
 		assertEquals(0, marketPlaceDao.loadItems().size());
 	}	
@@ -174,8 +177,8 @@ public class MarketPlaceDAOTest {
 	@Test
 	public void testUpdateItemUsage(){
 		Item item = marketPlaceDao.loadItem("Once");
-		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
-		assertEquals(true, marketPlaceDao.updateItemUsage("Once", "00111", "Test"));
+		assertEquals(true, marketPlaceDao.persistPurhcase("001111", item));
+		assertEquals(true, marketPlaceDao.updateItemUsage("Once", "001111", "Test"));
 	}
 	
 	@Test(expected=NullPointerException.class)
@@ -298,6 +301,41 @@ public class MarketPlaceDAOTest {
 		marketPlaceDao.updateItemUsage("Continuous", "00111", "Test");
 		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
 		assertEquals(1, items.get(0).getTimesUsed());
+	}
+	
+	@After
+	public void tearDown(){
+		File file = new File("./resources/dbUnitDataSet.xml");
+		Scanner scan = null;
+		try {
+			scan = new Scanner(file);
+			String data = scan.useDelimiter("\\Z").next();
+			data = data.replace("course_id=\"" + courseId + "\"", "course_id=\"courseID\"");
+			PrintWriter writer = new PrintWriter("./resources/dbUnitDataSet.xml");
+			writer.write(data);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} finally{
+			scan.close();
+		}
+	}
+	
+	private void updateDatabaseInfo() {
+		File file = new File("./resources/dbUnitDataSet.xml");
+		Scanner scan = null;
+		try {
+			scan = new Scanner(file);
+			String data = scan.useDelimiter("\\Z").next();
+			data = data.replace("course_id=\"courseID\"", "course_id=\"" + courseId + "\"");
+			PrintWriter writer = new PrintWriter("./resources/dbUnitDataSet.xml");
+			writer.write(data);
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} finally{
+			scan.close();
+		}
 	}
 	
 }

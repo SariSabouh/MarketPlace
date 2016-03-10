@@ -9,6 +9,7 @@
     <column name="duration" data-type="int" nullable="false" identity="false" comment="Duration of Item" />
     <column name="effect_magnitude" data-type="int" nullable="false" identity="false" comment="The magnitude of the effect of the Item" />
     <column name="supply" data-type="int" nullable="false" identity="false" comment="Supply of Item" />
+    <column name="specific_column" data-type="nvarchar(100)" nullable="true" identity="false" comment="Specifies if its only available for one item or all but that item by keyword ONLY or NOT" />
     <column name="type" data-type="nvarchar(100)" nullable="false" identity="false" comment="Assessment Type of Item" />
     <column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
 

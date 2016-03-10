@@ -1,10 +1,13 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <dataset>      
 	<!--Item Table -->
-	<jsu_item name="Once" cost="875" duration="0" type="TEST" attribute_affected="DUEDATE" supply="1" effect_magnitude="24" course_id="courseID"/>
-	<jsu_item name="Continuous" cost="115" duration="65" type="ASSIGNMENT" attribute_affected="GRADE" supply="10" effect_magnitude="20" course_id="courseID"/>
-	<jsu_item name="OnceTwo" cost="200" duration="ONCE" type="ALL" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" course_id="courseID"/>
-	<jsu_item name="Passive" cost="200" duration="PASSIVE" type="ALL" attribute_affected="NUMATTEMPTS" supply="10" effect_magnitude="2" course_id="courseID"/>
+	<jsu_item name="Once" cost="875" duration="0" type="TEST" attribute_affected="DUEDATE" supply="1" effect_magnitude="24" specific_column="" course_id="courseID"/>
+	<jsu_item name="Continuous" cost="115" duration="65" type="ASSIGNMENT" attribute_affected="GRADE" supply="10" effect_magnitude="20" specific_column="" course_id="courseID"/>
+	<jsu_item name="OnceTwo" cost="200" duration="ONCE" type="ALL" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" specific_column="" course_id="courseID"/>
+	<jsu_item name="OnceThree" cost="200" duration="ONCE" type="ASSIGNMENT" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" specific_column="" course_id="courseID"/>
+	<jsu_item name="Passive" cost="200" duration="PASSIVE" type="ALL" attribute_affected="NUMATTEMPTS" supply="10" effect_magnitude="2" specific_column="" course_id="courseID"/>
+	<jsu_item name="SpecificOnly" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="NOT TEST" course_id="courseID"/>
+	<jsu_item name="SpecificNot" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="ONLY TEST" course_id="courseID"/>
 	
 	<!--PurchaseInfo Table -->
 	<jsu_purchaseinfo />
@@ -13,7 +16,7 @@
 	<jsu_item_use_info />
 	
 	<!--Settings Table -->
-	<jsu_settings name="visible_columns" value="Y" course_id="10_1"/>
+	<jsu_settings name="visible_columns" value="Y" course_id="courseID"/>
 	
 	<!--Gradebook Table -->
 	<jsu_gradebook />
