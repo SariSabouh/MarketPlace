@@ -6,6 +6,7 @@ type=TEST
 attAffected=DUEDATE
 supply=5
 effectMagnitude=24
+specific_column=NULL
 --
 name=Pearl of Wisdom
 cost=200
@@ -14,6 +15,7 @@ type=ALL
 attAffected=GRADE
 supply=10
 effectMagnitude=20
+specific_column=NULL
 --
 name=The Let Me Try Again Solution
 cost=150
@@ -22,6 +24,7 @@ type=ALL
 attAffected=NUMATTEMPTS
 supply=2
 effectMagnitude=2
+specific_column=NULL
 --
 name=Talk To The Middle Man
 cost=200
@@ -30,6 +33,7 @@ type=ALL
 attAffected=GRADE
 supply=5
 effectMagnitude=5
+specific_column=NULL
 --
 name=The Please Reply
 cost=1000
@@ -38,4 +42,5 @@ type=ALL
 attAffected=GRADE
 supply=10
 effectMagnitude=999
+specific_column=NULL
 --

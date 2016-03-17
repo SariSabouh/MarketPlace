@@ -71,6 +71,9 @@ public class BlackboardHandler {
 	/** The flag that defines if this is for testing or not. */
 	private boolean testing;
 	
+	/** This variable is only used for unit testing. */
+	private GradeDetail currentGradeDetail;
+	
 
 	/**
 	 * Instantiates a new blackboard handler. It also sets all students in the course
@@ -119,6 +122,7 @@ public class BlackboardHandler {
 			System.out.print("In process");
 			ItemController itemController = new ItemController();
 			Item item = itemController.getItemByName(itemList, itemName);
+			System.out.println("prcessItem exp: " + item.getExpirationDate());
 			if(student.canAfford(item.getCost())){
 				if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
 					System.out.println("Student can afford and store has supply");
@@ -147,12 +151,27 @@ public class BlackboardHandler {
 	 * @return true, if successful
 	 */
 	public void useItem(Item item, String columnName){
-		if(isStudent){
+		if(isStudent && isColumnAllowedForItem(item, columnName)){
 			Student student = getStudent();
 			updateItem(item, student, columnName);
 		}
 	}
 	
+	private boolean isColumnAllowedForItem(Item item, String columnName) {
+		String spec = item.getSpecific();
+		System.out.println("Spec " + spec);
+		if(spec == null){
+			spec = "";
+		}
+		if(spec.startsWith("NOT ") && spec.equals("NOT " + columnName)){
+			return false;
+		}
+		else if(spec.startsWith("ONLY ") && spec.equals("ONLY " + columnName)){
+			return true;
+		}
+		return true;
+	}
+
 	/**
 	 * Gets the @{link Student} that is currently logged in.
 	 *
@@ -273,7 +292,7 @@ public class BlackboardHandler {
 			student.setStudentID(currentUser.getStudentId());
 			student.setUserName(currentUser.getUserName());
 			student.setId(selectedMember.getId());
-			List<Item> itemList = dbController.loadNotExpiredItems(this.itemList, student.getStudentID());
+			List<Item> itemList = dbController.loadNotExpiredItems(this.itemList, student.getStudentID());			
 			for(Item item : this.itemList){
 				ItemController itemCont = new ItemController();
 				if(itemCont.getItemByName(itemList, item.getName()) != null){
@@ -681,7 +700,7 @@ public class BlackboardHandler {
 						gradebookManager.updateGrade(gradeDetail, true, courseID);
 					}
 					else{
-						student.setGold((int) manualScore);
+						currentGradeDetail = gradeDetail;
 					}
 					break;
 				} catch (BbSecurityException e) {
@@ -830,6 +849,10 @@ public class BlackboardHandler {
 		if(i != null){
 			setStudentsList(i);
 		}
+	}
+	
+	public GradeDetail getCurrentGradeDetail(){
+		return currentGradeDetail;
 	}
 	
 }

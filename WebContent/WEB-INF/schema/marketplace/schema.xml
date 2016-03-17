@@ -39,6 +39,7 @@
   	<column name="item_use_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
+  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="false" comment="This is the foreign key for the purchseinfo table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
   	<column name="used_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Use." />
   	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
   	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
@@ -51,6 +52,10 @@
   	
   	<foreign-key name="jsu_item_id_fk2" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
 	  <columnref name="item_pk1" />
+	</foreign-key>
+	
+	<foreign-key name="jsu_purchase_info_pk1" reference-table="jsu_purchaseinfo" comment="This is a Foreign Key referencing the primary key of the jsu_purchaseinfo table.">
+	  <columnref name="purchase_info_pk1" />
 	</foreign-key>
   </table>
 

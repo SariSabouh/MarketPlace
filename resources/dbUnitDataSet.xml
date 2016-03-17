@@ -6,8 +6,8 @@
 	<jsu_item name="OnceTwo" cost="200" duration="ONCE" type="ALL" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" specific_column="" course_id="courseID"/>
 	<jsu_item name="OnceThree" cost="200" duration="ONCE" type="ASSIGNMENT" attribute_affected="NUMATTEMPTS" supply="2" effect_magnitude="2" specific_column="" course_id="courseID"/>
 	<jsu_item name="Passive" cost="200" duration="PASSIVE" type="ALL" attribute_affected="NUMATTEMPTS" supply="10" effect_magnitude="2" specific_column="" course_id="courseID"/>
-	<jsu_item name="SpecificOnly" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="NOT TEST" course_id="courseID"/>
-	<jsu_item name="SpecificNot" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="ONLY TEST" course_id="courseID"/>
+	<jsu_item name="SpecificOnly" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="ONLY TEST" course_id="courseID"/>
+	<jsu_item name="SpecificNot" cost="200" duration="ONCE" type="ALL" attribute_affected="GRADE" supply="10" effect_magnitude="2" specific_column="NOT TEST" course_id="courseID"/>
 	
 	<!--PurchaseInfo Table -->
 	<jsu_purchaseinfo />

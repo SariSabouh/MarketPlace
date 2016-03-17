@@ -155,6 +155,7 @@
 			<div id="columnList">
               <label>Please Select Item From the List: 
                 <select id="mySelect">
+                	<option>NONE</option>
 	                <c:forEach items="${columnNames}" var="name">
 						<option>${name}</option>
 					</c:forEach>

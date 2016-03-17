@@ -240,6 +240,7 @@ public class BlackboardHandlerTest {
 		gradableItem.setMaxAttempts(2);
 		bbHandler.addGradableItem(gradableItem);
 		Item item = marketPlaceDao.loadItem("OnceTwo");
+		marketPlaceDao.persistPurhcase("00111", item);
 		bbHandler.useItem(item, "Test");
 		assertEquals(4, gradableItem.getMaxAttempts());
 	}
@@ -327,7 +328,7 @@ public class BlackboardHandlerTest {
 		bbHandler.useItem(item, "TEST");
 		assertEquals(2, gradableItem.getMaxAttempts());
 	}
-	
+		
 	@Test
 	public void testGetStudentIfInstructor(){
 		assertNull(bbHandler.getStudent());
@@ -410,7 +411,30 @@ public class BlackboardHandlerTest {
 		createStudents("00111");
 		assertEquals(1000, bbHandler.getStudent().getGold());
 		bbHandler.addGoldToAll("1000");
-		assertEquals(2000, bbHandler.getStudent().getGold());
+		assertEquals("2000.0", bbHandler.getCurrentGradeDetail().getManualGrade());
+	}
+	
+	@Test (expected=NullPointerException.class)
+	public void testInstantGradeItemWithNotThisColumn(){
+		createStudents("00111");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		bbHandler.addGradableItem(gradableItem);
+		Item item = marketPlaceDao.loadItem("SpecificNot");
+		bbHandler.useItem(item, "TEST");
+		assertEquals("0.0", bbHandler.getCurrentGradeDetail().getManualGrade());
+	}
+	
+	@Test
+	public void testInstantGradeItemWithOnlyThisColumn(){
+		createStudents("00111");
+		Item item = marketPlaceDao.loadItem("SpecificOnly");
+		marketPlaceDao.persistPurhcase("00111", item);
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		bbHandler.addGradableItem(gradableItem);
+		bbHandler.useItem(item, "TEST");
+		assertEquals("1002.0", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
 	@After

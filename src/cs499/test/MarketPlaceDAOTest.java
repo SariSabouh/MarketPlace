@@ -131,6 +131,16 @@ public class MarketPlaceDAOTest {
 	}
 	
 	@Test
+	public void testUnusedItemsWithSameNameThatItemHasBeenUsed(){
+		Item item = marketPlaceDao.loadItem("Once");
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
+		marketPlaceDao.expireInstantItem("Once", "00111", "Test");
+		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
+		List<Item> itemList = marketPlaceDao.loadItems();
+		assertEquals("Once", marketPlaceDao.loadNotExpiredItems(itemList, "00111").get(0).getName());
+	}
+	
+	@Test
 	public void testLoadUnusedItemsThatAreUsed(){
 		Item item = marketPlaceDao.loadItem("Once");
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
@@ -169,7 +179,7 @@ public class MarketPlaceDAOTest {
 	public void testExpireInstantItemWithWrongName(){
 		Item item = marketPlaceDao.loadItem("Once");
 		assertEquals(true, marketPlaceDao.persistPurhcase("00111", item));
-		assertEquals(true, marketPlaceDao.expireInstantItem("UNO", "00111", "Test"));
+		assertEquals(false, marketPlaceDao.expireInstantItem("UNO", "00111", "Test"));
 		List<Item> itemList = marketPlaceDao.loadItems();
 		assertEquals("Once", marketPlaceDao.loadNotExpiredItems(itemList, "00111").get(0).getName());
 	}

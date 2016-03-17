@@ -28,6 +28,8 @@ public class JSUBbDatabase extends BbDatabase {
 			}
 		} else {
 			try {
+//				System.out.println("Open Method: " + Thread.currentThread().getStackTrace()[2].getMethodName() + " class: " + Thread.currentThread().getStackTrace()[2].getClassName() + " line: " + Thread.currentThread().getStackTrace()[2].getLineNumber());
+//				System.out.println("Cont: " + Thread.currentThread().getStackTrace()[3].getMethodName() + " class: " + Thread.currentThread().getStackTrace()[3].getClassName() + " line: " + Thread.currentThread().getStackTrace()[3].getLineNumber());
 				cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 				cManager.cleanPinnedConnections();
 				cManager.cleanUnreleasedConnections();
@@ -41,6 +43,7 @@ public class JSUBbDatabase extends BbDatabase {
 	
 	public static boolean closeConnection(boolean testing){
 		if(!testing){
+//			System.out.println("Close Method: " + Thread.currentThread().getStackTrace()[2].getMethodName());
 			cManager.close();
 			return true;
 		}

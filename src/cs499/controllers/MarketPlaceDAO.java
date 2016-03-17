@@ -62,6 +62,7 @@ public class MarketPlaceDAO {
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
+		        	item.setSpecific(rSet.getString("specific_column"));
 		        	itemList.add(item);
 	        	}
 	        }
@@ -112,6 +113,7 @@ public class MarketPlaceDAO {
 		        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
 		        	item.setSupply(rSet.getInt("supply"));
 		        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
+		        	item.setSpecific(rSet.getString("specific_column"));
 	        	}
 	        }
 	        rSet.close();
@@ -309,7 +311,7 @@ public class MarketPlaceDAO {
 	 * @param itemName the @{link Item} name
 	 */
 	public boolean persistPurhcase(String studentID, Item item) {
-		System.out.print("Persist Items");
+		System.out.print("Persist Items ");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -325,6 +327,48 @@ public class MarketPlaceDAO {
             insertQuery.setString(4, new DateTime().toString());
             insertQuery.setInt(5, (int) item.getCost());
             insertQuery.setString(6, courseId);
+            if(insertQuery.executeUpdate() > 0){
+            	persistInfo(studentID, item);
+            	return true;
+            }
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        return false;
+	}
+	
+	private boolean persistInfo(String studentID, Item item) {
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+        	String getPurInfoRow = "";
+        	if(testing){
+        		getPurInfoRow = "select purchase_info_pk1 from jsu_purchaseinfo where item_pk1 = (select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ? order by purchase_info_pk1 desc limit 1))";
+        	}
+        	else{
+        		getPurInfoRow = "select max(purchase_info_pk1) from jsu_purchaseinfo where item_pk1 = (select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?))";
+        	}
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("insert into jsu_item_use_info (student_id, item_pk1, used_date, expiration_date, gradebook_column_name, course_id, purchase_info_pk1) ");
+		    queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), \'NA\', \'NA\', \'NA\', ?, (");
+		    queryString.append(getPurInfoRow);
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setString(1, studentID);
+            insertQuery.setString(2, item.getName());
+            insertQuery.setString(3, courseId);
+            insertQuery.setString(4, courseId);
+            insertQuery.setString(5, item.getName());
+            insertQuery.setString(6, courseId);
+            insertQuery.setString(7, studentID);
+            insertQuery.setString(8, courseId);
             if(insertQuery.executeUpdate() > 0){
             	return true;
             }
@@ -349,6 +393,7 @@ public class MarketPlaceDAO {
 	 */
 	public void emptyDatabase() { // VERY DANGEROUS METHOD REMOVES ALL ITEMS IN ALL TABLES IN DB USE WISELY
         Connection conn = null;
+        deleteItemUseInfo();
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
@@ -367,7 +412,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        deleteItemUseInfo();
+        deleteItemList();
         System.out.println("Deleted Purchase Info");
 	}
 	
@@ -396,7 +441,6 @@ public class MarketPlaceDAO {
 			}
 	    }
         System.out.println("Deleted Item Use Info");
-        deleteItemList();
 	}
 	
 	/**
@@ -496,9 +540,9 @@ public class MarketPlaceDAO {
 			conn = JSUBbDatabase.getConnection(testing);
 	        PreparedStatement selectQuery = null;
 	        queryString.append("SELECT jsu_item.name, jsu_item_use_info.expiration_date, jsu_item_use_info.times_used ");
-	        queryString.append("FROM jsu_item, jsu_purchaseinfo LEFT OUTER JOIN jsu_item_use_info ");
-	        queryString.append("ON jsu_purchaseinfo.item_pk1 = jsu_item_use_info.item_pk1 and jsu_purchaseinfo.student_id = jsu_item_use_info.student_id and jsu_purchaseinfo.course_id = jsu_item_use_info.course_id ");
-	        queryString.append("where jsu_purchaseinfo.student_id = ? and jsu_item.item_pk1 = jsu_purchaseinfo.item_pk1 and jsu_item.course_id = ? and jsu_purchaseinfo.course_id = ?");
+	        queryString.append("FROM jsu_item, jsu_item_use_info ");
+	        queryString.append("where jsu_item.item_pk1 = jsu_item_use_info.item_pk1 and jsu_item.course_id = jsu_item_use_info.course_id ");
+	        queryString.append("and jsu_item_use_info.student_id = ? and jsu_item.item_pk1 = jsu_item_use_info.item_pk1 and jsu_item.course_id = ? and jsu_item_use_info.course_id = ?");
             selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setString(1, studentID);
 	        selectQuery.setString(2, courseId);
@@ -507,11 +551,12 @@ public class MarketPlaceDAO {
 	        while(rSet.next()){
 	        	ItemController itemCont = new ItemController();
 	        	String expirationString = rSet.getString("expiration_date");
+	        	String itemName = rSet.getString("name");
+	        	System.out.println(itemName + " date " + expirationString);
 	        	if(expirationString == null){
 	        		expirationString = "NA";
 	        	}
 	        	if(expirationString.equals("NA")){
-	        		String itemName = rSet.getString("name");
 		        	System.out.println("Item found: " + itemName);
 		        	Item item = itemCont.getItemByName(items, itemName);
 		        	item.setExpirationDate("NA");
@@ -521,7 +566,6 @@ public class MarketPlaceDAO {
 	        	else{
 	        		DateTime expirationDate = new DateTime(expirationString);
 	        		if(expirationDate.isAfterNow()){
-	        			String itemName = rSet.getString("name");
 	    	        	System.out.println("Item found: " + itemName);
 	    	        	Item item = itemCont.getItemByName(items, itemName);
 			        	item.setExpirationDate(expirationString);
@@ -529,11 +573,9 @@ public class MarketPlaceDAO {
 			        	itemList.add(item);
 	        		}
 	        		else{
-	        			Item item = loadItem(rSet.getString("name"));
+	        			Item item = itemCont.getItemByName(items, itemName);
 	        			if(item.getDuration() != 0){
-		        			String itemName = rSet.getString("name");
 		    	        	System.out.println("Expired Continuous Item found: " + itemName);
-		    	        	item = itemCont.getItemByName(items, itemName);
 				        	item.setExpirationDate(expirationString);
 				        	item.setTimesUsed(rSet.getInt("times_used"));
 				        	itemList.add(item);
@@ -568,16 +610,16 @@ public class MarketPlaceDAO {
         try {
 			conn = JSUBbDatabase.getConnection(testing);
 	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("INSERT INTO jsu_item_use_info");
-            queryString.append("(student_id, item_pk1, used_date, expiration_date, times_used, gradebook_column_name, course_id) ");
-            queryString.append(" VALUES (?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 1, ?, ?) ");
+	        queryString.append("UPDATE jsu_item_use_info");
+            queryString.append(" set times_used = 1, gradebook_column_name = ?, used_date = ?, expiration_date = ?");
+            queryString.append(" where student_id = ? and item_pk1 = (select item_pk1 from jsu_item where name = ? and course_id = ?) and course_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(1, studentID);
-	        selectQuery.setString(2, name);
-	        selectQuery.setString(3, courseId);
-            selectQuery.setString(4, new DateTime().toString());
-            selectQuery.setString(5, new DateTime().toString());
-            selectQuery.setString(6, columnName);
+	        selectQuery.setString(1, columnName);
+            selectQuery.setString(2, new DateTime().toString());
+            selectQuery.setString(3, new DateTime().toString());
+	        selectQuery.setString(4, studentID);
+	        selectQuery.setString(5, name);
+	        selectQuery.setString(6, courseId);
             selectQuery.setString(7, courseId);
 	        int rowsUpdated = selectQuery.executeUpdate();
 	        if(rowsUpdated < 1){

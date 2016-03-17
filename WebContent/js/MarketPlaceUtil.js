@@ -1,6 +1,5 @@
 jQuery.noConflict();
 (function($) {
-	
 	var settingsNames = $("#settingNames").val();
 	settingsNames = settingsNames.replace('[', '');
 	settingsNames = settingsNames.replace(']', '');
@@ -67,18 +66,24 @@ jQuery.noConflict();
 	});
     $("#useItem").click(function() {
     	var nameItemRadio = $('input[name=itemRadio]:checked', '#myRadioButtons').parent().text().trim();
-		$.ajax({
-	    	url: $("#useItemURL").val(),
-    		type: "GET",
-    		data: {columnName: $('#mySelect :selected').text().trim(), itemName: nameItemRadio},
-    		success: function(result){
-    			alert("Item Used");
-    			location.reload();
-    		},
-    		error: function(result){
-    			alert("Item Use Failed. Check Option Selected.");
-    		}
-	    });
+    	var columnNameUsed = $('#mySelect :selected').text().trim();
+    	if(columnNameUsed == "NONE"){
+    		alert("Item Use Failed. Check Option Selected.");
+    	}
+    	else{
+			$.ajax({
+		    	url: $("#useItemURL").val(),
+	    		type: "GET",
+	    		data: {columnName: columnNameUsed, itemName: nameItemRadio},
+	    		success: function(result){
+	    			alert("Item Used");
+	    			location.reload();
+	    		},
+	    		error: function(result){
+	    			alert("Item Use Failed. Check Option Selected.");
+	    		}
+		    });
+    	}
 	});
     $('input[name="itemRadio"]').click(function(){
     	$("#mySelect").hide();
