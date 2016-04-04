@@ -2,7 +2,7 @@
 <comment>This schema defines a table used by the application to store a Blackboard user's favorite Blackboard course</comment>
 
   <table name="jsu_item">
-  	<column name="item_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="item_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
     <column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Item" />
     <column name="attribute_affected" data-type="nvarchar(100)" nullable="false" identity="false" comment="Attribute that the Item will affect" />
     <column name="cost" data-type="int" nullable="false" identity="false" comment="Cost of Item" />
@@ -19,7 +19,7 @@
   </table>
   
   <table name="jsu_purchaseinfo">
-  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
   	<column name="purchase_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Purhcase." />
@@ -36,10 +36,10 @@
   </table>
 
   <table name="jsu_item_use_info">
-  	<column name="item_use_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="item_use_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
   	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
-  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="false" comment="This is the foreign key for the purchseinfo table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="purchase_info_pk1" data-type="int" nullable="false" identity="false" comment="This is the foreign key for the purchseinfo table, in Oracle it should be updated using a sequence which will be created automatically" />
   	<column name="used_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Use." />
   	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Expiration." />
   	<column name="times_used" data-type="int" nullable="true" identity="false" comment="How many times did it get used." />
@@ -60,7 +60,7 @@
   </table>
 
   <table name="jsu_gradebook">
-  	<column name="gradebook_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="gradebook_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
   	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that Attempted the column." />
   	<column name="gradebook_column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column name." />
   	<column name="last_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Last attempt date." />
@@ -73,7 +73,7 @@
   </table>
   
   <table name="jsu_settings">
-  	<column name="settings_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using the sequence jsu_item_seq which will be created automatically" />
+  	<column name="settings_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
   	<column name="name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Name of Setting." />
   	<column name="value" data-type="nvarchar(100)" nullable="false" identity="false" comment="Value of Setting." />
 	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
@@ -81,6 +81,40 @@
   	<primary-key name="jsu_settings_id" comment="Unique primary key">
       <columnref name="settings_pk1" />
     </primary-key>
+  </table>
+  
+  <table name="jsu_community_item_info">
+  	<column name="community_item_info_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
+  	<column name="item_pk1" data-type="int" nullable="false" identity="false" comment="Item Id." />
+  	<column name="purchase_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date of Purhcase." />
+  	<column name="expiration_date" data-type="nvarchar(100)" nullable="false" identity="false" comment="Date community item wait expires" />y
+  	<column name="active" data-type="int" nullable="false" identity="false" comment="0 Inactive and 1 Active" />
+  	<column name="column_name" data-type="nvarchar(100)" nullable="false" identity="false" comment="Column it will affect" />
+	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+	
+  	<primary-key name="jsu_community_item_info_id1" comment="Unique primary key">
+      <columnref name="community_item_info_pk1" />
+    </primary-key>
+  	
+  	<foreign-key name="jsu_item_id_fk10" reference-table="jsu_item" comment="This is a Foreign Key referencing the primary key of the jsu_item table.">
+	  <columnref name="item_pk1" />
+	</foreign-key>
+  </table>
+  
+  <table name="jsu_community_item_usage">
+  	<column name="community_item_usage_pk1" data-type="int" nullable="false" identity="true" comment="This is the primary key for the table, in Oracle it should be updated using a sequence which will be created automatically" />
+  	<column name="community_item_info_pk1" data-type="int" nullable="false" identity="false" comment="This is a Foreign Key referencing the primary key of the jsu_community_item_info table." />
+  	<column name="student_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="StudentId of person that made the purchase." />
+  	<column name="paid" data-type="int" nullable="false" identity="false" comment="Amount paid for Purhcase." />
+  	<column name="course_id" data-type="nvarchar(100)" nullable="false" identity="false" comment="Course ID" />
+
+  	<primary-key name="jsu_community_item_usage_id1" comment="Unique primary key">
+      <columnref name="community_item_usage_pk1" />
+    </primary-key>
+    
+	<foreign-key name="jsu_community_item_info_id_fk1" reference-table="jsu_community_item_info" comment="This is a Foreign Key referencing the primary key of the jsu_community_item_info table.">
+	  <columnref name="community_item_info_pk1" />
+	</foreign-key>
   </table>
 
 </schema>

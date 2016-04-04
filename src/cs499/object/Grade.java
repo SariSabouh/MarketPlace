@@ -1,4 +1,4 @@
-package cs499.util;
+package cs499.object;
 
 import blackboard.platform.gradebook2.GradeWithAttemptScore;
 

@@ -1,4 +1,4 @@
-package cs499.util;
+package cs499.object;
 
 /**
  * Settings for Module POJO.

@@ -1,4 +1,4 @@
-package cs499.itemHandler;
+package cs499.object;
 
 import java.io.Serializable;
 
@@ -106,7 +106,7 @@ public class Item implements Serializable{
 	}
 
 	/**
-	 * Sets the {@link AssessmentType}.
+	 * Sets the {@link AssessmentType} between ASSIGNMENT, TEST and ALL.
 	 *
 	 * @param type the new type
 	 */
@@ -145,7 +145,7 @@ public class Item implements Serializable{
 	}
 
 	/**
-	 * Gets the {@link AssessmentType}.
+	 * Gets the {@link AssessmentType} between ASSIGNMENT, TEST and ALL.
 	 *
 	 * @return the type
 	 */
@@ -190,7 +190,7 @@ public class Item implements Serializable{
 	}
 	
 	/**
-	 * Gets the {@link AttributeAffected}.
+	 * Gets the {@link AttributeAffected} between DUEDATE, NUMATTEMPTS and GRADE.
 	 *
 	 * @return the attribute affected
 	 */
@@ -199,7 +199,7 @@ public class Item implements Serializable{
 	}
 
 	/**
-	 * Sets the {@link AttributeAffected}.
+	 * Sets the {@link AttributeAffected} between DUEDATE, NUMATTEMPTS and GRADE.
 	 *
 	 * @param attributeAffected the new attribute affected
 	 */

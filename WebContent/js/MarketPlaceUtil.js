@@ -34,6 +34,14 @@ jQuery.noConflict();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
     }
+    
+    if($("#communityItemExists").val() == "false"){
+    	$("#communityItemActive").hide();
+    }
+    else{
+    	$("#noCommunityItemActive").hide();
+    }
+    
     $("#buyItem").click(function() {
 		var student = $("#isStudent").val();
 		if(student == "true"){
@@ -52,17 +60,21 @@ jQuery.noConflict();
 		}
 	});
     $(".Truncate").click(function() {
-    	$.ajax({
-	    	url: $("#TRUNCATE").val(),
-    		type: "GET",
-    		success: function(result){
-    			alert("SUCCESS");
-    			location.reload();
-    		},
-    		error: function(result){
-    			alert("FAILED");
-    		}
-	    });
+    	if (confirm('Are you sure you want to erase all the infromation and reset to Preset?')) {
+        	$.ajax({
+    	    	url: $("#TRUNCATE").val(),
+        		type: "GET",
+        		success: function(result){
+        			alert("SUCCESS");
+        			location.reload();
+        		},
+        		error: function(result){
+        			alert("FAILED");
+        		}
+    	    });
+    	} else {
+    	    
+    	}
 	});
     $("#useItem").click(function() {
     	var nameItemRadio = $('input[name=itemRadio]:checked', '#myRadioButtons').parent().text().trim();
@@ -327,5 +339,116 @@ jQuery.noConflict();
     		}
     	});
     });
+    $("#communityItemButton").click(function() {
+		var index = $('#tabs a[href="#tabs-6"]').parent().index();
+		var name = $('input[name=buyItemRadio]:checked').val();
+		$('#tabs').tabs("option", "active", index);
+		$("#communityItemsSelect").val(name);
+		$("#communityItemColumnSelect").hide();
+    	$("#communityItemColumnSelect > option").each(function() {
+    		$("#communityItemColumnSelect option:contains("+ this.text+ ")").show();
+    	});
+        $.ajax({
+	    	url: $("#getListURL").val(),
+    		type: "GET",
+    		dataType: "json",
+    		contentType:"application/json",
+    		data: {category : name},
+    		success: function(results){
+    			var columnString = $("#columnNames").val();
+    			columnString = columnString.substring(1, columnString.length-1);
+    			var columnNames = columnString.split(',');
+    			for (var i = 0; i < columnNames.length; i++) {
+    				var exists = false;
+    				for(var k = 0; k < results.length; k++) {
+    					if (columnNames[i].trim() == results[k].trim()) {
+    						exists = true;
+    						break;
+    					}
+    				}
+    				if(!exists){
+    					var trimmedName = columnNames[i].trim();
+    					$("#communityItemColumnSelect option:contains("+ trimmedName +")").hide();
+    				}
+    			}
+    			if(results[0].trim() == "ALL"){
+    				$("#communityItemColumnSelect option:contains('ALL')").show();
+    			}
+    			else{
+    				$("#communityItemColumnSelect option:contains('ALL')").hide();
+    			}
+                $("#communityItemColumnSelect").show();
+    		},
+    		error: function(result){
+    			$("#communityItemColumnSelect").hide();
+    			alert("Category is invalid. Please check the category of the Item.");
+    		}
+	    });
+	});
+    $(".CommunityItemOption").click(function() {
+		var name = $('#communityItemsSelect :selected').text().trim();
+		$("#communityItemColumnSelect").hide();
+    	$("#communityItemColumnSelect > option").each(function() {
+    		$("#communityItemColumnSelect option:contains("+ this.text+ ")").show();
+    	});
+        $.ajax({
+	    	url: $("#getListURL").val(),
+    		type: "GET",
+    		dataType: "json",
+    		contentType:"application/json",
+    		data: {category : name},
+    		success: function(results){
+    			var columnString = $("#columnNames").val();
+    			columnString = columnString.substring(1, columnString.length-1);
+    			var columnNames = columnString.split(',');
+    			for (var i = 0; i < columnNames.length; i++) {
+    				var exists = false;
+    				for(var k = 0; k < results.length; k++) {
+    					if (columnNames[i].trim() == results[k].trim()) {
+    						exists = true;
+    						break;
+    					}
+    				}
+    				if(!exists){
+    					var trimmedName = columnNames[i].trim();
+    					$("#communityItemColumnSelect option:contains("+ trimmedName +")").hide();
+    				}
+    			}
+    			if(results[0].trim() == "ALL"){
+    				$("#communityItemColumnSelect option:contains('ALL')").show();
+    			}
+    			else{
+    				$("#communityItemColumnSelect option:contains('ALL')").hide();
+    			}
+                $("#communityItemColumnSelect").show();
+    		},
+    		error: function(result){
+    			$("#communityItemColumnSelect").hide();
+    			alert("Category is invalid. Please check the category of the Item.");
+    		}
+	    });
+	});
+    $("#communityItemBuy").click(function() {
+    	var student = $("#isStudent").val();
+    	var columnNameUsed = $('#communityItemColumnSelect :selected').text().trim();
+		if(student == "true"){
+			if(columnNameUsed == "NONE"){
+	    		alert("Item Use Failed. Check Option Selected.");
+	    	}
+			$.ajax({
+		    	url: $("#useCommunityItemURL").val(),
+	    		type: "GET",
+	    		data: {itemName: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val(),
+	    			downPayment: $("#communityDownPayment").val(), columnUsed: columnNameUsed},
+	    		success: function(result){
+	    			alert("Community Item Purchased");
+	    			location.reload();
+	    		},
+	    		error: function(result){
+	    			alert("Item Purchase FAILED. Check down payment total. It has to be more than 1 GOLD!");
+	    		}
+		    });
+		}
+	});
 })
 (jQuery);

@@ -9,10 +9,10 @@ import org.junit.Test;
 import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
-import cs499.itemHandler.Item;
-import cs499.itemHandler.Item.AssessmentType;
-import cs499.itemHandler.Item.AttributeAffected;
-import cs499.util.Setting;
+import cs499.object.Item;
+import cs499.object.Setting;
+import cs499.object.Item.AssessmentType;
+import cs499.object.Item.AttributeAffected;
 
 import java.io.File;
 import java.io.FileInputStream;

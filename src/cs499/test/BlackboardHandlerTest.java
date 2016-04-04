@@ -32,7 +32,7 @@ import blackboard.platform.gradebook2.GradableItem;
 import cs499.controllers.BlackboardHandler;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
-import cs499.itemHandler.Item;
+import cs499.object.Item;
 
 public class BlackboardHandlerTest {
 	

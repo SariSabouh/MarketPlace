@@ -28,13 +28,14 @@ import blackboard.platform.gradebook2.impl.AttemptDAO;
 import blackboard.platform.gradebook2.impl.GradeDetailDAO;
 import blackboard.platform.gradebook2.impl.GradingSchemaDAO;
 import blackboard.platform.security.authentication.BbSecurityException;
-import cs499.itemHandler.Item;
-import cs499.itemHandler.Item.AttributeAffected;
-import cs499.itemHandler.ItemController;
-import cs499.util.Grade;
-import cs499.util.Student;
-import cs499.util.Grade.Condition;
-import cs499.util.GradebookColumnPojo;
+import cs499.object.CommunityItem;
+import cs499.object.Grade;
+import cs499.object.GradebookColumnPojo;
+import cs499.object.Item;
+import cs499.object.Student;
+import cs499.object.Grade.Condition;
+import cs499.object.Item.AttributeAffected;
+import cs499.util.ItemController;
 
 /**
  * @author SabouhS
@@ -157,6 +158,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	public void useCommunityItem(CommunityItem item){
+		if(isStudent && isColumnAllowedForItem(item, item.getColumnName())){
+			MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.getExternalString());
+			marketPlaceDAO.addCommunityItem(item, getStudent().getStudentID());
+		}
+	}
+	
 	private boolean isColumnAllowedForItem(Item item, String columnName) {
 		String spec = item.getSpecific();
 		System.out.println("Spec " + spec);
@@ -200,7 +208,9 @@ public class BlackboardHandler {
 		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.toExternalString());
 		Item item = marketPlaceDAO.loadItem(itemName);
 		String type = itemName;
+		AttributeAffected attrAff = null;
 		if(item != null){
+			attrAff = item.getAttributeAffected();
 			type = item.getType().toString();
 			if(item.getDuration() != 0){
 				columns.add("ALL");
@@ -208,6 +218,11 @@ public class BlackboardHandler {
 			}
 		}
 		for(GradableItem grade : gradableItemList){
+			if(attrAff == Item.AttributeAffected.DUEDATE){
+				if(!grade.isDueDateSet()){
+					continue;
+				}
+			}
 			String gradeTitle = grade.getTitle();
 			if(gradeTitle.equals("Weighted Total") || gradeTitle.equals("Total") || gradeTitle.equals("Gold")
 					|| grade.getCategoryId() == null){

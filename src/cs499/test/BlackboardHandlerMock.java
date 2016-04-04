@@ -17,12 +17,12 @@ import blackboard.platform.gradebook2.GradableItem;
 import blackboard.platform.gradebook2.GradeDetail;
 import blackboard.platform.gradebook2.GradeWithAttemptScore;
 import cs499.controllers.MarketPlaceDAO;
-import cs499.itemHandler.Item;
-import cs499.itemHandler.ItemController;
-import cs499.itemHandler.Item.AttributeAffected;
-import cs499.util.Grade;
-import cs499.util.GradebookColumnPojo;
-import cs499.util.Student;
+import cs499.object.Grade;
+import cs499.object.GradebookColumnPojo;
+import cs499.object.Item;
+import cs499.object.Student;
+import cs499.object.Item.AttributeAffected;
+import cs499.util.ItemController;
 
 public class BlackboardHandlerMock{
 

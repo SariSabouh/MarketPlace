@@ -1,7 +1,9 @@
-package cs499.itemHandler;
+package cs499.util;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import cs499.object.Item;
 
 /**
  * @author SabouhS

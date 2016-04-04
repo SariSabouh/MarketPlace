@@ -10,12 +10,13 @@ import java.util.List;
 import org.joda.time.DateTime;
 
 import blackboard.platform.gradebook2.AttemptDetail;
-import cs499.itemHandler.Item;
-import cs499.itemHandler.Item.AssessmentType;
-import cs499.itemHandler.Item.AttributeAffected;
-import cs499.itemHandler.ItemController;
-import cs499.util.GradebookColumnPojo;
-import cs499.util.Setting;
+import cs499.object.CommunityItem;
+import cs499.object.GradebookColumnPojo;
+import cs499.object.Item;
+import cs499.object.Setting;
+import cs499.object.Item.AssessmentType;
+import cs499.object.Item.AttributeAffected;
+import cs499.util.ItemController;
 
 /**
  * @author SabouhS
@@ -412,6 +413,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
+        deleteCommunityItemInfo();
         deleteItemList();
         System.out.println("Deleted Purchase Info");
 	}
@@ -524,6 +526,61 @@ public class MarketPlaceDAO {
 			}
 	    }
         System.out.println("Deleted Settings");
+	}
+	
+	/**
+	 * Truncates the Community Item Info table.
+	 * It is only called bye {@link #emptyDatabase()}
+	 */
+	private void deleteCommunityItemInfo() {
+		deleteCommunityItemUsage();
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from jsu_community_item_info where course_id = ?");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setString(1, courseId);
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Deleted Community Item Info");
+	}
+	
+	/**
+	 * Truncates the Community Item Usage table.
+	 * It is only called bye {@link #emptyDatabase()}
+	 */
+	private void deleteCommunityItemUsage() {
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        PreparedStatement insertQuery = null;
+	        queryString.append("delete from jsu_community_item_usage where course_id = ?");
+            insertQuery = conn.prepareStatement(queryString.toString());
+            insertQuery.setString(1, courseId);
+            insertQuery.executeUpdate();
+            insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Deleted Community Item Usage");
 	}
 	
 	/**
@@ -905,28 +962,28 @@ public class MarketPlaceDAO {
 	public boolean updateGradebookColumn(AttemptDetail attempt, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
-        PreparedStatement selectQuery = null;
+        PreparedStatement updateQuery = null;
         try {
         	conn = JSUBbDatabase.getConnection(testing);
         	queryString.append("update jsu_gradebook ");
 	        queryString.append("set last_date = ?, grade = ? ");
 	        queryString.append("where gradebook_column_name = ? and student_id = ? and course_id = ?");
-	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setInt(2, (int) attempt.getScore());
-	        selectQuery.setString(4, studentID);
-	        selectQuery.setString(5, courseId);
+	        updateQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        updateQuery.setInt(2, (int) attempt.getScore());
+	        updateQuery.setString(4, studentID);
+	        updateQuery.setString(5, courseId);
 	        if(testing){
-	        	selectQuery.setString(3, "TEST");
-	        	selectQuery.setString(1, new DateTime(attempt.getAttemptDate().getTime()).toString());
+	        	updateQuery.setString(3, "TEST");
+	        	updateQuery.setString(1, new DateTime(attempt.getAttemptDate().getTime()).toString());
 	        }
 	        else{
-	        	selectQuery.setString(3, attempt.getGradebookItem().getTitle());
-	        	selectQuery.setString(1, new DateTime().toString());
+	        	updateQuery.setString(3, attempt.getGradebookItem().getTitle());
+	        	updateQuery.setString(1, new DateTime().toString());
 	        }
-	        if(selectQuery.executeUpdate() > 0){
+	        if(updateQuery.executeUpdate() > 0){
 	        	return true;
 	        }
-	        selectQuery.close();
+	        updateQuery.close();
 	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
 	    } finally {
@@ -949,19 +1006,19 @@ public class MarketPlaceDAO {
 	public void insertGradebookColumn(int grade, String gradeTitle, String studentID) {
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
-        PreparedStatement selectQuery = null;
+        PreparedStatement insertQuery = null;
         try {
         	conn = JSUBbDatabase.getConnection(testing);
         	queryString.append("insert into jsu_gradebook(gradebook_column_name, last_date, grade, student_id, course_id) ");
 	        queryString.append("VALUES (?, ?, ?, ?, ?)");
-	        selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(2, new DateTime().toString());
-	        selectQuery.setInt(3, grade);
-	        selectQuery.setString(4, studentID);
-	        selectQuery.setString(5, courseId);
-        	selectQuery.setString(1, gradeTitle);
-	        selectQuery.executeUpdate();
-	        selectQuery.close();
+	        insertQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        insertQuery.setString(2, new DateTime().toString());
+	        insertQuery.setInt(3, grade);
+	        insertQuery.setString(4, studentID);
+	        insertQuery.setString(5, courseId);
+        	insertQuery.setString(1, gradeTitle);
+	        insertQuery.executeUpdate();
+	        insertQuery.close();
 	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
 	    } finally {
@@ -1099,5 +1156,145 @@ public class MarketPlaceDAO {
 			}
 	    }
         System.out.println("Expired from database");
+	}
+
+	public void addCommunityItem(CommunityItem item, String studentID) {
+		System.out.println("In addCommunityItem");
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        int newId = -1;
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        System.out.println("Inserting Community Item");
+	        queryString.append("insert into jsu_community_item_info(item_pk1, purchase_date, expiration_date, active, column_name, course_id) ");
+	        queryString.append("values((select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 1, ?, ?)");
+	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), new String[]{"community_item_info_pk1"});
+	        insertQuery.setString(1, item.getName());
+	        insertQuery.setString(2, courseId);
+	        insertQuery.setString(3, new DateTime().toString());
+	        insertQuery.setString(4, new DateTime().plusDays(2).toString());
+	        insertQuery.setString(5, item.getColumnName());
+	        insertQuery.setString(6, courseId);
+	        System.out.println("Item name: " + item.getColumnName());
+	        insertQuery.execute();
+	        ResultSet rs = insertQuery.getGeneratedKeys();
+	        while(rs.next()){
+	        	newId = rs.getInt(1);
+	        }
+	        insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Added Community Item to table");
+        addCommunityItemPayment(item, studentID, newId);
+	}
+	
+	public void addCommunityItemPayment(CommunityItem item, String studentID, int newId){
+		System.out.println("In addCommunityItemPayment");
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        System.out.println("Inserting Community Item");
+	        queryString.append("insert into jsu_community_item_usage(community_item_info_pk1, student_id, paid, course_id) ");
+	        queryString.append("values(?, ?, ?, ?)");
+	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        insertQuery.setInt(1, newId);
+	        insertQuery.setString(2, studentID);
+	        insertQuery.setInt(3, item.getPaid());
+	        insertQuery.setString(4, courseId);
+	        insertQuery.executeUpdate();
+	        insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Added Community Item usage to table");
+
+	}
+	
+	public CommunityItem getCurrentCommunityItem() {
+		System.out.println("In get Current Item");
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        CommunityItem item = new CommunityItem("NO$ITEM");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        System.out.println("Selecting Community Item");
+	        queryString.append("select jsu_item.*, jsu_community_item_info.* ");
+	        queryString.append("from jsu_community_item_info join jsu_item on(jsu_community_item_info.item_pk1 = jsu_item.item_pk1) where jsu_community_item_info.course_id = ? and jsu_community_item_info.active = 1 and jsu_item.course_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, courseId);
+	        selectQuery.setString(2, courseId);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	item = new CommunityItem(rSet.getString("name"));
+	        	item.setAttributeAffected(AttributeAffected.valueOf(rSet.getString("attribute_affected")));
+	        	item.setCost(rSet.getInt("cost"));
+	        	item.setDuration(rSet.getString("duration"));
+	        	item.setEffectMagnitude(rSet.getInt("effect_magnitude"));
+	        	item.setSupply(rSet.getInt("supply"));
+	        	item.setType(AssessmentType.valueOf(rSet.getString("type")));
+	        	item.setSpecific(rSet.getString("specific_column"));
+	        	item.setActivationLimitDate(rSet.getString("expiration_date"));
+	        	item.setColumnName(rSet.getString("column_name"));
+	        	item.setForeignId(rSet.getLong("community_item_info_pk1"));
+	        }
+	        rSet.close();
+	        selectQuery.close();
+	        if(!item.getName().equals("NO ITEM")){
+	        	item.setPaid(getCommunityItemPay(item.getForeignId()));
+	        }
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        return item;
+	}
+	
+	private int getCommunityItemPay(long id){
+		System.out.println("In get Current Item Pay");
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        int totalPaid = 0;
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("select paid from jsu_community_item_usage where community_item_info_pk1 = ? and course_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setLong(1, id);
+	        selectQuery.setString(2, courseId);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	totalPaid += rSet.getInt("paid");
+	        }
+	        rSet.close();
+	        selectQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Total Pay is: " + totalPaid);
+        return totalPaid;
 	}
 }

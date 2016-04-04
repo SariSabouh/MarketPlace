@@ -1,6 +1,4 @@
-package cs499.itemHandler;
-
-import cs499.itemHandler.Item.*;
+package cs499.util;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -14,6 +12,9 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
+
+import cs499.object.Item;
+import cs499.object.Item.*;
 
 /**
  * @author SabouhS

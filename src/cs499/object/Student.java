@@ -1,12 +1,11 @@
-package cs499.util;
+package cs499.object;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import blackboard.persist.Id;
 import cs499.controllers.MarketPlaceDAO;
-import cs499.itemHandler.Item;
-import cs499.itemHandler.ItemController;
+import cs499.util.ItemController;
 
 /**
  * @author SabouhS

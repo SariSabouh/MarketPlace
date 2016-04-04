@@ -1,6 +1,6 @@
 <%@page import="cs499.controllers.MarketPlaceDAO"%>
 <%@page import="com.google.gson.JsonArray"%>
-<%@page import="cs499.itemHandler.Item"%>
+<%@page import="cs499.object.Item"%>
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%

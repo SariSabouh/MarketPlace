@@ -1,7 +1,7 @@
-<%@page import="cs499.itemHandler.Item.AssessmentType"%>
-<%@page import="cs499.itemHandler.Item.AttributeAffected"%>
+<%@page import="cs499.object.Item.AssessmentType"%>
+<%@page import="cs499.object.Item.AttributeAffected"%>
 <%@page import="cs499.controllers.MarketPlaceDAO"%>
-<%@page import="cs499.itemHandler.Item"%>
+<%@page import="cs499.object.Item"%>
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%

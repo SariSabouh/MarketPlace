@@ -1,5 +1,5 @@
 <%@page import="cs499.controllers.MarketPlaceDAO"%>
-<%@page import="cs499.util.Setting"%>
+<%@page import="cs499.object.Setting"%>
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%

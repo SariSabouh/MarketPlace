@@ -10,9 +10,10 @@
 <%@page import="java.util.ArrayList"%>
 <%@page import="java.util.Scanner"%>
 <%@page import="cs499.controllers.*"%>
-<%@page import="cs499.itemHandler.Item"%>
-<%@page import="cs499.util.Student"%>
-<%@page import="cs499.util.Setting"%>
+<%@page import="cs499.object.Item"%>
+<%@page import="cs499.object.CommunityItem"%>
+<%@page import="cs499.object.Student"%>
+<%@page import="cs499.object.Setting"%>
 <%@page import="java.io.InputStream"%>
 <%@page import="blackboard.platform.plugin.PlugInUtil"%>
 <%@ taglib uri="/bbData" prefix="bbData"%> 					
@@ -67,6 +68,11 @@
 	pageContext.setAttribute("allItems", allItems);
 	List<String> columnNames = bbHandler.getAllColumnsByType("ALL");
 	pageContext.setAttribute("columnNames", columnNames);
+	CommunityItem communityItem = dbController.getCurrentCommunityItem();
+	boolean communityItemExists = false; 
+	if(!communityItem.getName().equals("NO$ITEM")){
+		communityItemExists = true; 
+	}
 	List<String> settingNames = new ArrayList<String>();
 	List<String> settingValues = new ArrayList<String>();
 	for(Setting setting : dbController.getDefaultSettings()){
@@ -84,6 +90,7 @@
 	String checkBoxesURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/CheckBoxUtil.jsp");
 	String getItemInfoURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
 	String getItemDescriptionURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemDescriptionUtil.jsp");
+	String useCommunityItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/UseCommunityItemUtil.jsp");
 	
 %>
 
@@ -108,6 +115,7 @@
 
 <body>
 
+<input type="hidden" id="communityItemExists" name="communityItemExists" value="<%=communityItemExists%>"/>
 <input type="hidden" id="isStudent" name="isStudent" value="<%=isStudent%>"/>
 <input type="hidden" id="settingNames" name="settingNames" value="<%=settingNames%>"/>
 <input type="hidden" id="settingValues" name="settingValues" value="<%=settingValues%>"/>
@@ -123,7 +131,7 @@
 <input type="hidden" id="checkBoxesURL" name="checkBoxesURL" value="<%=checkBoxesURL%>"/>
 <input type="hidden" id="getItemInfoURL" name="getItemInfoURL" value="<%=getItemInfoURL%>"/>
 <input type="hidden" id="getItemDescriptionURL" name="getItemDescriptionURL" value="<%=getItemDescriptionURL%>"/>
-
+<input type="hidden" id="useCommunityItemURL" name="useCommunityItemURL" value="<%=useCommunityItemURL%>"/>
 	<div id="tabs">
 
 		<ul>
@@ -137,6 +145,8 @@
 			<li><a href="#tabs-5">Edit Item</a></li>
 			
 			<li><a href="#tabs-4">Settings</a></li>
+			
+			<li><a href="#tabs-6">Community Item</a></li>
 
 		</ul>
 
@@ -189,6 +199,7 @@
 			</div>
 			<input id="buyItem" type="button" value="Buy Item">
 			<input id="directEditItem" type="button" value="Edit Item">
+            <input id="communityItemButton" type="button" value="Community Use Item">
 			<div>
   				<p id="itemDescription" style="font-size:75%;"></p>
 			</div>
@@ -284,6 +295,37 @@
 			
 		</div>
 
+		<div id="tabs-6">
+			<div id="noCommunityItemActive">
+			Community Item:
+				<select id="communityItemsSelect">
+					<option>NONE</option>
+	                <c:forEach items="${allItems}" var="item">
+						<option class="CommunityItemOption">${item.name}</option>
+					</c:forEach>
+	            </select>
+	            <p></p>
+				Gold to Pay (More than 1 Gold): <input type="text" id="communityDownPayment"/>
+				<p></p>
+				Column to Affect: <select id="communityItemColumnSelect">
+					<option>NONE</option>
+	                <c:forEach items="${columnNames}" var="name">
+						<option>${name}</option>
+					</c:forEach>
+	            </select>
+	            <p></p>
+	            <input id="communityItemBuy" type="button" value="Community Use Item">
+	        </div>
+	        <div id="communityItemActive">
+				Community Item:<p><%=communityItem.getName()%></p>
+				<p>Total amount paid is: <%=communityItem.getPaid() %> out of <%=communityItem.getCost() %>.
+				 This item will affect <%=communityItem.getColumnName() %> only!
+				<p>To activate this item the total price has to be filled. To participate in the activation please pay some gold for this Community Item
+				that will affect the <%=communityItem.getAttributeAffected() %> by <%=communityItem.getEffectMagnitude() %>.</p>
+				<input id="payGold" type="button" value="Pay Gold for This Item">
+				<input type="text" id="payGoldField"/>
+			</div>
+		</div>
 
 	</div>
 	
