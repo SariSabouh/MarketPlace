@@ -128,21 +128,25 @@ public class BlackboardHandler {
 				if(!new MarketPlaceDAO(testing, courseID.toExternalString()).isOutOfSupply(item)){
 					System.out.println("Student can afford and store has supply");
 					student.buyItem(item, testing, courseID.getExternalString());
-					for (GradableItem gradeItem : gradableItemList){
-						if (gradeItem.getTitle().equals("Gold")){
-							try {
-								if(!testing){
-									gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
-								}
-								break;
-							} catch (BbSecurityException e) {
-								e.printStackTrace();
-							}
-						}
-					}
+					persistGoldChange(student);
 				}
 			}
 		}
+	}
+	
+	public void persistGoldChange(Student student){
+		for (GradableItem gradeItem : gradableItemList){
+			if (gradeItem.getTitle().equals("Gold")){
+				try {
+					if(!testing){
+						gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
+					}
+					break;
+				} catch (BbSecurityException e) {
+					e.printStackTrace();
+				}
+			}
+		};
 	}
 	
 	/**
@@ -159,6 +163,10 @@ public class BlackboardHandler {
 	}
 	
 	public void useCommunityItem(CommunityItem item){
+		activateItem(item, getStudent(), item.getColumnName());
+	}
+	
+	public void setCommunityItem(CommunityItem item){
 		if(isStudent && isColumnAllowedForItem(item, item.getColumnName())){
 			MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.getExternalString());
 			marketPlaceDAO.addCommunityItem(item, getStudent().getStudentID());

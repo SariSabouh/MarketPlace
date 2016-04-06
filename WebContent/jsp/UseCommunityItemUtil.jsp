@@ -1,6 +1,7 @@
 <%@page import="cs499.controllers.BlackboardHandler"%>
 <%@page import="cs499.controllers.MarketPlaceDAO"%>
 <%@page import="cs499.object.CommunityItem"%>
+<%@page import="cs499.object.Student"%>
 <%@ taglib uri="/bbNG" prefix="bbNG"%>
 <%@ taglib uri="/bbData" prefix="bbData"%>
 <%
@@ -19,7 +20,11 @@
 	item.setColumnName(columnName);
 	System.out.println(columnName + " to be affected");
 	try{
-		bbHandler.useCommunityItem(item);
+		Student student = bbHandler.getStudent();
+		item.setCost(downPayment);
+		student.substractGold(item);
+		bbHandler.persistGoldChange(student);
+		bbHandler.setCommunityItem(item);
 	}catch(Exception e){
 		e.printStackTrace();
 		response.setStatus(500);

@@ -385,7 +385,7 @@ jQuery.noConflict();
     		}
 	    });
 	});
-    $(".CommunityItemOption").click(function() {
+    $("#communityItemsSelect").change(function() {
 		var name = $('#communityItemsSelect :selected').text().trim();
 		$("#communityItemColumnSelect").hide();
     	$("#communityItemColumnSelect > option").each(function() {
@@ -446,6 +446,24 @@ jQuery.noConflict();
 	    		},
 	    		error: function(result){
 	    			alert("Item Purchase FAILED. Check down payment total. It has to be more than 1 GOLD!");
+	    		}
+		    });
+		}
+	});
+    $("#payGold").click(function() {
+    	var student = $("#isStudent").val();
+    	var pay = $('#payGoldField').val();
+		if(student == "true"){
+			$.ajax({
+		    	url: $("#payGoldURL").val(),
+	    		type: "GET",
+	    		data: {goldPaid: pay},
+	    		success: function(result){
+	    			alert("Payment Processed");
+	    			location.reload();
+	    		},
+	    		error: function(result){
+	    			alert("Payment Failed. Make Sure You Can Afford.");
 	    		}
 		    });
 		}

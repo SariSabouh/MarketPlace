@@ -9,6 +9,7 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
+import blackboard.persist.impl.mapping.BbObjectValueHandler;
 import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.object.CommunityItem;
 import cs499.object.GradebookColumnPojo;
@@ -1165,7 +1166,6 @@ public class MarketPlaceDAO {
         int newId = -1;
         try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Inserting Community Item");
 	        queryString.append("insert into jsu_community_item_info(item_pk1, purchase_date, expiration_date, active, column_name, course_id) ");
 	        queryString.append("values((select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 1, ?, ?)");
 	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), new String[]{"community_item_info_pk1"});
@@ -1201,7 +1201,6 @@ public class MarketPlaceDAO {
         StringBuffer queryString = new StringBuffer("");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Inserting Community Item");
 	        queryString.append("insert into jsu_community_item_usage(community_item_info_pk1, student_id, paid, course_id) ");
 	        queryString.append("values(?, ?, ?, ?)");
 	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1220,7 +1219,7 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Added Community Item usage to table");
+        System.out.println("Added Community Item Payment to Table");
 
 	}
 	
@@ -1249,7 +1248,8 @@ public class MarketPlaceDAO {
 	        	item.setSpecific(rSet.getString("specific_column"));
 	        	item.setActivationLimitDate(rSet.getString("expiration_date"));
 	        	item.setColumnName(rSet.getString("column_name"));
-	        	item.setForeignId(rSet.getLong("community_item_info_pk1"));
+	        	item.setForeignId(rSet.getInt("community_item_info_pk1"));
+	        	System.out.println("Community Item ID: " + item.getForeignId());
 	        }
 	        rSet.close();
 	        selectQuery.close();
@@ -1296,5 +1296,62 @@ public class MarketPlaceDAO {
 	    }
         System.out.println("Total Pay is: " + totalPaid);
         return totalPaid;
+	}
+	
+	public boolean checkCommunityItemPaid(CommunityItem item){
+		System.out.println("In Check Community Item Status");
+		Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        int totalPaid = 0;
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("select paid from jsu_community_item_usage where community_item_info_pk1 = ? and course_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setLong(1, item.getForeignId());
+	        selectQuery.setString(2, courseId);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	totalPaid += rSet.getInt("paid");
+	        }
+	        rSet.close();
+	        selectQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        if(totalPaid >= item.getCost() && totalPaid != 0){
+        	activateCommunityItem(item);
+        	return true;
+        }
+        return false;
+	}
+	
+	private void activateCommunityItem(CommunityItem item){
+		System.out.println("In activateCommunityItem");
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("update jsu_community_item_info set active = 0 where course_id = ? and community_item_info_pk1 = ?");
+	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        insertQuery.setString(1, courseId);
+	        insertQuery.setLong(2, item.getForeignId());
+	        System.out.println("In Activate Item Id: " + item.getForeignId());
+	        insertQuery.executeUpdate();
+	        insertQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
 	}
 }

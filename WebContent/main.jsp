@@ -69,6 +69,10 @@
 	List<String> columnNames = bbHandler.getAllColumnsByType("ALL");
 	pageContext.setAttribute("columnNames", columnNames);
 	CommunityItem communityItem = dbController.getCurrentCommunityItem();
+	if(dbController.checkCommunityItemPaid(communityItem)){
+		bbHandler.useCommunityItem(communityItem);
+	}
+	communityItem = dbController.getCurrentCommunityItem();
 	boolean communityItemExists = false; 
 	if(!communityItem.getName().equals("NO$ITEM")){
 		communityItemExists = true; 
@@ -91,7 +95,7 @@
 	String getItemInfoURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
 	String getItemDescriptionURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemDescriptionUtil.jsp");
 	String useCommunityItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/UseCommunityItemUtil.jsp");
-	
+	String payGoldURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/PayGoldUtil.jsp");	
 %>
 
 <!doctype html>
@@ -132,6 +136,7 @@
 <input type="hidden" id="getItemInfoURL" name="getItemInfoURL" value="<%=getItemInfoURL%>"/>
 <input type="hidden" id="getItemDescriptionURL" name="getItemDescriptionURL" value="<%=getItemDescriptionURL%>"/>
 <input type="hidden" id="useCommunityItemURL" name="useCommunityItemURL" value="<%=useCommunityItemURL%>"/>
+<input type="hidden" id="payGoldURL" name="payGoldURL" value="<%=payGoldURL%>"/>
 	<div id="tabs">
 
 		<ul>
@@ -317,11 +322,11 @@
 	            <input id="communityItemBuy" type="button" value="Community Use Item">
 	        </div>
 	        <div id="communityItemActive">
-				Community Item:<p><%=communityItem.getName()%></p>
-				<p>Total amount paid is: <%=communityItem.getPaid() %> out of <%=communityItem.getCost() %>.
-				 This item will affect <%=communityItem.getColumnName() %> only!
+				<p>Community Item: <%=communityItem.getName()%></p>
+				<p>Total amount paid is: <b><%=communityItem.getPaid()%></b> out of <b><%=communityItem.getCost()%></b>.
+				 This item will affect <b><%=communityItem.getColumnName() %></b> only!
 				<p>To activate this item the total price has to be filled. To participate in the activation please pay some gold for this Community Item
-				that will affect the <%=communityItem.getAttributeAffected() %> by <%=communityItem.getEffectMagnitude() %>.</p>
+				that will affect the <b><%=communityItem.getAttributeAffected()%></b> by <b><%=communityItem.getEffectMagnitude() %>.</b></p>
 				<input id="payGold" type="button" value="Pay Gold for This Item">
 				<input type="text" id="payGoldField"/>
 			</div>

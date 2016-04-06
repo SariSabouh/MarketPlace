@@ -29,7 +29,7 @@ public class CommunityItem extends Item{
 	
 	private String activationLimitDate;
 	
-	private long foreignId;
+	private int foreignId;
 
 	public int getPaid() {
 		return paid;
@@ -55,11 +55,11 @@ public class CommunityItem extends Item{
 		this.activationLimitDate = activationLimitDate;
 	}
 
-	public long getForeignId() {
+	public int getForeignId() {
 		return foreignId;
 	}
 
-	public void setForeignId(long foreignId) {
+	public void setForeignId(int foreignId) {
 		this.foreignId = foreignId;
 	}
 
