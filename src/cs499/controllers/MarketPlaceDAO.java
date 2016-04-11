@@ -9,12 +9,12 @@ import java.util.List;
 
 import org.joda.time.DateTime;
 
-import blackboard.persist.impl.mapping.BbObjectValueHandler;
 import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.object.CommunityItem;
 import cs499.object.GradebookColumnPojo;
 import cs499.object.Item;
 import cs499.object.Setting;
+import cs499.object.Student;
 import cs499.object.Item.AssessmentType;
 import cs499.object.Item.AttributeAffected;
 import cs499.util.ItemController;
@@ -1160,7 +1160,6 @@ public class MarketPlaceDAO {
 	}
 
 	public void addCommunityItem(CommunityItem item, String studentID) {
-		System.out.println("In addCommunityItem");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         int newId = -1;
@@ -1172,7 +1171,7 @@ public class MarketPlaceDAO {
 	        insertQuery.setString(1, item.getName());
 	        insertQuery.setString(2, courseId);
 	        insertQuery.setString(3, new DateTime().toString());
-	        insertQuery.setString(4, new DateTime().plusDays(2).toString());
+	        insertQuery.setString(4, new DateTime().plusDays(2).toString()); //TODO how long?
 	        insertQuery.setString(5, item.getColumnName());
 	        insertQuery.setString(6, courseId);
 	        System.out.println("Item name: " + item.getColumnName());
@@ -1196,7 +1195,6 @@ public class MarketPlaceDAO {
 	}
 	
 	public void addCommunityItemPayment(CommunityItem item, String studentID, int newId){
-		System.out.println("In addCommunityItemPayment");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -1224,7 +1222,6 @@ public class MarketPlaceDAO {
 	}
 	
 	public CommunityItem getCurrentCommunityItem() {
-		System.out.println("In get Current Item");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         CommunityItem item = new CommunityItem("NO$ITEM");
@@ -1298,20 +1295,23 @@ public class MarketPlaceDAO {
         return totalPaid;
 	}
 	
-	public boolean checkCommunityItemPaid(CommunityItem item){
-		System.out.println("In Check Community Item Status");
+	public String checkCommunityItemStatus(CommunityItem item){
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         int totalPaid = 0;
+        DateTime date = null;
         try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        queryString.append("select paid from jsu_community_item_usage where community_item_info_pk1 = ? and course_id = ?");
+			queryString.append("select jsu_community_item_usage.paid, jsu_community_item_info.expiration_date ");
+			queryString.append("from jsu_community_item_usage join jsu_community_item_info on (jsu_community_item_info.community_item_info_pk1 = jsu_community_item_usage.community_item_info_pk1) where jsu_community_item_usage.community_item_info_pk1 = ? and jsu_community_item_usage.course_id = ? and jsu_community_item_info.course_id = ? and jsu_community_item_info.active = 1");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        selectQuery.setLong(1, item.getForeignId());
 	        selectQuery.setString(2, courseId);
+	        selectQuery.setString(3, courseId);
 	        ResultSet rSet = selectQuery.executeQuery();
 	        while(rSet.next()){
 	        	totalPaid += rSet.getInt("paid");
+	        	date = new DateTime(rSet.getString("expiration_date"));
 	        }
 	        rSet.close();
 	        selectQuery.close();
@@ -1325,14 +1325,17 @@ public class MarketPlaceDAO {
 			}
 	    }
         if(totalPaid >= item.getCost() && totalPaid != 0){
-        	activateCommunityItem(item);
-        	return true;
+        	inactiveCommunityItem(item);
+        	return "Activated";
         }
-        return false;
+        else if(date.isBeforeNow()){
+        	inactiveCommunityItem(item);
+        	return "Refunded";
+        }
+        return "Pending";
 	}
 	
-	private void activateCommunityItem(CommunityItem item){
-		System.out.println("In activateCommunityItem");
+	private void inactiveCommunityItem(CommunityItem item){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         try {
@@ -1341,7 +1344,6 @@ public class MarketPlaceDAO {
 	        PreparedStatement insertQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
 	        insertQuery.setString(1, courseId);
 	        insertQuery.setLong(2, item.getForeignId());
-	        System.out.println("In Activate Item Id: " + item.getForeignId());
 	        insertQuery.executeUpdate();
 	        insertQuery.close();
         } catch (java.sql.SQLException sE){
@@ -1353,5 +1355,35 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
+	}
+	
+	public List<Student> getCommunityItemStudentsList(int id){
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        List<Student> studentList = new ArrayList<Student>();
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        queryString.append("select student_id, paid from jsu_community_item_usage where course_id = ? and community_item_info_pk1 = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, courseId);
+	        selectQuery.setInt(2, id);
+	        ResultSet rSet = selectQuery.executeQuery();
+	        while(rSet.next()){
+	        	Student student = new Student();
+	        	student.setStudentID(rSet.getString("student_id"));
+	        	student.setGold(rSet.getInt("paid"));
+	        	studentList.add(student);
+	        }
+	        selectQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        return studentList;
 	}
 }

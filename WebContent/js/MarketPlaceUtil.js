@@ -438,7 +438,7 @@ jQuery.noConflict();
 			$.ajax({
 		    	url: $("#useCommunityItemURL").val(),
 	    		type: "GET",
-	    		data: {itemName: $('input[name=buyItemRadio]:checked', '#storeRadioButtons').val(),
+	    		data: {itemName: $('#communityItemsSelect :selected').text().trim(),
 	    			downPayment: $("#communityDownPayment").val(), columnUsed: columnNameUsed},
 	    		success: function(result){
 	    			alert("Community Item Purchased");

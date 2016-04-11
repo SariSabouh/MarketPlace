@@ -173,6 +173,21 @@ public class BlackboardHandler {
 		}
 	}
 	
+	public void refundCommunityItem(int id){
+		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.getExternalString());
+		List<Student> studentsList = marketPlaceDAO.getCommunityItemStudentsList(id);
+		for(int i = 0; i<studentsList.size(); i++){
+			for(int k = 0; k<students.size(); k++){
+				if(students.get(k).getStudentID().equals(studentsList.get(i).getStudentID())){
+					Student student = students.get(k);
+					student.setGold(student.getGold() + studentsList.get(i).getGold());
+					persistGoldChange(student);
+					break;
+				}
+			}
+		}
+	}
+	
 	private boolean isColumnAllowedForItem(Item item, String columnName) {
 		String spec = item.getSpecific();
 		System.out.println("Spec " + spec);

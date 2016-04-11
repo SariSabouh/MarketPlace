@@ -47,6 +47,22 @@
 	String role = sessionUserRole.trim().toLowerCase();
 	List<Item> myItems = new ArrayList<Item>();
 	int myGold = 0;
+	CommunityItem communityItem = dbController.getCurrentCommunityItem();
+	boolean communityItemExists = false; 
+	if(!communityItem.getName().equals("NO$ITEM")){
+		communityItemExists = true; 
+		String communityItemStatus = dbController.checkCommunityItemStatus(communityItem);
+		if(communityItemStatus.equals("Activated")){
+			bbHandler.useCommunityItem(communityItem);
+		}
+		else if(communityItemStatus.equals("Refunded")){
+			bbHandler.refundCommunityItem(communityItem.getForeignId());
+		}
+	}
+	communityItem = dbController.getCurrentCommunityItem();
+	if(communityItem.getName().equals("NO$ITEM")){
+		communityItemExists = false;
+	}
 	if (role.contains("student")) {
 		isStudent = true;
 		Student student = bbHandler.getStudent();
@@ -68,15 +84,6 @@
 	pageContext.setAttribute("allItems", allItems);
 	List<String> columnNames = bbHandler.getAllColumnsByType("ALL");
 	pageContext.setAttribute("columnNames", columnNames);
-	CommunityItem communityItem = dbController.getCurrentCommunityItem();
-	if(dbController.checkCommunityItemPaid(communityItem)){
-		bbHandler.useCommunityItem(communityItem);
-	}
-	communityItem = dbController.getCurrentCommunityItem();
-	boolean communityItemExists = false; 
-	if(!communityItem.getName().equals("NO$ITEM")){
-		communityItemExists = true; 
-	}
 	List<String> settingNames = new ArrayList<String>();
 	List<String> settingValues = new ArrayList<String>();
 	for(Setting setting : dbController.getDefaultSettings()){
@@ -156,15 +163,15 @@
 		</ul>
 
 		<div id="tabs-1">
-		<form id="myRadioButtons">
-			<c:forEach items="${myItems}" var="item">  
-				<TR>  
-					<td><label>
-					<input type="radio" name="itemRadio" value="${item.name}">${item.name}</label></td>
-				    <td><p></p></td>
-				</TR>
-			</c:forEach>
-		</form>
+			<form id="myRadioButtons">
+				<c:forEach items="${myItems}" var="item">  
+					<TR>  
+						<td><label>
+						<input type="radio" name="itemRadio" value="${item.name}">${item.name}</label></td>
+					    <td><p></p></td>
+					</TR>
+				</c:forEach>
+			</form>
 			<p></p>
 			
 			<div id="columnList">
