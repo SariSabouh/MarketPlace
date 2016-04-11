@@ -167,7 +167,7 @@
 				<c:forEach items="${myItems}" var="item">  
 					<TR>  
 						<td><label>
-						<input type="radio" name="itemRadio" value="${item.name}">${item.name}</label></td>
+						<input type="radio" name="itemRadio" value="${item.name}">${item.name}. Expires in: ${item.expirationDate}</label></td>
 					    <td><p></p></td>
 					</TR>
 				</c:forEach>
