@@ -12,7 +12,12 @@
 		setting.setName(name);
 		setting.setValue(value);
 		if(name.equals("community_item_wait")){
-			
+			try{
+				
+			}
+			catch(NumberFormatException e){
+				Integer.parseInt(value);
+			}
 		}
 		marketPlaceDAO.updateSetting(setting);
 	}catch(Exception e){

@@ -1,3 +1,4 @@
+<!DOCTYPE xml>
 <schema name="jsu_marketplace">
 <comment>This schema defines a table used by the application to store a Blackboard user's favorite Blackboard course</comment>
 

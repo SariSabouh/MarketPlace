@@ -138,8 +138,14 @@ public class BlackboardHandler {
 		for (GradableItem gradeItem : gradableItemList){
 			if (gradeItem.getTitle().equals("Gold")){
 				try {
+					GradeDetail gradeDetail = null;
 					if(!testing){
-						gradebookManager.updateGrade(getGradeDetail(gradeItem, student), true, courseID);
+						gradeDetail = getGradeDetail(gradeItem, student);
+						gradebookManager.updateGrade(gradeDetail, true, courseID);
+					}
+					else{
+						gradeDetail = createGradeDetail(gradeItem, student);
+						currentGradeDetail = gradeDetail;
 					}
 					break;
 				} catch (BbSecurityException e) {
@@ -695,6 +701,9 @@ public class BlackboardHandler {
 					try {
 						if(!testing){
 							gradebookManager.persistGradebookItem(gradeItem);
+						}
+						else{
+							gradeItem.setDueDate(cal);
 						}
 						System.out.println("Persisted GradableItem");
 					} catch (BbSecurityException e) {

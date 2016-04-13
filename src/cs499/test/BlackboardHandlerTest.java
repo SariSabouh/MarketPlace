@@ -32,6 +32,7 @@ import blackboard.platform.gradebook2.GradableItem;
 import cs499.controllers.BlackboardHandler;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
+import cs499.object.CommunityItem;
 import cs499.object.Item;
 
 public class BlackboardHandlerTest {
@@ -58,6 +59,8 @@ public class BlackboardHandlerTest {
         courseID = Id.newId(Course.DATA_TYPE);
         updateDatabaseInfo();
         IDataSet dataSet = getDataSet();
+        marketPlaceDao = new MarketPlaceDAO(true, courseID.toExternalString());
+        marketPlaceDao.emptyDatabase();
         DatabaseOperation.CLEAN_INSERT.execute(connection, dataSet);
         connection.close();
         sessionUser = new User();
@@ -66,7 +69,6 @@ public class BlackboardHandlerTest {
 		sessionUser.setId(Id.newId(User.DATA_TYPE));
 		sessionUser.setUserName("username");
 		sessionUser.setStudentId("00111");
-		marketPlaceDao = new MarketPlaceDAO(true, courseID.toExternalString());
 		bbHandler = new BlackboardHandler(courseID, sessionUser, marketPlaceDao.loadItems());
     }
 
@@ -435,6 +437,47 @@ public class BlackboardHandlerTest {
 		bbHandler.addGradableItem(gradableItem);
 		bbHandler.useItem(item, "TEST");
 		assertEquals("1002.0", bbHandler.getCurrentGradeDetail().getManualGrade());
+	}
+	
+	@Test
+	public void testSetCommunityItem(){
+		createStudents("00111");
+		Item item = marketPlaceDao.loadItem("Once");
+		CommunityItem cItem = new CommunityItem(item);
+		bbHandler.setCommunityItem(cItem);
+		assertEquals("Once", marketPlaceDao.getCurrentCommunityItem().getName());
+	}
+	
+	@Test
+	public void testUseCommunityItem(){
+		createStudents("00111");
+		Item item = marketPlaceDao.loadItem("Once");
+		CommunityItem cItem = new CommunityItem(item);
+		cItem.setColumnName("TEST");
+		GradableItem gradableItem = new GradableItem();
+		gradableItem.setTitle("TEST");
+		Calendar cal = Calendar.getInstance();
+		gradableItem.setDueDate(cal);
+		bbHandler.addGradableItem(gradableItem);
+		bbHandler.useCommunityItem(cItem);
+		cal.add(Calendar.HOUR_OF_DAY, 24);
+		assertEquals(cal, bbHandler.getGradableItemList().get(1).getDueDate());
+	}
+	
+	@Test
+	public void testRefundCommunityItem(){
+		createStudents("00111");
+		Item item = marketPlaceDao.loadItem("Once");
+		CommunityItem cItem = new CommunityItem(item);
+		cItem.setColumnName("TEST");
+		cItem.setPaid(500);
+		cItem.setCost(500);
+		bbHandler.getStudent().substractGold(cItem);
+		bbHandler.setCommunityItem(cItem);
+		assertEquals(500, bbHandler.getStudent().getGold());
+		cItem = marketPlaceDao.getCurrentCommunityItem();
+		bbHandler.refundCommunityItem(cItem.getForeignId());
+		assertEquals("1000", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
 	@After

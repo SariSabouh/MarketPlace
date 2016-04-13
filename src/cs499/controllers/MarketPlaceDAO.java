@@ -423,7 +423,7 @@ public class MarketPlaceDAO {
 	    }
         deleteCommunityItemInfo();
         deleteItemList();
-        System.out.println("Deleted Purchase Info");
+        System.out.println("Database Truncated");
 	}
 	
 	/**
@@ -450,7 +450,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Item Use Info");
 	}
 	
 	/**
@@ -477,7 +476,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Item List");
         deleteGradebookColumn();
 	}
 	
@@ -505,7 +503,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Gradebook Columns");
         deleteSettings();
 	}
 	
@@ -533,7 +530,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Settings");
 	}
 	
 	/**
@@ -561,7 +557,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Community Item Info");
 	}
 	
 	/**
@@ -588,7 +583,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Deleted Community Item Usage");
 	}
 	
 	/**
@@ -1113,65 +1107,12 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
-	private StringBuffer getLastUsedTestQuery(String name, String studentID){
-		StringBuffer queryString = new StringBuffer("");
-		queryString.append("insert into jsu_item_use_info ");
-		queryString.append("(student_id, item_pk1, used_date, gradebook_column_name, course_id) ");
-		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, \'NA\', ?) ");
-		queryString.append("ON DUPLICATE KEY UPDATE used_date = ?");
-		return queryString;
-	}
-	
-	private StringBuffer getUsedExpiryTestQuery(Item item, String studentID){
-		StringBuffer queryString = new StringBuffer("");
-		queryString.append("insert into jsu_item_use_info ");
-		queryString.append("(student_id, item_pk1, used_date, expiration_date, gradebook_column_name, course_id) ");
-		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, \'NA\', ?) ");
-		queryString.append("ON DUPLICATE KEY UPDATE used_date=?, expiration_date=?");
-		return queryString;
-	}
-	
-	/**
-	 * Only used for testing.
-	 * @param studentID
-	 * @param name
-	 * @param date
-	 */
-	public void editItemUseInfoExpDate(String studentID, String name, String date){
-        Connection conn = null;
-        StringBuffer queryString = new StringBuffer("");
-        try {
-			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Expiring item for studentid: " + studentID);
-	        queryString.append("update jsu_item_use_info ");
-	        queryString.append("set expiration_date = ? ");
-	        queryString.append("where item_pk1 = (select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
-	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-	        selectQuery.setString(1, date);
-	        selectQuery.setString(2, name);
-	        selectQuery.setString(3, courseId);
-            selectQuery.setString(4, studentID);
-            selectQuery.setString(5, courseId);
-	        selectQuery.executeUpdate();
-	        selectQuery.close();
-        } catch (java.sql.SQLException sE){
-	    	sE.printStackTrace();
-	    } finally {
-	    	try {
-				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
-			} catch (SQLException e) {
-				e.printStackTrace();
-			}
-	    }
-        System.out.println("Expired from database");
-	}
-
 	public void addCommunityItem(CommunityItem item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         int newId = -1;
         try {
-        	Setting setting = getSetting("directEditItem");
+        	Setting setting = getSetting("community_item_wait");
 			conn = JSUBbDatabase.getConnection(testing);
 	        queryString.append("insert into jsu_community_item_info(item_pk1, purchase_date, expiration_date, active, column_name, course_id) ");
 	        queryString.append("values((select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 1, ?, ?)");
@@ -1390,5 +1331,58 @@ public class MarketPlaceDAO {
 			}
 	    }
         return studentList;
+	}
+	
+	private StringBuffer getLastUsedTestQuery(String name, String studentID){
+		StringBuffer queryString = new StringBuffer("");
+		queryString.append("insert into jsu_item_use_info ");
+		queryString.append("(student_id, item_pk1, used_date, gradebook_column_name, course_id) ");
+		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, \'NA\', ?) ");
+		queryString.append("ON DUPLICATE KEY UPDATE used_date = ?");
+		return queryString;
+	}
+	
+	private StringBuffer getUsedExpiryTestQuery(Item item, String studentID){
+		StringBuffer queryString = new StringBuffer("");
+		queryString.append("insert into jsu_item_use_info ");
+		queryString.append("(student_id, item_pk1, used_date, expiration_date, gradebook_column_name, course_id) ");
+		queryString.append("values(?, (select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, \'NA\', ?) ");
+		queryString.append("ON DUPLICATE KEY UPDATE used_date=?, expiration_date=?");
+		return queryString;
+	}
+	
+	/**
+	 * Only used for testing.
+	 * @param studentID
+	 * @param name
+	 * @param date
+	 */
+	public void editItemUseInfoExpDate(String studentID, String name, String date){
+        Connection conn = null;
+        StringBuffer queryString = new StringBuffer("");
+        try {
+			conn = JSUBbDatabase.getConnection(testing);
+	        System.out.println("Expiring item for studentid: " + studentID);
+	        queryString.append("update jsu_item_use_info ");
+	        queryString.append("set expiration_date = ? ");
+	        queryString.append("where item_pk1 = (select item_pk1 from jsu_item where name = ? and course_id = ?) and student_id = ? and course_id = ?");
+	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+	        selectQuery.setString(1, date);
+	        selectQuery.setString(2, name);
+	        selectQuery.setString(3, courseId);
+            selectQuery.setString(4, studentID);
+            selectQuery.setString(5, courseId);
+	        selectQuery.executeUpdate();
+	        selectQuery.close();
+        } catch (java.sql.SQLException sE){
+	    	sE.printStackTrace();
+	    } finally {
+	    	try {
+				if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+	    }
+        System.out.println("Expired from database");
 	}
 }

@@ -15,9 +15,16 @@
 	<!--ItemUseInfo Table -->
 	<jsu_item_use_info />
 	
-	<!--Settings Table -->
-	<jsu_settings name="visible_columns" value="Y" course_id="courseID"/>
-	
 	<!--Gradebook Table -->
 	<jsu_gradebook />
+	
+	<!--Settings Table -->
+	<jsu_settings name="visible_columns" value="Y" course_id="courseID"/>
+	<jsu_settings name="community_item_wait" value="7" course_id="courseID"/>
+	
+	<!--Commyunity Item Usage Table -->
+	<jsu_community_item_usage />
+	
+	<!--Community Item Info Table -->
+	<jsu_community_item_info />
 </dataset>

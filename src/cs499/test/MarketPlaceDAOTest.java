@@ -9,8 +9,10 @@ import org.junit.Test;
 import blackboard.platform.gradebook2.AttemptDetail;
 import cs499.controllers.JSUBbDatabase;
 import cs499.controllers.MarketPlaceDAO;
+import cs499.object.CommunityItem;
 import cs499.object.Item;
 import cs499.object.Setting;
+import cs499.object.Student;
 import cs499.object.Item.AssessmentType;
 import cs499.object.Item.AttributeAffected;
 
@@ -23,6 +25,8 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
+import javax.xml.crypto.Data;
 
 import org.dbunit.database.DatabaseConnection;
 import org.dbunit.database.IDatabaseConnection;
@@ -63,6 +67,7 @@ public class MarketPlaceDAOTest {
         IDatabaseConnection connection = getConnection();
         IDataSet dataSet = getDataSet();
         marketPlaceDao = new MarketPlaceDAO(true, courseId);
+        marketPlaceDao.emptyDatabase();
         DatabaseOperation.CLEAN_INSERT.execute(connection, dataSet);
         connection.close();
     }
@@ -311,6 +316,77 @@ public class MarketPlaceDAOTest {
 		marketPlaceDao.updateItemUsage("Continuous", "00111", "Test");
 		items = marketPlaceDao.loadNotExpiredItems(items, "00111");
 		assertEquals(1, items.get(0).getTimesUsed());
+	}
+	
+	@Test
+	public void testAddCommunityItem(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(50);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		assertEquals("Once", marketPlaceDao.getCurrentCommunityItem().getName());
+	}
+
+	@Test
+	public void testAddCommunityItemPayment(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(70);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		item = marketPlaceDao.getCurrentCommunityItem();
+		assertEquals(70, item.getPaid());
+		item.setPaid(30);
+		marketPlaceDao.addCommunityItemPayment(item, "0011", item.getForeignId());
+		item = marketPlaceDao.getCurrentCommunityItem();
+		assertEquals(100, item.getPaid());
+	}
+	
+	@Test
+	public void testCheckCommunityItemStatusPending(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(70);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		item = marketPlaceDao.getCurrentCommunityItem();
+		assertEquals("Pending", marketPlaceDao.checkCommunityItemStatus(item));
+	}
+	
+	@Test
+	public void testCheckCommunityItemStatusActivated(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(70);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		item = marketPlaceDao.getCurrentCommunityItem();
+		item.setPaid(805);
+		marketPlaceDao.addCommunityItemPayment(item, "0011", item.getForeignId());
+		assertEquals("Activated", marketPlaceDao.checkCommunityItemStatus(item));
+	}
+	
+	@Test
+	public void testCheckCommunityItemStatusRefunded(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(70);
+		Setting setting = new Setting();
+		setting.setName("community_item_wait");
+		setting.setValue("-1");
+		marketPlaceDao.updateSetting(setting);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		item = marketPlaceDao.getCurrentCommunityItem();
+		assertEquals("Refunded", marketPlaceDao.checkCommunityItemStatus(item));
+	}
+	
+	@Test 
+	public void testGetCommunityItemStudents(){
+		CommunityItem item = new CommunityItem("Once");
+		item.setColumnName("Test 1");
+		item.setPaid(70);
+		marketPlaceDao.addCommunityItem(item, "00111");
+		item = marketPlaceDao.getCurrentCommunityItem();
+		marketPlaceDao.addCommunityItemPayment(item, "0011", item.getForeignId());
+		List<Student> students = marketPlaceDao.getCommunityItemStudentsList(item.getForeignId());
+		assertEquals(2, students.size());
 	}
 	
 	@After
