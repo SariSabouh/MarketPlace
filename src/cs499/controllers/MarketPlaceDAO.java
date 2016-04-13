@@ -20,6 +20,8 @@ import cs499.object.Item.AttributeAffected;
 import cs499.util.ItemController;
 
 /**
+ * The Class MarketPlaceDAO.
+ *
  * @author SabouhS
  * 
  * The Class MarketPlaceDAO. This is the class that controls the database
@@ -27,14 +29,86 @@ import cs499.util.ItemController;
  */
 public class MarketPlaceDAO {
 	
+	/** The testing boolean that defines if this is in testing state or not. */
 	private boolean testing;
 	
+	/** The course id. */
 	private String courseId;
 	
 	
+	/**
+	 * Instantiates a new Market Place Dao.
+	 *
+	 * @param testing the testing
+	 * @param courseId the course id
+	 */
 	public MarketPlaceDAO(boolean testing, String courseId){
 		this.testing = testing;
 		this.courseId = courseId;
+	}
+	
+	/**
+	 * Initilize database. If this is the very first time this is ran
+	 * or if the database was cleared, it will load a starting list
+	 * of items from a resource file in this project.
+	 *
+	 * @param content the content
+	 * @return the list
+	 */
+	public List<Item> initilizeDatabase(String content){
+		 Connection conn = null;
+	        StringBuffer queryString = new StringBuffer("");
+	        ItemController itemContr = getDataSeed(content);
+	        try {
+				conn = JSUBbDatabase.getConnection(testing);
+		        PreparedStatement insertQuery = null;
+		        queryString.append("INSERT INTO jsu_item");
+	            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type, course_id) ");
+	            queryString.append(" VALUES (\'ITEM_INIT\', \'GRADE\', 0, 0, 0, 0, \'ALL\', ?) ");
+	            insertQuery = conn.prepareStatement(queryString.toString());
+	            insertQuery.setString(1, courseId);
+	            insertQuery.executeUpdate();
+		        for(Item item : itemContr.getItemList()){
+		        	queryString = new StringBuffer("");
+		            queryString.append("INSERT INTO jsu_item");
+		            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type, course_id) ");
+		            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?) ");
+		            insertQuery = conn.prepareStatement(queryString.toString());
+		            insertQuery.setString(1, item.getName());
+		            insertQuery.setString(2, item.getAttributeAffected().toString());
+		            insertQuery.setInt(3, (int)item.getCost());
+		            insertQuery.setInt(4, item.getDuration());
+		            insertQuery.setInt(5, (int)item.getEffectMagnitude());
+		            insertQuery.setInt(6, (int)item.getSupply());
+		            insertQuery.setString(7, item.getType().toString());
+		            insertQuery.setString(8, courseId);
+		            insertQuery.executeUpdate();
+		        }
+	            insertQuery.close();
+	        } catch (java.sql.SQLException sE){
+		    	sE.printStackTrace();
+		    } finally {
+		    	try {
+					if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
+				} catch (SQLException e) {
+					e.printStackTrace();
+				}
+		    }
+        setDefaultSettings();
+        return itemContr.getItemList();
+	}
+	
+	/**
+	 * Gets the data seed from the resource file and converts it
+	 * to a list of @{link Item} in @{link ItemController}.
+	 *
+	 * @param content the content
+	 * @return the data seed
+	 */
+	private ItemController getDataSeed(String content){
+		ItemController itemContr = new ItemController();
+		itemContr.createItemListFromContents(content);
+		return itemContr;
 	}
 	
 	/**
@@ -131,58 +205,10 @@ public class MarketPlaceDAO {
 	    }
         return item;
 	}
-	
+		
 	/**
-	 * Initilize database. If this is the very first time this is ran
-	 * or if the database was cleared, it will load a starting list
-	 * of items from a resource file in this project.
-	 *
-	 * @param content the content
-	 * @return the list
+	 * Sets the default @{link Setting}
 	 */
-	public List<Item> initilizeDatabase(String content){
-		 Connection conn = null;
-	        StringBuffer queryString = new StringBuffer("");
-	        ItemController itemContr = getDataSeed(content);
-	        try {
-				conn = JSUBbDatabase.getConnection(testing);
-		        PreparedStatement insertQuery = null;
-		        queryString.append("INSERT INTO jsu_item");
-	            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type, course_id) ");
-	            queryString.append(" VALUES (\'ITEM_INIT\', \'GRADE\', 0, 0, 0, 0, \'ALL\', ?) ");
-	            insertQuery = conn.prepareStatement(queryString.toString());
-	            insertQuery.setString(1, courseId);
-	            insertQuery.executeUpdate();
-		        for(Item item : itemContr.getItemList()){
-		        	queryString = new StringBuffer("");
-		            queryString.append("INSERT INTO jsu_item");
-		            queryString.append("(name, attribute_affected, cost, duration, effect_magnitude, supply, type, course_id) ");
-		            queryString.append(" VALUES (?, ?, ?, ?, ?, ?, ?, ?) ");
-		            insertQuery = conn.prepareStatement(queryString.toString());
-		            insertQuery.setString(1, item.getName());
-		            insertQuery.setString(2, item.getAttributeAffected().toString());
-		            insertQuery.setInt(3, (int)item.getCost());
-		            insertQuery.setInt(4, item.getDuration());
-		            insertQuery.setInt(5, (int)item.getEffectMagnitude());
-		            insertQuery.setInt(6, (int)item.getSupply());
-		            insertQuery.setString(7, item.getType().toString());
-		            insertQuery.setString(8, courseId);
-		            insertQuery.executeUpdate();
-		        }
-	            insertQuery.close();
-	        } catch (java.sql.SQLException sE){
-		    	sE.printStackTrace();
-		    } finally {
-		    	try {
-					if(!JSUBbDatabase.closeConnection(testing)){ conn.close(); }
-				} catch (SQLException e) {
-					e.printStackTrace();
-				}
-		    }
-        setDefaultSettings();
-        return itemContr.getItemList();
-	}
-	
 	private void setDefaultSettings() {
 		Connection conn = null;
 	    StringBuffer queryString = new StringBuffer("");
@@ -214,6 +240,11 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Update setting.
+	 *
+	 * @param setting the @{link Setting}
+	 */
 	public void updateSetting(Setting setting) {
 		Connection conn = null;
 	    StringBuffer queryString = new StringBuffer("");
@@ -239,6 +270,11 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Gets the default @{link Setting}
+	 *
+	 * @return the default settings
+	 */
 	public List<Setting> getDefaultSettings(){
 		List<Setting> settings = new ArrayList<Setting>();
 		Connection conn = null;
@@ -270,6 +306,12 @@ public class MarketPlaceDAO {
 	    return settings;
 	}
 	
+	/**
+	 * Gets the @{link Setting}
+	 *
+	 * @param name the name
+	 * @return the @{link Setting}
+	 */
 	public Setting getSetting(String name){
 		Setting setting = new Setting();
 		Connection conn = null;
@@ -301,23 +343,11 @@ public class MarketPlaceDAO {
 	}
 
 	/**
-	 * Gets the data seed from the resource file and converts it
-	 * to a list of @{link Item} in @{link ItemController}.
-	 *
-	 * @param content the content
-	 * @return the data seed
-	 */
-	private ItemController getDataSeed(String content){
-		ItemController itemContr = new ItemController();
-		itemContr.createItemListFromContents(content);
-		return itemContr;
-	}
-
-	/**
 	 * Persist purhcase of @{link Item} in the database.
 	 *
 	 * @param studentID the {@link Student} id
-	 * @param itemName the @{link Item} name
+	 * @param item the item
+	 * @return true, if successful
 	 */
 	public boolean persistPurhcase(String studentID, Item item) {
 		System.out.print("Persist Items ");
@@ -353,6 +383,13 @@ public class MarketPlaceDAO {
         return false;
 	}
 	
+	/**
+	 * Persist info.
+	 *
+	 * @param studentID the student id
+	 * @param item the item
+	 * @return true, if successful
+	 */
 	private boolean persistInfo(String studentID, Item item) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -588,6 +625,7 @@ public class MarketPlaceDAO {
 	/**
 	 * Load unused {@link Item}.
 	 *
+	 * @param items the items
 	 * @param studentID the student id
 	 * @return the list
 	 */
@@ -661,6 +699,7 @@ public class MarketPlaceDAO {
 	 *
 	 * @param name the name of the @{link Item}
 	 * @param studentID the @{link Student} id
+	 * @param columnName the column name
 	 * @return true, if successful
 	 */
 	public boolean expireInstantItem(String name, String studentID, String columnName) {
@@ -699,10 +738,11 @@ public class MarketPlaceDAO {
 	}
 	
 	/**
-	 * Increment the usage of the item in the database table
+	 * Increment the usage of the item in the database table.
 	 *
 	 * @param name the @{link Item} name
 	 * @param studentID the @{link Student} id
+	 * @param columnName the column name
 	 * @return true, if successful
 	 */
 	public boolean updateItemUsage(String name, String studentID, String columnName) {
@@ -815,7 +855,6 @@ public class MarketPlaceDAO {
 	 * Checks if the Store is out of supply of the passed {@link Item}.
 	 *
 	 * @param item the @{link Item}
-	 * @param studentID the @{link Student} id
 	 * @return true, if is out of supply
 	 */
 	public boolean isOutOfSupply(Item item) {
@@ -910,11 +949,10 @@ public class MarketPlaceDAO {
 	}
 	
 	/**
-	 * Gets the {@link GradebookColumnPojo} from database by Name and StudentId
+	 * Gets the {@link GradebookColumnPojo} from database by Name and StudentId.
 	 *
 	 * @param title the title of the Gradebook Column
 	 * @param studentID the student id
-	 * 
 	 * @return {@link GradebookColumnPojo}
 	 */	
 	public GradebookColumnPojo getGradebookColumnByNameAndStudentId(String title, String studentID){
@@ -954,11 +992,10 @@ public class MarketPlaceDAO {
 	}
 
 	/**
-	 * Updates the {@link GradebookColumnPojo} in database
+	 * Updates the {@link GradebookColumnPojo} in database.
 	 *
 	 * @param attempt the AttemptDetail object
 	 * @param studentID the student id
-	 * 
 	 * @return true if success
 	 */
 	public boolean updateGradebookColumn(AttemptDetail attempt, String studentID) {
@@ -999,11 +1036,11 @@ public class MarketPlaceDAO {
 	}
 	
 	/**
-	 * Inserts a {@link GradebookColumnPojo} to the database
+	 * Inserts a {@link GradebookColumnPojo} to the database.
 	 *
-	 * @param attempt the AttemptDetail object
+	 * @param grade the grade
+	 * @param gradeTitle the grade title
 	 * @param studentID the student id
-	 * 
 	 */
 	public void insertGradebookColumn(int grade, String gradeTitle, String studentID) {
 		Connection conn = null;
@@ -1034,8 +1071,8 @@ public class MarketPlaceDAO {
 	
 	/**
 	 * Adds new {@link Item} to the Database.
-	 * 
-	 * @param {@link Item}
+	 *
+	 * @param item the item
 	 */
 	public void addItem(Item item){
         Connection conn = null;
@@ -1071,9 +1108,9 @@ public class MarketPlaceDAO {
 	
 	
 	/**
-	 * 
 	 * Edits {@link Item} information and sets it to the Database.
-	 * @param {@link Item}
+	 *
+	 * @param item the item
 	 */
 	public void editItem(Item item){
         Connection conn = null;
@@ -1107,6 +1144,12 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Adds the @{link CommunityItem} to the database.
+	 *
+	 * @param item the @{link CommunityItem}
+	 * @param studentID the student id
+	 */
 	public void addCommunityItem(CommunityItem item, String studentID) {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1143,6 +1186,13 @@ public class MarketPlaceDAO {
         addCommunityItemPayment(item, studentID, newId);
 	}
 	
+	/**
+	 * Adds the @{link CommunityItem} payment.
+	 *
+	 * @param item the @{link CommunityItem}
+	 * @param studentID the student id
+	 * @param newId the latest id inserted to the CommunityItemInfo table.
+	 */
 	public void addCommunityItemPayment(CommunityItem item, String studentID, int newId){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1170,6 +1220,11 @@ public class MarketPlaceDAO {
 
 	}
 	
+	/**
+	 * Gets the current @{link CommunityItem}.
+	 *
+	 * @return the current @{link CommunityItem}
+	 */
 	public CommunityItem getCurrentCommunityItem() {
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1213,6 +1268,12 @@ public class MarketPlaceDAO {
         return item;
 	}
 	
+	/**
+	 * Gets the @{link CommunityItem} total amount paid.
+	 *
+	 * @param id the id
+	 * @return the total amount paid for the @{link CommunityItem}.
+	 */
 	private int getCommunityItemPay(long id){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1241,6 +1302,12 @@ public class MarketPlaceDAO {
         return totalPaid;
 	}
 	
+	/**
+	 * Check @{link CommunityItem} status.
+	 *
+	 * @param item the @{link CommunityItem}
+	 * @return Activated if it was paid in full, Refunded if its time finished and Pending if it has not had any updates.
+	 */
 	public String checkCommunityItemStatus(CommunityItem item){
 		Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1281,6 +1348,11 @@ public class MarketPlaceDAO {
         return "Pending";
 	}
 	
+	/**
+	 * Turns off the @{link CommunityItem} from Active to InActive.
+	 *
+	 * @param item the @{link CommunityItem}
+	 */
 	private void inactiveCommunityItem(CommunityItem item){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1303,6 +1375,12 @@ public class MarketPlaceDAO {
 	    }
 	}
 	
+	/**
+	 * Gets the @{link CommunityItem} students list that paid for it.
+	 *
+	 * @param id the id
+	 * @return The list of @{link Student} that paid for the @{link CommunityItem}
+	 */
 	public List<Student> getCommunityItemStudentsList(int id){
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
@@ -1333,6 +1411,13 @@ public class MarketPlaceDAO {
         return studentList;
 	}
 	
+	/**
+	 * Gets the LastUsed test query. This is ONLY used for TESTING on MySQL.
+	 *
+	 * @param name the name
+	 * @param studentID the student id
+	 * @return the last used test query
+	 */
 	private StringBuffer getLastUsedTestQuery(String name, String studentID){
 		StringBuffer queryString = new StringBuffer("");
 		queryString.append("insert into jsu_item_use_info ");
@@ -1342,6 +1427,13 @@ public class MarketPlaceDAO {
 		return queryString;
 	}
 	
+	/**
+	 * Gets the used expiry test query. This is ONLY used for TESTING on MySQL.
+	 *
+	 * @param item the item
+	 * @param studentID the student id
+	 * @return the used expiry test query
+	 */
 	private StringBuffer getUsedExpiryTestQuery(Item item, String studentID){
 		StringBuffer queryString = new StringBuffer("");
 		queryString.append("insert into jsu_item_use_info ");
@@ -1353,9 +1445,10 @@ public class MarketPlaceDAO {
 	
 	/**
 	 * Only used for testing.
-	 * @param studentID
-	 * @param name
-	 * @param date
+	 *
+	 * @param studentID the student id
+	 * @param name the name
+	 * @param date the date
 	 */
 	public void editItemUseInfoExpDate(String studentID, String name, String date){
         Connection conn = null;

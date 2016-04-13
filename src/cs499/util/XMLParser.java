@@ -17,6 +17,8 @@ import cs499.object.Item;
 import cs499.object.Item.*;
 
 /**
+ * The Class XMLParser.
+ *
  * @author SabouhS
  * 
  * The Class XMLParser. Parses XML @{link Item} list to its objects

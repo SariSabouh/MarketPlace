@@ -35,23 +35,50 @@ import cs499.controllers.MarketPlaceDAO;
 import cs499.object.CommunityItem;
 import cs499.object.Item;
 
+/**
+ * The Class BlackboardHandlerTest.
+ */
 public class BlackboardHandlerTest {
 	
+	/** The bb handler. */
 	private BlackboardHandler bbHandler;
+	
+	/** The market place dao. */
 	private MarketPlaceDAO marketPlaceDao;
+	
+	/** The course id. */
 	private Id courseID;
+	
+	/** The session user. */
 	private User sessionUser;
 	
+	/**
+	 * Gets the connection.
+	 *
+	 * @return the connection
+	 * @throws Exception the exception
+	 */
 	protected IDatabaseConnection getConnection() throws Exception {
 		Class.forName("com.mysql.jdbc.Driver");
 		Connection jdbcConnection = JSUBbDatabase.getConnection(true);
 		return new DatabaseConnection(jdbcConnection);
 	}
 	
+	/**
+	 * Gets the data set.
+	 *
+	 * @return the data set
+	 * @throws Exception the exception
+	 */
 	protected IDataSet getDataSet() throws Exception {
 		return new FlatXmlDataSet(new FileInputStream("./resources/dbUnitDataSet.xml"));
 	}
 	
+	/**
+	 * Sets the up.
+	 *
+	 * @throws Exception the exception
+	 */
 	@Before
 	public void setUp() throws Exception
     {
@@ -72,6 +99,11 @@ public class BlackboardHandlerTest {
 		bbHandler = new BlackboardHandler(courseID, sessionUser, marketPlaceDao.loadItems());
     }
 
+	/**
+	 * Test constructor add gold column.
+	 *
+	 * @throws PersistenceException the persistence exception
+	 */
 	@Test
 	public void testConstructorAddGoldColumn() throws PersistenceException{
 		assertEquals(0, bbHandler.getGradableItemList().size());
@@ -79,6 +111,11 @@ public class BlackboardHandlerTest {
 		assertEquals("Gold", bbHandler.getGradableItemList().get(0).getTitle());
 	}
 	
+	/**
+	 * Test add gold column.
+	 *
+	 * @throws PersistenceException the persistence exception
+	 */
 	@Test
 	public void testAddGoldColumn() throws PersistenceException{
 		GradableItem gradableItem = new GradableItem();
@@ -87,6 +124,11 @@ public class BlackboardHandlerTest {
 		assertEquals(1, bbHandler.getGradableItemList().size());
 	}
 	
+	/**
+	 * Test set students without gold column.
+	 *
+	 * @throws PersistenceException the persistence exception
+	 */
 	@Test
 	public void testSetStudentsWithoutGoldColumn() throws PersistenceException{
 		List<CourseMembership> memberList = new ArrayList<CourseMembership>();
@@ -104,12 +146,22 @@ public class BlackboardHandlerTest {
 		assertEquals(0, bbHandler.getStudent().getGold());
 	}
 	
+	/**
+	 * Test set students with gold column.
+	 *
+	 * @throws PersistenceException the persistence exception
+	 */
 	@Test
 	public void testSetStudentsWithGoldColumn() throws PersistenceException{
 		createStudents("00111");
 		assertEquals(1000, bbHandler.getStudent().getGold());
 	}
 	
+	/**
+	 * Test set students with items.
+	 *
+	 * @throws PersistenceException the persistence exception
+	 */
 	@Test
 	public void testSetStudentsWithItems() throws PersistenceException{
 		Item item = new Item("Once");
@@ -118,11 +170,17 @@ public class BlackboardHandlerTest {
 		assertEquals(1000, bbHandler.getStudent().getGold());
 	}
 	
+	/**
+	 * Test process item if instructor.
+	 */
 	@Test
 	public void testProcessItemIfInstructor(){
 		bbHandler.processItem("Once");
 	}
 	
+	/**
+	 * Test process item if student can afford.
+	 */
 	@Test
 	public void testProcessItemIfStudentCanAfford(){
 		createStudents("00111");
@@ -131,6 +189,9 @@ public class BlackboardHandlerTest {
 		assertEquals("Once", bbHandler.getStudent().getItemList().get(0).getName());
 	}
 
+	/**
+	 * Test process item if student can not afford.
+	 */
 	@Test
 	public void testProcessItemIfStudentCanNotAfford(){
 		createStudents("00111");
@@ -139,6 +200,9 @@ public class BlackboardHandlerTest {
 		assertEquals(0, bbHandler.getStudent().getItemList().size());
 	}
 	
+	/**
+	 * Test process item if out of supply.
+	 */
 	@Test
 	public void testProcessItemIfOutOfSupply(){
 		createStudents("00111");
@@ -148,6 +212,9 @@ public class BlackboardHandlerTest {
 		assertEquals(1, bbHandler.getStudent().getItemList().size());
 	}
 	
+	/**
+	 * Test not gradable item in process item.
+	 */
 	@Test
 	public void testNotGradableItemInProcessItem(){
 		List<CourseMembership> memberList = new ArrayList<CourseMembership>();
@@ -171,6 +238,9 @@ public class BlackboardHandlerTest {
 		}
 	}
 	
+	/**
+	 * Test no gold gradable item in process item.
+	 */
 	@Test
 	public void testNoGoldGradableItemInProcessItem(){
 		List<CourseMembership> memberList = new ArrayList<CourseMembership>();
@@ -197,6 +267,9 @@ public class BlackboardHandlerTest {
 		}
 	}
 	
+	/**
+	 * Test use due date item with no due date columns.
+	 */
 	@Test
 	public void testUseDueDateItemWithNoDueDateColumns(){
 		createStudents("00111");
@@ -208,6 +281,9 @@ public class BlackboardHandlerTest {
 		assertEquals(false, bbHandler.getGradableItemList().get(1).isDueDateSet());
 	}
 	
+	/**
+	 * Test instant due date item with due date columns.
+	 */
 	@Test
 	public void testInstantDueDateItemWithDueDateColumns(){
 		createStudents("00111");
@@ -222,6 +298,9 @@ public class BlackboardHandlerTest {
 		assertEquals(cal, bbHandler.getGradableItemList().get(1).getDueDate());
 	}
 
+	/**
+	 * Test instant num attempt item with unlimited attempts.
+	 */
 	@Test
 	public void testInstantNumAttemptItemWithUnlimitedAttempts(){
 		createStudents("00111");
@@ -234,6 +313,9 @@ public class BlackboardHandlerTest {
 		assertEquals(true, gradableItem.isAllowUnlimitedAttempts());
 	}
 	
+	/**
+	 * Test instant num attempt item.
+	 */
 	@Test
 	public void testInstantNumAttemptItem(){
 		createStudents("00111");
@@ -247,6 +329,9 @@ public class BlackboardHandlerTest {
 		assertEquals(4, gradableItem.getMaxAttempts());
 	}
 	
+	/**
+	 * Test continuous grade item first insert.
+	 */
 	@Test
 	public void testContinuousGradeItemFirstInsert(){
 		createStudents("00111");
@@ -261,6 +346,9 @@ public class BlackboardHandlerTest {
 		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
 	}
 	
+	/**
+	 * Test continuous grade item second run when date is not before.
+	 */
 	@Test
 	public void testContinuousGradeItemSecondRunWhenDateIsNotBefore(){
 		createStudents("00111");
@@ -276,6 +364,9 @@ public class BlackboardHandlerTest {
 		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
 	}
 	
+	/**
+	 * Test instant item with update columns.
+	 */
 	@Test
 	public void testInstantItemWithUpdateColumns(){
 		createStudents("00111");
@@ -287,6 +378,9 @@ public class BlackboardHandlerTest {
 		assertEquals(null ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111"));
 	}
 	
+	/**
+	 * Test not activated continuous item with update columns.
+	 */
 	@Test
 	public void testNotActivatedContinuousItemWithUpdateColumns(){
 		createStudents("00111");
@@ -298,6 +392,9 @@ public class BlackboardHandlerTest {
 		assertEquals(null ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111"));
 	}
 	
+	/**
+	 * Test continuous item with update columns when item expired and pending.
+	 */
 	@Test
 	public void testContinuousItemWithUpdateColumnsWhenItemExpiredAndPending(){
 		createStudents("00111");
@@ -317,6 +414,9 @@ public class BlackboardHandlerTest {
 		assertEquals(120 ,marketPlaceDao.getGradebookColumnByNameAndStudentId("TEST", "00111").getGrade());
 	}
 	
+	/**
+	 * Test use passive item.
+	 */
 	@Test
 	public void testUsePassiveItem(){ // Passives are used not automatically but more like Teacher has to reply to email
 		createStudents("00111");
@@ -331,23 +431,35 @@ public class BlackboardHandlerTest {
 		assertEquals(2, gradableItem.getMaxAttempts());
 	}
 		
+	/**
+	 * Test get student if instructor.
+	 */
 	@Test
 	public void testGetStudentIfInstructor(){
 		assertNull(bbHandler.getStudent());
 	}
 	
+	/**
+	 * Test get student if right student.
+	 */
 	@Test
 	public void testGetStudentIfRightStudent(){
 		createStudents("00111");
 		assertNotNull(bbHandler.getStudent());
 	}
 	
+	/**
+	 * Test get student if wrong student.
+	 */
 	@Test
 	public void testGetStudentIfWrongStudent(){
 		createStudents("0011");
 		assertNull(bbHandler.getStudent());
 	}
 	
+	/**
+	 * Test get all columns by type when continuous.
+	 */
 	@Test
 	public void testGetAllColumnsByTypeWhenContinuous(){
 		List<String> columns = bbHandler.getAllColumnsByType("Continuous");
@@ -355,6 +467,9 @@ public class BlackboardHandlerTest {
 		assertEquals("ALL", columns.get(0));
 	}
 	
+	/**
+	 * Test get all columns by type when all.
+	 */
 	@Test
 	public void testGetAllColumnsByTypeWhenAll(){
 		GradableItem gradableItem = new GradableItem();
@@ -374,6 +489,9 @@ public class BlackboardHandlerTest {
 		assertEquals("[Test, Assignment]", columns.toString());
 	}
 	
+	/**
+	 * Test get all columns by type when assignment.
+	 */
 	@Test
 	public void testGetAllColumnsByTypeWhenAssignment(){
 		GradableItem gradableItem = new GradableItem();
@@ -391,6 +509,9 @@ public class BlackboardHandlerTest {
 		assertEquals("[Assignment]", columns.toString());
 	}
 	
+	/**
+	 * Test get all columns by type when test.
+	 */
 	@Test
 	public void testGetAllColumnsByTypeWhenTest(){
 		GradableItem gradableItem = new GradableItem();
@@ -408,6 +529,9 @@ public class BlackboardHandlerTest {
 		assertEquals("[Test]", columns.toString());
 	}
 	
+	/**
+	 * Test add gold to all.
+	 */
 	@Test
 	public void testAddGoldToAll(){
 		createStudents("00111");
@@ -416,6 +540,9 @@ public class BlackboardHandlerTest {
 		assertEquals("2000.0", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
+	/**
+	 * Test instant grade item with not this column.
+	 */
 	@Test (expected=NullPointerException.class)
 	public void testInstantGradeItemWithNotThisColumn(){
 		createStudents("00111");
@@ -427,6 +554,9 @@ public class BlackboardHandlerTest {
 		assertEquals("0.0", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
+	/**
+	 * Test instant grade item with only this column.
+	 */
 	@Test
 	public void testInstantGradeItemWithOnlyThisColumn(){
 		createStudents("00111");
@@ -439,6 +569,9 @@ public class BlackboardHandlerTest {
 		assertEquals("1002.0", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
+	/**
+	 * Test set community item.
+	 */
 	@Test
 	public void testSetCommunityItem(){
 		createStudents("00111");
@@ -448,6 +581,9 @@ public class BlackboardHandlerTest {
 		assertEquals("Once", marketPlaceDao.getCurrentCommunityItem().getName());
 	}
 	
+	/**
+	 * Test use community item.
+	 */
 	@Test
 	public void testUseCommunityItem(){
 		createStudents("00111");
@@ -464,6 +600,9 @@ public class BlackboardHandlerTest {
 		assertEquals(cal, bbHandler.getGradableItemList().get(1).getDueDate());
 	}
 	
+	/**
+	 * Test refund community item.
+	 */
 	@Test
 	public void testRefundCommunityItem(){
 		createStudents("00111");
@@ -480,6 +619,9 @@ public class BlackboardHandlerTest {
 		assertEquals("1000", bbHandler.getCurrentGradeDetail().getManualGrade());
 	}
 	
+	/**
+	 * Tear down.
+	 */
 	@After
 	public void tearDown(){
 		File file = new File("./resources/dbUnitDataSet.xml");
@@ -498,6 +640,11 @@ public class BlackboardHandlerTest {
 		}
 	}
 	
+	/**
+	 * Creates the students.
+	 *
+	 * @param studentId the student id
+	 */
 	private void createStudents(String studentId){
 		List<CourseMembership> memberList = new ArrayList<CourseMembership>();
 		CourseMembership student = new CourseMembership();
@@ -518,6 +665,9 @@ public class BlackboardHandlerTest {
 		}
 	}
 	
+	/**
+	 * Update database info.
+	 */
 	private void updateDatabaseInfo() {
 		File file = new File("./resources/dbUnitDataSet.xml");
 		Scanner scan = null;

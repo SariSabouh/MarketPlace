@@ -8,6 +8,8 @@ import cs499.controllers.MarketPlaceDAO;
 import cs499.util.ItemController;
 
 /**
+ * The Class Student.
+ *
  * @author SabouhS
  * 
  * The Class Student.
@@ -178,6 +180,8 @@ public class Student{
 	 * Adds @{link Item} to list and persists in database.
 	 *
 	 * @param item the item
+	 * @param testing the testing
+	 * @param courseId the course id
 	 */
 	public void buyItem(Item item, boolean testing, String courseId){
 		gold = (int) (gold - item.getCost());

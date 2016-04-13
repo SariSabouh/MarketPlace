@@ -6,6 +6,8 @@ import java.util.List;
 import cs499.object.Item;
 
 /**
+ * The Class ItemController.
+ *
  * @author SabouhS
  * 
  * The Class ItemController.

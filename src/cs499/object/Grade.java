@@ -1,8 +1,9 @@
 package cs499.object;
 
 import blackboard.platform.gradebook2.GradeWithAttemptScore;
-
 /**
+ * The Class Grade.
+ *
  * @author SabouhS
  * 
  * The Class Grade.

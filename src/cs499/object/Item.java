@@ -1,8 +1,9 @@
 package cs499.object;
 
 import java.io.Serializable;
-
 /**
+ * The Class Item.
+ *
  * @author SabouhS
  * 
  * The Class Item.
@@ -131,6 +132,11 @@ public class Item implements Serializable{
 		}
 	}
 	
+	/**
+	 * Sets the duration.
+	 *
+	 * @param duration the new duration
+	 */
 	public void setDuration(int duration){
 		this.duration = duration;
 	}
@@ -207,27 +213,57 @@ public class Item implements Serializable{
 		this.attributeAffected = attributeAffected;
 	}	
 	
+	/**
+	 * Gets the expiration date.
+	 *
+	 * @return the expiration date
+	 */
 	public String getExpirationDate() {
 		return expirationDate;
 	}
 
+	/**
+	 * Sets the expiration date.
+	 *
+	 * @param expirationDate the new expiration date
+	 */
 	public void setExpirationDate(String expirationDate) {
 		this.expirationDate = expirationDate;
 	}
 	
+	/**
+	 * Sets the times used.
+	 *
+	 * @param timesUsed the new times used
+	 */
 	public void setTimesUsed(int timesUsed) {
 		this.timesUsed = timesUsed;
 	}
 	
+	/**
+	 * Gets the times used.
+	 *
+	 * @return the times used
+	 */
 	public int getTimesUsed(){
 		return timesUsed;
 	}
 	
+	/**
+	 * Gets the specific.
+	 *
+	 * @return the specific
+	 */
 	public String getSpecific() {
 		return specific;
 	}
 
 
+	/**
+	 * Sets the specific.
+	 *
+	 * @param specific the new specific
+	 */
 	public void setSpecific(String specific) {
 		if(specific == null){
 			specific = "NULL";
@@ -235,9 +271,12 @@ public class Item implements Serializable{
 		this.specific = specific;
 	}
 	
-	/** 
+	/**
+	 *  
 	 * Returns the toString for this class.
 	 * It contains the relevant information about the item.
+	 *
+	 * @return the string
 	 */
 	@Override
 	public String toString(){
@@ -263,6 +302,9 @@ public class Item implements Serializable{
 		return output;
 	}
 	
+	/* (non-Javadoc)
+	 * @see java.lang.Object#equals(java.lang.Object)
+	 */
 	@Override
     public boolean equals(Object o) {
         if (o instanceof Item) {

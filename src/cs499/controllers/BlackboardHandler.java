@@ -38,6 +38,8 @@ import cs499.object.Item.AttributeAffected;
 import cs499.util.ItemController;
 
 /**
+ * The Class BlackboardHandler.
+ *
  * @author SabouhS
  * 
  * The Class BlackboardHandler. It is our version of Blackboard, as it holds the necessary
@@ -134,6 +136,11 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Persists gold change in case of Refund or Item Purchase.
+	 *
+	 * @param student the {@link Student}
+	 */
 	public void persistGoldChange(Student student){
 		for (GradableItem gradeItem : gradableItemList){
 			if (gradeItem.getTitle().equals("Gold")){
@@ -159,6 +166,7 @@ public class BlackboardHandler {
 	 * Uses the @{link Item} that is requested by the student that is currently logged in.
 	 *
 	 * @param item the item
+	 * @param columnName the column name
 	 * @return true, if successful
 	 */
 	public void useItem(Item item, String columnName){
@@ -168,10 +176,20 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Activate {@link CommunityItem}.
+	 *
+	 * @param item the {@link CommunityItem}.
+	 */
 	public void useCommunityItem(CommunityItem item){
 		activateItem(item, getStudent(), item.getColumnName());
 	}
 	
+	/**
+	 * Sets the {@link CommunityItem} to Active.
+	 *
+	 * @param item the new {@link CommunityItem}.
+	 */
 	public void setCommunityItem(CommunityItem item){
 		if(isStudent && isColumnAllowedForItem(item, item.getColumnName())){
 			MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.getExternalString());
@@ -179,6 +197,11 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Refund the students that paid for this {@link CommunityItem}.
+	 *
+	 * @param id the {@link CommunityItem} Primary Id.
+	 */
 	public void refundCommunityItem(int id){
 		MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(testing, courseID.getExternalString());
 		List<Student> studentsList = marketPlaceDAO.getCommunityItemStudentsList(id);
@@ -194,6 +217,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Checks if this column is allowed for this {@link Item}.
+	 *
+	 * @param item the {@link Item}
+	 * @param columnName the column name
+	 * @return true, if is allowed.
+	 */
 	private boolean isColumnAllowedForItem(Item item, String columnName) {
 		String spec = item.getSpecific();
 		System.out.println("Spec " + spec);
@@ -291,6 +321,8 @@ public class BlackboardHandler {
 	
 	/**
 	 * Adds Gold to all students with passed parameter.
+	 *
+	 * @param gold the gold
 	 */
 	public void addGoldToAll(String gold){
 		for(Student student : students){
@@ -301,7 +333,8 @@ public class BlackboardHandler {
 	
 	/**
 	 * Adds the Gold Column to the Gradebook if it is not already there.
-	 * @throws PersistenceException
+	 *
+	 * @throws PersistenceException the persistence exception
 	 */
 	private void addGoldColumn() throws PersistenceException {
 		for(GradableItem grade : gradableItemList){
@@ -353,6 +386,11 @@ public class BlackboardHandler {
 		setStudentsGold();
 	}
 	
+	/**
+	 * Update columns in usage of continuous items.
+	 *
+	 * @param student the student
+	 */
 	private void updateColumns(Student student) {
 		for(Item item : student.getItemList()){
 			if(item.getDuration() != 0 && item.getTimesUsed() > 0){
@@ -399,6 +437,12 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Check if attempt is graded or not.
+	 *
+	 * @param gradeDetail the grade detail
+	 * @return true, if successful
+	 */
 	private boolean checkIfAttemptGraded(GradeDetail gradeDetail){
 		Id gradedAttemptId = gradeDetail.getLastGradedAttemptId();
 		Id attemptId = gradeDetail.getLastAttemptId();
@@ -434,6 +478,13 @@ public class BlackboardHandler {
 		return true;
 	}
 	
+	/**
+	 * Adjust grade in a magnitude of the Continuous {@link Item} used.
+	 *
+	 * @param gradeDetail the grade detail
+	 * @param student the {@link Student}
+	 * @param item the {@link Item}
+	 */
 	private void adjustContinuousGrade(GradeDetail gradeDetail, Student student, Item item){
 		String gradeTitle = gradeDetail.getGradableItem().getTitle();
 		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString());
@@ -492,6 +543,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Adjust grade in a magnitude of the Continuous {@link Item} used if the grade was pending for grading.
+	 *
+	 * @param gradeDetail the grade detail
+	 * @param student the {@link Student}
+	 * @param item the {@link Item}
+	 */
 	private void adjustContinuousPendingGrade(GradeDetail gradeDetail, Student student, Item item){
 		String gradeTitle = gradeDetail.getGradableItem().getTitle();
 		MarketPlaceDAO dbHandler = new MarketPlaceDAO(testing, courseID.toExternalString());
@@ -530,6 +588,13 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Adjust the total grade of the attempt from the effect Magnitude of the {@link Item}.
+	 *
+	 * @param attempt the attempt
+	 * @param item the {@link Item}
+	 * @return the attempt detail
+	 */
 	private AttemptDetail adjustAttemptGrade(AttemptDetail attempt, Item item){
 		String grade = attempt.getGrade();
 		double score = attempt.getScore();
@@ -541,6 +606,12 @@ public class BlackboardHandler {
 		return attempt;
 	}
 	
+	/**
+	 * Checks if the {@link Item} is expired or not.
+	 *
+	 * @param expDate the {@link Item} expiration date
+	 * @return true, if item is expired
+	 */
 	private boolean isItemExpired(String expDate){
 		if(expDate.equals("NA")){
 			return false;
@@ -559,7 +630,7 @@ public class BlackboardHandler {
 	 * by passing the gradable item and the @{link Student} we are trying to update.
 	 *
 	 * @param gradeItem the grade item
-	 * @param @{link Student} the student
+	 * @param student the student
 	 * @return the grade detail
 	 */
 	private GradeDetail getGradeDetail(GradableItem gradeItem, Student student){
@@ -662,7 +733,7 @@ public class BlackboardHandler {
 	 *
 	 * @param item the @{link Item}
 	 * @param student the @{link Student}
-	 * @return true, if successful
+	 * @param columnName the column name
 	 */
 	private void activateItem(Item item, Student student, String columnName) {
 		System.out.println("In activate Item");
@@ -763,7 +834,6 @@ public class BlackboardHandler {
 	 *
 	 * @param effectMagnitude the effect magnitude
 	 * @param columnName the column name
-	 * @param student the @{link Student}
 	 */
 	private void adjustColumnNumberOfAttempts(float effectMagnitude, String columnName){
 		System.out.println("In Adjust Column Number of Attempts Step");
@@ -795,6 +865,8 @@ public class BlackboardHandler {
 	 * Update @{link Item} status in the database.
 	 *
 	 * @param item the item
+	 * @param student the student
+	 * @param columnName the column name
 	 * @return true, if successful
 	 */
 	private boolean updateItem(Item item, Student student, String columnName){
@@ -832,6 +904,13 @@ public class BlackboardHandler {
 		return false;
 	}
 	
+	/**
+	 * Creates the grade detail. Used ONLY for testing.
+	 *
+	 * @param gradableItem the gradable item
+	 * @param student the student
+	 * @return the grade detail
+	 */
 	public GradeDetail createGradeDetail(GradableItem gradableItem, Student student){
 		GradeDetail gradeDetail = new GradeDetail();
 		gradeDetail.setCourseUserId(student.getId());
@@ -844,6 +923,13 @@ public class BlackboardHandler {
 		return gradeDetail;
 	}
 	
+	/**
+	 * Creates the grade detail with attempt. Used ONLY for testing.
+	 *
+	 * @param gradableItem the gradable item
+	 * @param student the student
+	 * @return the grade detail
+	 */
 	public GradeDetail createGradeDetailWithAttempt(GradableItem gradableItem, Student student){
 		GradeDetail gradeDetail = new GradeDetail();
 		gradeDetail.setCourseUserId(student.getId());
@@ -879,16 +965,29 @@ public class BlackboardHandler {
 	
 	/**
 	 * This method is only used for testing.
-	 * @param gradableItem
+	 *
+	 * @param gradableItem the gradable item
 	 */
 	public void addGradableItem(GradableItem gradableItem){
 		gradableItemList.add(gradableItem);
 	}
 	
+	/**
+	 * Gets the gradable item list. Used ONLY for testing.
+	 *
+	 * @return the gradable item list
+	 */
 	public List<GradableItem> getGradableItemList(){
 		return gradableItemList;
 	}
 	
+	/**
+	 * Testing constructor. Used ONLY for testing.
+	 *
+	 * @param i the i
+	 * @param addGold the add gold
+	 * @throws PersistenceException the persistence exception
+	 */
 	public void testingConstructor(Iterator<CourseMembership> i, boolean addGold) throws PersistenceException{
 		if(addGold){
 			addGoldColumn();
@@ -898,6 +997,11 @@ public class BlackboardHandler {
 		}
 	}
 	
+	/**
+	 * Gets the current grade detail. Used ONLY for testing.
+	 *
+	 * @return the current grade detail
+	 */
 	public GradeDetail getCurrentGradeDetail(){
 		return currentGradeDetail;
 	}

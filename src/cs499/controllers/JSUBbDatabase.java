@@ -11,14 +11,32 @@ import blackboard.db.ConnectionManager;
 import blackboard.db.ConnectionNotAvailableException;
 import blackboard.db.DataStoreDescriptor;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class JSUBbDatabase.
+ */
 public class JSUBbDatabase extends BbDatabase {
 
+	/**
+	 * Instantiates a new JSU bb database.
+	 *
+	 * @param arg0 the arg0
+	 * @param arg1 the arg1
+	 * @throws InitializationException the initialization exception
+	 */
 	protected JSUBbDatabase(DataStoreDescriptor arg0, Map<String, BbDatabase> arg1) throws InitializationException {
 		super(arg0, arg1);
 	}
 	
+	/** The c manager. */
 	static ConnectionManager cManager;
 
+	/**
+	 * Gets the connection.
+	 *
+	 * @param testing the testing
+	 * @return the connection
+	 */
 	public static Connection getConnection(boolean testing) {
 		if (testing) {
 			try {
@@ -28,8 +46,6 @@ public class JSUBbDatabase extends BbDatabase {
 			}
 		} else {
 			try {
-//				System.out.println("Open Method: " + Thread.currentThread().getStackTrace()[2].getMethodName() + " class: " + Thread.currentThread().getStackTrace()[2].getClassName() + " line: " + Thread.currentThread().getStackTrace()[2].getLineNumber());
-//				System.out.println("Cont: " + Thread.currentThread().getStackTrace()[3].getMethodName() + " class: " + Thread.currentThread().getStackTrace()[3].getClassName() + " line: " + Thread.currentThread().getStackTrace()[3].getLineNumber());
 				cManager = BbDatabase.getDefaultInstance().getConnectionManager();
 				cManager.cleanPinnedConnections();
 				cManager.cleanUnreleasedConnections();
@@ -41,9 +57,14 @@ public class JSUBbDatabase extends BbDatabase {
 		return null;
 	}
 	
+	/**
+	 * Close connection.
+	 *
+	 * @param testing the testing
+	 * @return true, if successful
+	 */
 	public static boolean closeConnection(boolean testing){
 		if(!testing){
-//			System.out.println("Close Method: " + Thread.currentThread().getStackTrace()[2].getMethodName());
 			cManager.close();
 			return true;
 		}
