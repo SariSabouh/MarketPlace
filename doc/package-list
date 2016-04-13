@@ -1,1 +1,5 @@
 cs499.controllers
+cs499.exceptions
+cs499.object
+cs499.test
+cs499.util
