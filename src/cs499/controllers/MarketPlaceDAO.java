@@ -195,6 +195,13 @@ public class MarketPlaceDAO {
 	        insertQuery = conn.prepareStatement(queryString.toString());
 	        insertQuery.setString(1, courseId);
 	        insertQuery.executeUpdate();
+	        queryString = new StringBuffer("");
+	        queryString.append("INSERT INTO jsu_settings");
+	        queryString.append("(name, value, course_id) ");
+	        queryString.append(" VALUES (\'community_item_wait\', \'7\', ?) ");
+	        insertQuery = conn.prepareStatement(queryString.toString());
+	        insertQuery.setString(1, courseId);
+	        insertQuery.executeUpdate();
 	        insertQuery.close();
 	    } catch (java.sql.SQLException sE){
 	    	sE.printStackTrace();
@@ -1164,6 +1171,7 @@ public class MarketPlaceDAO {
         StringBuffer queryString = new StringBuffer("");
         int newId = -1;
         try {
+        	Setting setting = getSetting("directEditItem");
 			conn = JSUBbDatabase.getConnection(testing);
 	        queryString.append("insert into jsu_community_item_info(item_pk1, purchase_date, expiration_date, active, column_name, course_id) ");
 	        queryString.append("values((select item_pk1 from jsu_item where name = ? and course_id = ?), ?, ?, 1, ?, ?)");
@@ -1171,7 +1179,7 @@ public class MarketPlaceDAO {
 	        insertQuery.setString(1, item.getName());
 	        insertQuery.setString(2, courseId);
 	        insertQuery.setString(3, new DateTime().toString());
-	        insertQuery.setString(4, new DateTime().plusDays(2).toString()); //TODO how long?
+	        insertQuery.setString(4, new DateTime().plusDays(Integer.parseInt(setting.getValue())).toString());
 	        insertQuery.setString(5, item.getColumnName());
 	        insertQuery.setString(6, courseId);
 	        System.out.println("Item name: " + item.getColumnName());
@@ -1227,7 +1235,6 @@ public class MarketPlaceDAO {
         CommunityItem item = new CommunityItem("NO$ITEM");
         try {
 			conn = JSUBbDatabase.getConnection(testing);
-	        System.out.println("Selecting Community Item");
 	        queryString.append("select jsu_item.*, jsu_community_item_info.* ");
 	        queryString.append("from jsu_community_item_info join jsu_item on(jsu_community_item_info.item_pk1 = jsu_item.item_pk1) where jsu_community_item_info.course_id = ? and jsu_community_item_info.active = 1 and jsu_item.course_id = ?");
 	        PreparedStatement selectQuery = conn.prepareStatement(queryString.toString(), ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1266,7 +1273,6 @@ public class MarketPlaceDAO {
 	}
 	
 	private int getCommunityItemPay(long id){
-		System.out.println("In get Current Item Pay");
         Connection conn = null;
         StringBuffer queryString = new StringBuffer("");
         int totalPaid = 0;
@@ -1291,7 +1297,6 @@ public class MarketPlaceDAO {
 				e.printStackTrace();
 			}
 	    }
-        System.out.println("Total Pay is: " + totalPaid);
         return totalPaid;
 	}
 	

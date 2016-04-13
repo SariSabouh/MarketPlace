@@ -14,6 +14,10 @@
 	item.setEffectMagnitude(Float.parseFloat(request.getParameter("effectMagnitude")));
 	item.setSupply(Integer.parseInt(request.getParameter("supply")));
 	item.setType(AssessmentType.valueOf(request.getParameter("assessmentType")));
+	String specific = request.getParameter("specific");
+	if(!specific.startsWith("NONE ")){
+		item.setSpecific(specific);
+	}
 	try{
 		marketPlaceDAO.addItem(item);
 	}catch(Exception e){

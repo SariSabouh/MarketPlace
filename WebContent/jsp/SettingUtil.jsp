@@ -11,6 +11,9 @@
 		Setting setting = new Setting();
 		setting.setName(name);
 		setting.setValue(value);
+		if(name.equals("community_item_wait")){
+			
+		}
 		marketPlaceDAO.updateSetting(setting);
 	}catch(Exception e){
 		e.printStackTrace();

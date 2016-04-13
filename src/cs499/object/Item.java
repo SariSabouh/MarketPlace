@@ -229,6 +229,9 @@ public class Item implements Serializable{
 
 
 	public void setSpecific(String specific) {
+		if(specific == null){
+			specific = "NULL";
+		}
 		this.specific = specific;
 	}
 	
@@ -251,6 +254,12 @@ public class Item implements Serializable{
 		}
 		output	+= " It costs " + cost + " Gold. The store only has " + supply+ " units available. ";
 		output  += "It only affects " + attributeAffected + " by " + effectMagnitude + ". And it can only target " + type;
+		if(specific.startsWith("NOT ")){
+			output += " It can affect all available collumns of criteria but " + specific;
+		}
+		else if(specific.startsWith("ONLY ")){
+			output += " It can affect " + specific;
+		}
 		return output;
 	}
 	

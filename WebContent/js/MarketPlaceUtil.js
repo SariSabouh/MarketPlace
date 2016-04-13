@@ -33,6 +33,7 @@ jQuery.noConflict();
     	$('#tabs > ul li:has(a[href="#tabs-5"])').hide();
         $("#tabs").tabs('refresh');
         $("#tabs").tabs('option', 'active', 1);
+        $('#directEditItem').hide();
     }
     
     if($("#communityItemExists").val() == "false"){
@@ -197,7 +198,8 @@ jQuery.noConflict();
     		type: "GET",
     		data: {name: $('#newItemName').val(), cost: $('#newItemCost').val(), attributeAffected: $('#newAttributeAffected option:selected' ).text(),
     			   effectMagnitude: $('#newItemMagnitude').val(), supply: $('#newItemSupply').val(),
-    			   assessmentType: $('#newItemAssessment option:selected' ).text(), duration: duration},
+    			   assessmentType: $('#newItemAssessment option:selected' ).text(), duration: duration,
+    			   specific: $('#newItemNotOnly option:selected' ).text() + $('#newItemColumnName option:selected' ).text()},
     		success: function(results){
 				alert("Item Added");
 				location.reload();
@@ -228,7 +230,7 @@ jQuery.noConflict();
         	flag = "Y";
         }
         $.ajax({
-	    	url: $("#checkBoxesURL").val(),
+	    	url: $("#settingsURL").val(),
     		type: "GET",
     		data: {name: $(this).attr("id"), value: flag},
     		success: function(result){
@@ -251,7 +253,8 @@ jQuery.noConflict();
     		type: "GET",
     		data: {name: $('#editItemName').val(), cost: $('#editItemCost').val(), attributeAffected: $('#editAttributeAffected option:selected' ).text(),
     			   effectMagnitude: $('#editItemMagnitude').val(), supply: $('#editItemSupply').val(),
-    			   assessmentType: $('#editItemAssessment option:selected' ).text(), duration: duration},
+    			   assessmentType: $('#editItemAssessment option:selected' ).text(), duration: duration,
+    			   specific: $('#editItemNotOnly option:selected' ).text() + $('#editItemColumnName option:selected' ).text()},
     		success: function(results){
 				alert("Item updated");
 				location.reload();
@@ -285,6 +288,8 @@ jQuery.noConflict();
     			$('#editItemSupply').val(results[3]);
     			$('#editAttributeAffected').val(results[4]);
     			$('#editItemAssessment').val(results[5]);
+    			$('#editItemNotOnly').val(results[6]);
+    			$('#editItemColumnName').val(results[7]);
     		},
     		error: function(result){
     			alert("Failed To prefill Item info. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
@@ -333,6 +338,8 @@ jQuery.noConflict();
     			$('#editItemSupply').val(results[3]);
     			$('#editAttributeAffected').val(results[4]);
     			$('#editItemAssessment').val(results[5]);
+    			$('#editItemNotOnly').val(results[6]);
+    			$('#editItemColumnName').val(results[7]);
     		},
     		error: function(result){
     			alert("Failed To prefill Item info. Make Sure All Fields Are Filled. If It Failed again, Contact Admin.");
@@ -467,6 +474,26 @@ jQuery.noConflict();
 	    		}
 		    });
 		}
+	});
+    $("#defaultCommunityItemWait").click(function() {
+    	var valueSet = $('#setCItemWaitField').val()
+    	if(!isNaN(valueSet)){
+			$.ajax({
+		    	url: $("#settingsURL").val(),
+	    		type: "GET",
+	    		data: {name: "community_item_wait", value: valueSet},
+	    		success: function(result){
+	    			alert("Setting Updated");
+	    			location.reload();
+	    		},
+	    		error: function(result){
+	    			alert("Setting Failed to Update.");
+	    		}
+			});
+    	}
+    	else{
+    		alert("Please ONLY Input Numbers.");
+    	}
 	});
 })
 (jQuery);

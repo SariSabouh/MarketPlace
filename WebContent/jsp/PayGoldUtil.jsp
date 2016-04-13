@@ -8,7 +8,7 @@
 	System.out.println("In PayGoldUtil");
 	MarketPlaceDAO marketPlaceDAO = new MarketPlaceDAO(false, (String) application.getAttribute("courseId"));
 	BlackboardHandler bbHandler = (BlackboardHandler) application.getAttribute("bbHandler");
-	int goldPaid = Integer.parseInt(request.getParameter("goldPaid"));
+	int goldPaid = Integer.parseInt(request.getParameter("goldPaid").replaceAll("[^0-9]", ""));
 	try{
 		CommunityItem item = marketPlaceDAO.getCurrentCommunityItem();
 		item.setPaid(goldPaid);

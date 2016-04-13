@@ -86,9 +86,13 @@
 	pageContext.setAttribute("columnNames", columnNames);
 	List<String> settingNames = new ArrayList<String>();
 	List<String> settingValues = new ArrayList<String>();
+	String defaultCItemWait = "";
 	for(Setting setting : dbController.getDefaultSettings()){
 		settingNames.add(setting.getName());
 		settingValues.add(setting.getValue());
+		if(setting.getName().equals("community_item_wait")){
+			defaultCItemWait = setting.getValue();
+		}
 	}
 	String getDurationURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetDurationUtil.jsp");
 	String addItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/AddItemUtil.jsp");
@@ -98,7 +102,7 @@
 	String TRUNCATEURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/TRUNCATE.jsp");
 	String getListURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetListUtil.jsp");
 	String addGoldURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/AddGoldUtil.jsp");
-	String checkBoxesURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/CheckBoxUtil.jsp");
+	String settingsURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/SettingUtil.jsp");
 	String getItemInfoURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemInfoUtil.jsp");
 	String getItemDescriptionURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/GetItemDescriptionUtil.jsp");
 	String useCommunityItemURL = PlugInUtil.getUri("jsu", "MarketPlace", "jsp/UseCommunityItemUtil.jsp");
@@ -139,7 +143,7 @@
 <input type="hidden" id="getListURL" name="getListURL" value="<%=getListURL%>"/>
 <input type="hidden" id="TRUNCATE" name="TRUNCATE" value="<%=TRUNCATEURL%>"/>
 <input type="hidden" id="addGoldURL" name="addGoldURL" value="<%=addGoldURL%>"/>
-<input type="hidden" id="checkBoxesURL" name="checkBoxesURL" value="<%=checkBoxesURL%>"/>
+<input type="hidden" id="settingsURL" name="settingsURL" value="<%=settingsURL%>"/>
 <input type="hidden" id="getItemInfoURL" name="getItemInfoURL" value="<%=getItemInfoURL%>"/>
 <input type="hidden" id="getItemDescriptionURL" name="getItemDescriptionURL" value="<%=getItemDescriptionURL%>"/>
 <input type="hidden" id="useCommunityItemURL" name="useCommunityItemURL" value="<%=useCommunityItemURL%>"/>
@@ -250,6 +254,18 @@
             <p></p>
             Supply: <input type="text" id="newItemSupply"/>
 			<p></p>
+			Item Specification:
+			<select id="newItemNotOnly">
+				<option>NONE </option>
+           		<option>NOT </option>
+	            <option>ONLY </option>
+            </select>
+            <select id="newItemColumnName">
+                <c:forEach items="${columnNames}" var="name">
+					<option>${name}</option>
+				</c:forEach>
+            </select>
+			<p></p>
 			<input id="addItem" type="button" value="Add Item">
 		</div>
 		
@@ -259,6 +275,9 @@
 			<p></p>
 			<input id="addGold" type="button" value="Add Gold To All">
 			<input type="text" id="addGoldField"/>
+			<p></p>
+			<input id="defaultCommunityItemWait" type="button" value="Set Number Of Days Community Item Waits">
+			<input type="text" id="setCItemWaitField" placeholder="<%=defaultCItemWait%>"/>(Shaded Number is The Current Value)
 			<p></p>
 			<input type="checkbox" class="CheckBoxes" id="visible_columns"/>
 			<span>Only Show Columns Visible To Students While Using Items</span>
@@ -302,6 +321,18 @@
             Effect Magnitude: <input type="text" id="editItemMagnitude"/>
             <p></p>
             Supply: <input type="text" id="editItemSupply"/>
+			<p></p>
+			Item Specification:
+			<select id="editItemNotOnly">
+				<option>NONE </option>
+           		<option>NOT </option>
+	            <option>ONLY </option>
+            </select>
+            <select id="editItemColumnName">
+                <c:forEach items="${columnNames}" var="name">
+					<option>${name}</option>
+				</c:forEach>
+            </select>
 			<p></p>
 			<input id="editItem" type="button" value="Edit Item">
 			
